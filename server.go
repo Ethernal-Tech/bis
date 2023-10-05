@@ -1,26 +1,26 @@
 package main
 
 import (
-	"bisgo/handlers"
 	"log"
 	"net/http"
 )
 
+type application struct {
+}
+
 func main() {
 	mux := http.NewServeMux()
+	app := &application{}
 
-	mux.HandleFunc("/", handlers.Index)
-	mux.HandleFunc("/login", handlers.Login)
-	mux.HandleFunc("/transactions", handlers.Transactions)
-	mux.HandleFunc("/transactions/add", handlers.AddEditTransaction)
-	mux.HandleFunc("/transactions/edit", handlers.AddEditTransaction)
-	mux.HandleFunc("/transactions/history", handlers.TransactionHistory)
-
-	mux.HandleFunc("/api/transactions/add", handlers.ApiTransactionAdd)
-	mux.HandleFunc("/api/transactions/edit", handlers.ApiTransactionEdit)
-	mux.HandleFunc("/api/transactions/addPolicy", handlers.ApiTransactionAddPolicy)
-	mux.HandleFunc("/api/transactions/cancel", handlers.ApiTransactionCancel)
-
+	mux.HandleFunc("/", app.Index)
+	mux.HandleFunc("/login", app.Login)
+	mux.HandleFunc("/transactions", app.Transactions)
+	mux.HandleFunc("/transactions/add", app.TransactionAdd)
+	mux.HandleFunc("/transactions/edit", app.TransactionEdit)
+	mux.HandleFunc("/transactions/history", app.TransactionHistory)
+	mux.HandleFunc("/transactions/addPolicy", app.TransactionAddPolicy)
+	mux.HandleFunc("/transactions/cancel", app.TransactionCancel)
+	
 	err := http.ListenAndServe(":4000", mux)
 	log.Fatal(err)
 }
