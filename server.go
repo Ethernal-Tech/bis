@@ -3,24 +3,12 @@ package main
 import (
 	"log"
 	"net/http"
-	"time"
-
-	"github.com/alexedwards/scs/v2"
-	"github.com/alexedwards/scs/v2/memstore"
 )
 
-type application struct {
-	sessionManager *scs.SessionManager
-}
-
 func main() {
-	sessionManager := scs.New()
-	sessionManager.Store = memstore.New()
-	sessionManager.Lifetime = 2 * time.Hour
+	app := &application{}
 
-	app := &application{
-		sessionManager: sessionManager,
-	}
+	app.dependencies()
 
 	server := &http.Server{
 		Addr:    "localhost:4000",
