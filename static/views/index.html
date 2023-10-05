@@ -6,6 +6,15 @@
     <title>Document</title>
 </head>
 <body>
-    <div>Hello world!</div>
+    {{if or (eq . "no") (eq . "")}}
+        <form action="/login" method="POST">
+            <input type="text" name="username"/>
+            <input type="text" name="password"/>
+            <button>Click</button>
+        </form>
+    {{else}}
+        <div>You are already logged in!</div>
+        <a href="/logout">Log out</a>
+    {{end}}
 </body>
 </html>
