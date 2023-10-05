@@ -1,4 +1,4 @@
-package handlers
+package main
 
 import (
 	"log"
@@ -6,7 +6,7 @@ import (
 	"text/template"
 )
 
-func Index(w http.ResponseWriter, r *http.Request) {
+func (app *application) index(w http.ResponseWriter, r *http.Request) {
 	ts, err := template.ParseFiles("./static/views/index.html")
 	if err != nil {
 		log.Println(err.Error())

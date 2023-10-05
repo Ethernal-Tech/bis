@@ -1,14 +1,19 @@
 package main
 
 import (
-	"bisgo/handlers"
 	"log"
 	"net/http"
 )
 
+type application struct {
+}
+
 func main() {
 	mux := http.NewServeMux()
-	mux.HandleFunc("/", handlers.Index)
+
+	app := &application{}
+
+	mux.HandleFunc("/", app.index)
 	err := http.ListenAndServe(":4000", mux)
 	log.Fatal(err)
 }
