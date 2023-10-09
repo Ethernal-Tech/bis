@@ -34,7 +34,6 @@ type Transaction struct {
 	BeneficiaryBank uint64
 	Sender          uint64
 	Receiver        uint64
-	Date            time.Time
 	Curency         string
 	Amount          int
 	TypeId          int
@@ -72,3 +71,14 @@ type TransactionProof struct {
 	TransactionId uint64
 	Proof         string
 }
+
+const (
+	Initiated       int = 0
+	PoliciesApplied int = 1
+	ProofRequested  int = 2
+	ProofReceived   int = 3
+	ProofInvalid    int = 4
+	AssetSent       int = 5
+	AssetReceived   int = 6
+	Canceled        int = 7
+)
