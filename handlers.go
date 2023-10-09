@@ -58,6 +58,25 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (app *application) addTransaction(w http.ResponseWriter, r *http.Request) {
+	if loggedIn := app.sessionManager.GetString(r.Context(), "inside"); loggedIn != "yes" {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	}
+
+	ts, err := template.ParseFiles("./static/views/addtransaction.html")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error 1", 500)
+		return
+	}
+
+	ts.Execute(w, struct{}{})
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error 2", 500)
+	}
+}
+
 func (app *application) transactions(w http.ResponseWriter, r *http.Request) {
 	// read "sender" from request
 	// body, _ := ioutil.ReadAll(r.Body) ....

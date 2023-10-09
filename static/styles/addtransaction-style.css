@@ -1,0 +1,133 @@
+* {
+    margin: 0px;
+    padding: 0px;
+}
+
+body {
+    height: 100vh;
+    width: 100vw;
+    background-color: #3A6BAC;
+    background: linear-gradient(to bottom right, #3A6BAC 15%, #3A6BAC 49%, #3A6BAC 78%, #EAA121 78%, #EAA121 90%, #FFFFFF 90%, #FFFFFF 100%);
+}
+
+header {
+    background-color: #ffffff;
+    border-bottom: 4px solid #EAA121;
+}
+
+header > div {
+    width: 80%;
+    margin: 0px auto;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header > div > a {
+    display: flex;
+}
+
+header > div > div {
+    font-size: 24px;
+    font-family: 'Segoe UI';
+    color: #706f6f;
+}
+
+.logout {
+    text-decoration: none;
+    user-select: none;
+    font-family: 'Segoe UI';   
+    color: #aa322f;
+    font-weight: 700;
+}
+
+.add-transaction {
+    height: 620px;
+    width: 440px;
+    margin: 100px auto;
+    background-color: #ffffff;
+    border-radius: 4%;
+    border: 2px solid #706f6f;
+}
+
+.add-transaction > .title {
+    font-size: 38px;
+    font-family: 'Segoe UI';
+    text-align: center;
+    color: #EAA121;
+    font-weight: 700;
+    margin-top: 28px;
+    margin-bottom: 50px;
+}
+
+input:focus {
+    outline: none;
+}
+
+::placeholder {
+    font-family: 'Segoe UI';   
+    color: #706f6f;
+}
+  
+::-ms-input-placeholder { 
+    color: #706f6f;
+}
+
+input {
+    display: block;
+    margin: 0 auto;
+    width: 80%;
+    text-align: center;
+    border: none;
+    font-size: 24px;
+    color: #706f6f;
+    border-bottom: 2px solid #aa322f;
+    font-family: 'Segoe UI';
+    margin-bottom: 30px;
+}
+
+.buttons:hover {
+    cursor: pointer;
+}
+
+.buttons {
+    display: flex;
+    justify-content: space-between;
+    width: 80%;
+    margin: 0px auto;
+    margin-top: 46px;
+    height: 50px;
+}
+
+.confirm:hover {
+    letter-spacing: 4px;
+    cursor: pointer;
+}
+
+.confirm {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 6;
+    border: none;
+    background-color: #ffffff;
+    transition: 0.4s;
+    font-size: 24px;
+    font-family: 'Segoe UI';
+    color: #706f6f;
+    border: 2px solid #aa322f;
+    border-top-left-radius: 10px;
+    border-bottom-left-radius: 10px;
+    font-weight: 700;
+}
+
+.back {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #aa322f;
+    border-top-right-radius: 10px;
+    border-bottom-right-radius: 10px;
+}
