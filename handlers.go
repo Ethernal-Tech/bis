@@ -1,97 +1,94 @@
 package main
 
 import (
-	"io/ioutil"
+	// "io/ioutil"
 	"log"
 	"net/http"
 	"text/template"
 )
 
-func (app *application) Index(w http.ResponseWriter, r *http.Request) {
+func (app *application) index(w http.ResponseWriter, r *http.Request) {
 	ts, err := template.ParseFiles("./static/views/index.html")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error 1", 500)
 		return
 	}
-	ts.Execute(w, nil)
+
+	ts.Execute(w, app.sessionManager.GetString(r.Context(), "inside"))
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error 2", 500)
 	}
 }
 
-func (app *application) Login(w http.ResponseWriter, r *http.Request) {
-	ts, err := template.ParseFiles("./static/views/login.html")
+func (app *application) login(w http.ResponseWriter, r *http.Request) {
+	r.ParseForm()
+	username := r.Form.Get("username")
+	password := r.Form.Get("password")
+	if username == "admin" && password == "password" {
+		app.sessionManager.Put(r.Context(), "inside", "yes")
+	}
+
+	http.Redirect(w, r, "/special", http.StatusSeeOther)
+}
+
+func (app *application) logout(w http.ResponseWriter, r *http.Request) {
+	app.sessionManager.Put(r.Context(), "inside", "no")
+
+	http.Redirect(w, r, "/login", http.StatusSeeOther)
+}
+
+func (app *application) special(w http.ResponseWriter, r *http.Request) {
+	ts, err := template.ParseFiles("./static/views/special.html")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error 1", 500)
 		return
 	}
-	ts.Execute(w, nil)
+
+	ts.Execute(w, app.sessionManager.GetString(r.Context(), "inside"))
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error 2", 500)
 	}
 }
 
-func (app *application) Transactions(w http.ResponseWriter, r *http.Request) {
-	ts, err := template.ParseFiles("./static/views/transactions.html")
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error 1", 500)
-		return
-	}
-	ts.Execute(w, nil)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error 2", 500)
-	}	
+func (app *application) transactions(w http.ResponseWriter, r *http.Request) {
+	// read "sender" from request
+	// body, _ := ioutil.ReadAll(r.Body) ....
+	
+	// app.db.getTransactionsFor()
+
+	// return /transactions
 }
 
-func (app *application) TransactionAdd(w http.ResponseWriter, r *http.Request) {	
-	ts, err := template.ParseFiles("./static/views/transaction_add.html")
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error 1", 500)
-		return
-	}
-	ts.Execute(w, nil)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error 2", 500)
-	}
+func (app *application) transactionAdd(w http.ResponseWriter, r *http.Request) {
+	// Read transaction from body
+	// body, _ := ioutil.ReadAll(r.Body)
+	// var transactionData Transaction
+	// if err := json.Unmarshal(body, &transactionData); err != nil {
+	// 	log.Println(err.Error())
+	// 	return
+	// }
+
+	// app.db.InsertTransaction(transactionData)
+	// app.db.UpdateTransactionState(TransactionStates.Initiated)
+
+	// returect to /index
 }
 
-func (app *application) TransactionEdit(w http.ResponseWriter, r *http.Request) {	
-	ts, err := template.ParseFiles("./static/views/transaction_edit.html")
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error 1", 500)
-		return
-	}
-	ts.Execute(w, nil)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error 2", 500)
-	}
+func (app *application) transactionHistory(w http.ResponseWriter, r *http.Request) {
+	// read "transaction id" from request
+	// body, _ := ioutil.ReadAll(r.Body) ....
+
+	// app.db.GetTransactionById(transactionId)
+	// app.db.GetTransactionHistoryById(transactionId)
+
+	// return /transaction_hisotry
 }
 
-func (app *application) TransactionHistory(w http.ResponseWriter, r *http.Request) {
-	ts, err := template.ParseFiles("./static/views/transaction_history.html")
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error 1", 500)
-		return
-	}
-	ts.Execute(w, nil)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error 2", 500)
-	}
-}
-
-func (app *application) TransactionAddPolicy(w http.ResponseWriter, r *http.Request) {
+func (app *application) transactionAddPolicy(w http.ResponseWriter, r *http.Request) {
 	// Read policy parameter
 	// body, _ := ioutil.ReadAll(r.Body)
 	// var policyData Policy
@@ -101,23 +98,22 @@ func (app *application) TransactionAddPolicy(w http.ResponseWriter, r *http.Requ
 	// }
 
 	// Get transaction from db
-	// app.db.transactions.get(policy.id)
+	// app.db.GetTransactionById(policyData.transactionId)
 
 	// Add Policy to transaction (db)
+	// app.db.AddTransactionPolicy(policyData.transactionId, policyData.policies)
+	// app.db.UpdateTransactionState(TransactionStates.PoliciesApplied)
+
+	// run go routine -> Call BB Exec, Call OB Exec, Update Transaction to [ProofRequested], Wait ... 
+	// ... Update Transaction to [ProofReceived] or [ProofInvalid], Notify front?
 	
-	// Redirect to transactions
+	// Redirect to /index
 }
 
-func (app *application) TransactionCancel(w http.ResponseWriter, r *http.Request) {
-	ts, err := template.ParseFiles("./static/views/transaction_history.html")
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error 1", 500)
-		return
-	}
-	ts.Execute(w, nil)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error 2", 500)
-	}
+func (app *application) transactionCancel(w http.ResponseWriter, r *http.Request) {
+	// app.db.GetTransactionById(transactionId)
+	// check if not nil
+	// app.db.UpdateTransactionState(TransactionStates.Canceled)
+
+	// Redirect to /index
 }

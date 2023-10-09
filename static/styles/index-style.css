@@ -1,0 +1,134 @@
+* {
+    margin: 0px;
+    padding: 0px;
+}
+
+body {
+    height: 100vh;
+    width: 100vw;
+    background: linear-gradient(to bottom right, #FFFFFF 20%, #EAA121 20%, #EAA121 25%, #3A6BAC 25%, #3A6BAC 80%, #FFFFFF 80%, #FFFFFF 100%);
+}
+
+.log-in {
+    position: absolute;
+    height: 600px;
+    width: 400px;
+    top: calc(48vh - 300px);
+    left: calc(50vw - 200px);
+    background-color: #ffffff;
+    border-radius: 4%;
+}
+
+img {
+    margin: 46px auto;
+    display: block;
+}
+
+input:focus {
+    outline: none;
+}
+
+::placeholder {
+    font-family: 'Segoe UI';   
+    color: #706f6f;
+}
+  
+::-ms-input-placeholder { 
+    color: #706f6f;
+}
+
+input {
+    display: block;
+    margin: 0 auto;
+    width: 80%;
+    text-align: center;
+    border: none;
+    font-size: 24px;
+    color: #706f6f;
+    border-bottom: 2px solid #aa322f;
+    font-family: 'Segoe UI';
+}
+
+.input-username {
+    margin-top: 120px;
+    margin-bottom: 64px;
+}
+
+.input-password {
+    margin-bottom: 96px;
+}
+
+button:hover {
+    letter-spacing: 4px;
+}
+
+button {
+    display: block;
+    width: 80%;
+    height: 56px;
+    font-size: 24px;
+    color: #706f6f;
+    background-color: #ffffff;
+    border: none;
+    border: 2px solid #aa322f;
+    border-radius: 12px;
+    margin: 0px auto;
+    cursor: pointer;
+    font-family: 'Segoe UI';
+    transition: 0.4s;
+}
+
+.log-in a {
+    display: block;
+    text-decoration: none;
+    color: #706f6f;
+    font-size: 18px;
+    text-align: center;
+    margin-top: 18px;
+    user-select: none;
+    font-family: 'Segoe UI';   
+}
+
+.logged-in {
+    position: absolute;
+    height: 400px;
+    width: 400px;
+    top: calc(48vh - 200px);
+    left: calc(50vw - 200px);
+    background-color: #ffffff;
+    border-radius: 4%;
+}
+
+.logged-in div {
+    display: block;
+    text-align: center;
+    margin-top: 80px;
+    font-size: 28px;
+    color: #706f6f;
+    font-family: 'Segoe UI';  
+}
+
+.logged-in a:hover {
+    letter-spacing: 4px;
+}
+
+.logged-in a {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    width: 80%;
+    height: 56px;
+    font-size: 24px;
+    color: #706f6f;
+    background-color: #ffffff;
+    border: none;
+    border: 2px solid #aa322f;
+    border-radius: 12px;
+    margin: 0px auto;
+    cursor: pointer;
+    font-family: 'Segoe UI';
+    transition: 0.4s;
+    margin-top: 70px;
+}
+

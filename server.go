@@ -5,22 +5,16 @@ import (
 	"net/http"
 )
 
-type application struct {
-}
-
 func main() {
-	mux := http.NewServeMux()
 	app := &application{}
 
-	mux.HandleFunc("/", app.Index)
-	mux.HandleFunc("/login", app.Login)
-	mux.HandleFunc("/transactions", app.Transactions)
-	mux.HandleFunc("/transactions/add", app.TransactionAdd)
-	mux.HandleFunc("/transactions/edit", app.TransactionEdit)
-	mux.HandleFunc("/transactions/history", app.TransactionHistory)
-	mux.HandleFunc("/transactions/addPolicy", app.TransactionAddPolicy)
-	mux.HandleFunc("/transactions/cancel", app.TransactionCancel)
-	
-	err := http.ListenAndServe(":4000", mux)
+	app.dependencies()
+
+	server := &http.Server{
+		Addr:    "localhost:4000",
+		Handler: app.routes(),
+	}
+
+	err := server.ListenAndServe()
 	log.Fatal(err)
 }
