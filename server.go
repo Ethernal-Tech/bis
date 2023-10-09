@@ -17,6 +17,10 @@ func main() {
 	}
 	trs := app.db.GetTransactionsForAddress(1)
 	fmt.Println(trs)
+
+	tHistory := app.db.GetTransactionHistory(1)
+	fmt.Println(tHistory)
+
 	err := server.ListenAndServe()
 	app.db.Close()
 	log.Fatal(err)

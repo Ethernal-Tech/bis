@@ -1,5 +1,7 @@
 package DB
 
+import "time"
+
 type TransactionModel struct {
 	Id              uint64
 	OriginatorBank  string
@@ -10,4 +12,10 @@ type TransactionModel struct {
 	Amount          int
 	Type            string
 	Status          string
+	StatusHistory   []StatusHistoryModel
+}
+
+type StatusHistoryModel struct {
+	Date time.Time
+	Name string
 }
