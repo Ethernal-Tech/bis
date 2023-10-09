@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bisgo/DB"
 	"log"
 	"net/http"
 )
@@ -16,9 +15,7 @@ func main() {
 		Handler: app.routes(),
 	}
 
-	db := DB.InitDb()
-
 	err := server.ListenAndServe()
-	db.Close()
+	app.db.Close()
 	log.Fatal(err)
 }
