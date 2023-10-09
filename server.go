@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 )
@@ -15,13 +14,13 @@ func main() {
 		Addr:    "localhost:4000",
 		Handler: app.routes(),
 	}
-	trs := app.db.GetTransactionsForAddress(1)
-	fmt.Println(trs)
+	// trs := app.db.GetTransactionsForAddress(1)
+	// fmt.Println(trs)
 
-	tHistory := app.db.GetTransactionHistory(1)
-	fmt.Println(tHistory)
+	// tHistory := app.db.GetTransactionHistory(1)
+	// fmt.Println(tHistory)
 
 	err := server.ListenAndServe()
-	app.db.Close()
+	//app.db.Close()
 	log.Fatal(err)
 }

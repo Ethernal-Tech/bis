@@ -30,24 +30,28 @@ func (app *application) login(w http.ResponseWriter, r *http.Request) {
 		app.sessionManager.Put(r.Context(), "inside", "yes")
 	}
 
-	http.Redirect(w, r, "/special", http.StatusSeeOther)
+	http.Redirect(w, r, "/home", http.StatusSeeOther)
 }
 
 func (app *application) logout(w http.ResponseWriter, r *http.Request) {
 	app.sessionManager.Put(r.Context(), "inside", "no")
 
-	http.Redirect(w, r, "/login", http.StatusSeeOther)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func (app *application) special(w http.ResponseWriter, r *http.Request) {
-	ts, err := template.ParseFiles("./static/views/special.html")
+func (app *application) home(w http.ResponseWriter, r *http.Request) {
+	if loggedIn := app.sessionManager.GetString(r.Context(), "inside"); loggedIn != "yes" {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	}
+
+	ts, err := template.ParseFiles("./static/views/home.html")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error 1", 500)
 		return
 	}
 
-	ts.Execute(w, app.sessionManager.GetString(r.Context(), "inside"))
+	ts.Execute(w, struct{}{})
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error 2", 500)
@@ -57,7 +61,7 @@ func (app *application) special(w http.ResponseWriter, r *http.Request) {
 func (app *application) transactions(w http.ResponseWriter, r *http.Request) {
 	// read "sender" from request
 	// body, _ := ioutil.ReadAll(r.Body) ....
-	
+
 	// app.db.getTransactionsFor()
 
 	// return /transactions
@@ -104,9 +108,9 @@ func (app *application) transactionAddPolicy(w http.ResponseWriter, r *http.Requ
 	// app.db.AddTransactionPolicy(policyData.transactionId, policyData.policies)
 	// app.db.UpdateTransactionState(TransactionStates.PoliciesApplied)
 
-	// run go routine -> Call BB Exec, Call OB Exec, Update Transaction to [ProofRequested], Wait ... 
+	// run go routine -> Call BB Exec, Call OB Exec, Update Transaction to [ProofRequested], Wait ...
 	// ... Update Transaction to [ProofReceived] or [ProofInvalid], Notify front?
-	
+
 	// Redirect to /index
 }
 

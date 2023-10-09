@@ -1,0 +1,189 @@
+* {
+    margin: 0px;
+    padding: 0px;
+}
+
+body {
+    height: 100vh;
+    width: 100vw;
+    background-color: #3A6BAC;
+    background: linear-gradient(to bottom right, #3A6BAC 15%, #3A6BAC 49%, #3A6BAC 78%, #EAA121 78%, #EAA121 90%, #FFFFFF 90%, #FFFFFF 100%);
+}
+
+header {
+    background-color: #ffffff;
+    border-bottom: 4px solid #EAA121;
+}
+
+header > div {
+    width: 80%;
+    margin: 0px auto;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header > div > a {
+    display: flex;
+}
+
+header > div > div {
+    font-size: 24px;
+    font-family: 'Segoe UI';
+    color: #706f6f;
+}
+
+.logout {
+    text-decoration: none;
+    user-select: none;
+    font-family: 'Segoe UI';   
+    color: #aa322f;
+    font-weight: 700;
+}
+
+.add-transaction:hover {
+    letter-spacing: 4px;
+}
+
+.add-transaction {
+    text-decoration: none;
+    user-select: none;
+    font-size: 24px;
+    font-family: 'Segoe UI';   
+    background-color: #ffffff;
+    height: 46px;
+    width: 460px;
+    margin: 0px auto;
+    margin-top: 70px;
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    color: #706f6f;
+    font-weight: 400;
+    border: 2px solid #706f6f;
+    transition: 0.4s;
+}
+
+.table {
+    width: 80%;
+    height: 600px;
+    position: relative;
+    left: calc(50vw - 40%);
+    border-radius: 8px;
+    background-color: #ffffff;
+    border: 2px solid #706f6f;
+}
+
+.table-header, .table-row {
+    display: flex;
+    border-bottom: 2px solid #706f6f;
+    font-size: 28px;
+    height: 48px;
+    align-items: center;
+    font-weight: 700;
+    font-family: 'Segoe UI'; 
+    color: #706f6f;
+    text-decoration: none;
+}
+
+.table-header > div, .table-row > div {
+    text-align: center;
+}
+
+.table-header > div:nth-child(1), .table-row > div:nth-child(1) {
+    flex: 0.6;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.table-header > div:nth-child(2), .table-row > div:nth-child(2) {
+    flex: 2.2;
+}
+
+.table-header > div:nth-child(3), .table-row > div:nth-child(3) {
+    flex: 2.4;
+}
+
+.table-header > div:nth-child(4), .table-row > div:nth-child(4) {
+    flex: 2.4;
+}
+
+.table-header > div:nth-child(5), .table-row > div:nth-child(5) {
+    flex: 1.5;
+}
+
+.table-header > div:nth-child(6), .table-row > div:nth-child(6) {
+    flex: 1.5;
+}
+
+.table-header > div:nth-child(7), .table-row > div:nth-child(7) {
+    flex: 2;
+    color: #aa322f;
+}
+
+.table-header > div:nth-child(8), .table-row > div:nth-child(8) {
+    flex: 1.4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: 0.4s;
+}
+
+.table-row > div:nth-child(8) > a {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #EAA121;
+    cursor: pointer;
+}
+
+.set-policy:hover{
+    letter-spacing: 1.4px;
+}
+
+.set-policy {
+    text-align: center;
+    text-align: center;
+    background-color: #ffffff;
+    font-size: 24px;
+    height: 38px;
+    border-radius: 6px;
+    width: 170px;
+    align-items: center;
+    font-weight: 400;
+    font-family: 'Segoe UI'; 
+    color: #aa322f;
+    border: 2px solid #aa322f;
+    text-decoration: none;
+    cursor: pointer;
+    transition: 0.4s;
+}
+
+.table-body {
+    width: 100%;
+    height: 100%;
+}
+
+.table-row {
+    font-size: 24px;
+    font-weight: 400;
+}
+
+.table-body {
+    height: 550px;
+    overflow: auto;
+}
+
+.table-body::-webkit-scrollbar {
+    width: 4px;
+    visibility: hidden;
+}
+
+.table-body::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color:#aa322f;
+}
