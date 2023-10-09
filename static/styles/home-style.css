@@ -43,7 +43,7 @@ header > div > div {
 }
 
 .add-transaction:hover {
-    letter-spacing: 4px;
+    letter-spacing: 2px;
 }
 
 .add-transaction {
@@ -123,6 +123,8 @@ header > div > div {
 .table-header > div:nth-child(7), .table-row > div:nth-child(7) {
     flex: 2;
     color: #aa322f;
+    display: flex;
+    justify-content: center;
 }
 
 .table-header > div:nth-child(8), .table-row > div:nth-child(8) {
@@ -131,6 +133,10 @@ header > div > div {
     justify-content: center;
     align-items: center;
     transition: 0.4s;
+}
+
+.table-row > div:nth-child(8) > a:hover > svg {
+    color: rgb(183, 127, 31);
 }
 
 .table-row > div:nth-child(8) > a {
@@ -147,12 +153,12 @@ header > div > div {
 
 .set-policy {
     text-align: center;
-    text-align: center;
     background-color: #ffffff;
     font-size: 24px;
-    height: 38px;
+    height: 32px;
     border-radius: 6px;
-    width: 170px;
+    width: 150px;
+    display: block;
     align-items: center;
     font-weight: 400;
     font-family: 'Segoe UI'; 
