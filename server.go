@@ -16,5 +16,6 @@ func main() {
 	}
 
 	err := server.ListenAndServe()
+	app.db.Close()
 	log.Fatal(err)
 }
