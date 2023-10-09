@@ -11,7 +11,7 @@ import (
 
 type application struct {
 	sessionManager *scs.SessionManager
-	db             *sql.DB
+	db             *DBWrapper
 }
 
 func (app *application) dependencies() {

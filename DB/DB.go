@@ -7,7 +7,11 @@ import (
 	_ "github.com/denisenkom/go-mssqldb"
 )
 
-func InitDb() *sql.DB {
+type DBWrapper struct {
+	db	*sql.DB
+}
+
+func InitDb() *DBWrapper {
 	sqldb, err := sql.Open("sqlserver", "sqlserver://testUser:password@localhost:1434?database=BIS")
 	if err != nil {
 		log.Panic(err)
@@ -18,5 +22,28 @@ func InitDb() *sql.DB {
 		log.Panic(err)
 	}
 
-	return sqldb
+	wrapper := &DBWrapper{}
+	wrapper.db = sqldb
+
+	return wrapper
+}
+
+func (wrapper *DBWrapper) GetTransactionsForAddress(address uint64) {
+
+}
+
+func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) {
+
+}
+
+func (wrapper *DBWrapper) InsertTransaction(t Transaction) {
+	
+}
+
+func (wrapper *DBWrapper) InsertTransactionPolicy(transactionId uint64, policies []int) {
+	
+}
+
+func (wrapper *DBWrapper) UpdateTransactionState(transactionId uint64, state TransactionStates) {
+	
 }
