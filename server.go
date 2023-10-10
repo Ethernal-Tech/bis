@@ -21,6 +21,6 @@ func main() {
 	// fmt.Println(tHistory)
 
 	err := server.ListenAndServe()
-	//app.db.Close()
+	app.db.Close()
 	log.Fatal(err)
 }
