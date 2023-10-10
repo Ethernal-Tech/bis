@@ -112,8 +112,8 @@ header > div > div {
 }
 
 .policies-checked > div > div {
-    height: 16px;
-    width: 16px;
+    height: 22px;
+    width: 22px;
     border: 1px solid #706f6f;
     border-radius: 50%;
 }
@@ -127,7 +127,7 @@ header > div > div {
     justify-content: space-between;
     width: 80%;
     margin: 0px auto;
-    margin-top: 46px;
+    margin-top: 38px;
     height: 50px;
 }
 
