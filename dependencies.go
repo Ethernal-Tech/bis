@@ -14,7 +14,7 @@ type application struct {
 }
 
 func (app *application) dependencies() {
-	//app.db = DB.InitDb()
+	app.db = DB.InitDb()
 
 	sessionManager := scs.New()
 	sessionManager.Store = memstore.New()

@@ -12,7 +12,10 @@ type DBWrapper struct {
 }
 
 func InitDb() *DBWrapper {
+	// Windows authentication
+	//sqldb, err := sql.Open("sqlserver", "sqlserver://@localhost:1434?database=BIS&trusted_connection=yes")
 	sqldb, err := sql.Open("sqlserver", "sqlserver://testUser:123123@localhost:1434?database=BIS")
+
 	if err != nil {
 		log.Panic(err)
 	}
