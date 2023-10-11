@@ -96,6 +96,25 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 	}
 }
 
+func (app *application) transactionHistory(w http.ResponseWriter, r *http.Request) {
+	if loggedIn := app.sessionManager.GetString(r.Context(), "inside"); loggedIn != "yes" {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+	}
+
+	ts, err := template.ParseFiles("./static/views/transactionhistory.html")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error 1", 500)
+		return
+	}
+
+	ts.Execute(w, struct{}{})
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error 2", 500)
+	}
+}
+
 func (app *application) transactions(w http.ResponseWriter, r *http.Request) {
 	// read "sender" from request
 	// body, _ := ioutil.ReadAll(r.Body) ....
@@ -120,7 +139,7 @@ func (app *application) transactionAdd(w http.ResponseWriter, r *http.Request) {
 	// returect to /index
 }
 
-func (app *application) transactionHistory(w http.ResponseWriter, r *http.Request) {
+func (app *application) transactionHistory2(w http.ResponseWriter, r *http.Request) {
 	// read "transaction id" from request
 	// body, _ := ioutil.ReadAll(r.Body) ....
 
