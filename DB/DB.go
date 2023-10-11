@@ -3,6 +3,7 @@ package DB
 import (
 	"database/sql"
 	"log"
+	"time"
 
 	_ "github.com/denisenkom/go-mssqldb"
 )
@@ -13,7 +14,8 @@ type DBWrapper struct {
 
 func InitDb() *DBWrapper {
 	// Windows authentication
-	//sqldb, err := sql.Open("sqlserver", "sqlserver://@localhost:1434?database=BIS&trusted_connection=yes")
+	// sqldb, err := sql.Open("sqlserver", "sqlserver://@localhost:1434?database=BIS&trusted_connection=yes")
+	// sqldb, err := sql.Open("sqlserver", "server=localhost;user id=SA;password=asdQWE123;port=1434;database=BIS")
 	sqldb, err := sql.Open("sqlserver", "sqlserver://testUser:123123@localhost:1434?database=BIS")
 
 	if err != nil {
@@ -118,15 +120,44 @@ func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) Transactio
 }
 
 func (wrapper *DBWrapper) InsertTransaction(t Transaction) {
+	query := `INSERT INTO [dbo].[Transaction] VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7)`
 
+	_, err := wrapper.db.Exec(query, 
+		sql.Named("p1", t.OriginatorBank),
+		sql.Named("p2", t.BeneficiaryBank),
+		sql.Named("p3", t.Sender),
+		sql.Named("p4", t.Receiver),
+		sql.Named("p5", t.Curency),
+		sql.Named("p6", t.Amount),
+		sql.Named("p7", t.TypeId))
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (wrapper *DBWrapper) InsertTransactionPolicy(transactionId uint64, policies []int) {
+	query := `INSERT INTO [dbo].[TransactionPolicy] VALUES (@p1, @p2)`
 
+	for	_, policy := range policies {
+		_, err := wrapper.db.Exec(query, 
+			sql.Named("p1", transactionId),
+			sql.Named("p2", policy))
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
 }
 
 func (wrapper *DBWrapper) UpdateTransactionState(transactionId uint64, state int) {
+	query := `INSERT INTO [dbo].[TransactionHistory] VALUES (@p1, @p2, @p3)`
 
+	_, err := wrapper.db.Exec(query, 
+		sql.Named("p1", transactionId), 
+		sql.Named("p2", state), 
+		sql.Named("p3", time.Now()))
+	if err != nil {
+		log.Fatal(err)
+	}
 }
 
 func (wrapper *DBWrapper) Close() {
