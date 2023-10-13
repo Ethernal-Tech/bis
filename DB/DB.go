@@ -14,9 +14,9 @@ type DBWrapper struct {
 
 func InitDb() *DBWrapper {
 	// Windows authentication
-	sqldb, err := sql.Open("sqlserver", "sqlserver://@localhost:1434?database=BIS&trusted_connection=yes")
+	// sqldb, err := sql.Open("sqlserver", "sqlserver://@localhost:1434?database=BIS&trusted_connection=yes")
 	// sqldb, err := sql.Open("sqlserver", "server=localhost;user id=SA;password=asdQWE123;port=1434;database=BIS")
-	//sqldb, err := sql.Open("sqlserver", "sqlserver://testUser:123123@localhost:1434?database=BIS")
+	sqldb, err := sql.Open("sqlserver", "sqlserver://testUser:123123@localhost:1434?database=BIS")
 
 	if err != nil {
 		log.Panic(err)
@@ -33,6 +33,31 @@ func InitDb() *DBWrapper {
 	return wrapper
 }
 
+func (wrapper *DBWrapper) Login(username string, password string) BankEmployee {
+	query := `SELECT Name
+					,Username
+					,Password
+					,BankId 
+				FROM [dbo].[BankEmployee] 
+				WHERE Username = @p1 AND Password = @p2`
+
+	rows, err := wrapper.db.Query(query, 
+		sql.Named("p1", username), 
+		sql.Named("p2", password))
+	defer rows.Close()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var user BankEmployee
+	for rows.Next() {
+		rows.Scan(&user.Name, &user.Username, &user.Password, &user.BankId)
+	}
+
+	return user
+}
+
 func (wrapper *DBWrapper) GetTransactionsForAddress(address uint64) []TransactionModel {
 	query := `SELECT t.Id
 					,ob.Name
@@ -44,16 +69,18 @@ func (wrapper *DBWrapper) GetTransactionsForAddress(address uint64) []Transactio
 					,ty.Name
 					,s.Name
 				FROM [Transaction] as t
-				JOIN  (SELECT MAX(StatusId) AS StatusId, Transactionid FROM TransactionHistory GROUP BY Transactionid) as th ON th.Transactionid = t.Id 
+				JOIN (SELECT MAX(StatusId) AS StatusId, Transactionid FROM TransactionHistory GROUP BY Transactionid) as th ON th.Transactionid = t.Id 
 				JOIN [Status] as s ON s.Id = th.StatusId
 				JOIN [Type] as ty ON ty.Id = t.Id
 				JOIN Bank as ob ON ob.Id = t.OriginatorBank
 				JOIN Bank as bb ON bb.Id = t.BeneficiaryBank
 				JOIN BankClient as bcs ON bcs.Id = t.Sender
 				JOIN BankClient as bcr ON bcr.Id = t.Receiver
-				WHERE t.OriginatorBank = $1 OR t.BeneficiaryBank = $2`
+				WHERE t.OriginatorBank = @p1 OR t.BeneficiaryBank = @p2`
 
-	rows, err := wrapper.db.Query(query, address, address)
+	rows, err := wrapper.db.Query(query, 
+		sql.Named("p1", address), 
+		sql.Named("p2", address))
 	defer rows.Close()
 
 	if err != nil {
@@ -84,9 +111,9 @@ func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) Transactio
 				JOIN BankClient as bcs ON bcs.Id = t.Sender
 				JOIN BankClient as bcr ON bcr.Id = t.Receiver
 				JOIN [Type] as ty ON ty.Id = t.Id
-				WHERE t.Id = $1`
+				WHERE t.Id = @p1`
 
-	rows, err := wrapper.db.Query(query, transactionId)
+	rows, err := wrapper.db.Query(query, sql.Named("p1", transactionId))
 
 	if err != nil {
 		log.Fatal(err)
@@ -102,10 +129,9 @@ func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) Transactio
 					,th.Date
 				FROM TransactionHistory th
 				JOIN Status as s ON s.Id = th.StatusId
-				Where Transactionid = $1 Order by StatusId`
+				Where Transactionid = @p1 Order by StatusId`
 
-	rows, err = wrapper.db.Query(query, transactionId)
-	defer rows.Close()
+	rows, err = wrapper.db.Query(query, sql.Named("p1", transactionId))
 
 	if err != nil {
 		log.Fatal(err)
@@ -116,6 +142,27 @@ func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) Transactio
 		rows.Scan(&statusHistory.Name, &statusHistory.Date)
 		trnx.StatusHistory = append(trnx.StatusHistory, statusHistory)
 	}
+	trnx.Status = trnx.StatusHistory[len(trnx.StatusHistory)-1].Name
+	rows.Close()
+
+	query = `SELECT p.Name
+				FROM TransactionPolicy tp
+				JOIN Policy as p ON tp.PolicyId = p.Id
+				Where Transactionid = @p1`
+
+	rows, err = wrapper.db.Query(query, sql.Named("p1", transactionId))
+	defer rows.Close()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	for rows.Next() {
+		var policyName string
+		rows.Scan(&policyName)
+		trnx.Policies = append(trnx.Policies, policyName)
+	}
+
 	return trnx
 }
 

@@ -13,6 +13,7 @@ type TransactionModel struct {
 	Type            string
 	Status          string
 	StatusHistory   []StatusHistoryModel
+	Policies		[]string
 }
 
 type StatusHistoryModel struct {

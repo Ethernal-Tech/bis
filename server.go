@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"net/http"
-	// "bisgo/DB"
 )
 
 func main() {
@@ -18,7 +17,7 @@ func main() {
 	// trs := app.db.GetTransactionsForAddress(1)
 	// fmt.Println(trs)
 
-	// tHistory := app.db.GetTransactionHistory(1)
+	// tHistory := app.db.GetTransactionHistory(3)
 	// fmt.Println(tHistory)
 
 	// app.db.InsertTransaction(DB.Transaction{
@@ -30,6 +29,9 @@ func main() {
 	// 		Amount: 1234,
 	// 		TypeId: 1,
 	// 	})
+
+	// user := app.db.Login("admin", "admin")
+	// fmt.Println(user)
 
 	err := server.ListenAndServe()
 	app.db.Close()
