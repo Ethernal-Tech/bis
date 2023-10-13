@@ -14,9 +14,10 @@ type DBWrapper struct {
 
 func InitDb() *DBWrapper {
 	// Windows authentication
-	sqldb, err := sql.Open("sqlserver", "sqlserver://@localhost:1434?database=BIS&trusted_connection=yes")
+	// sqldb, err := sql.Open("sqlserver", "sqlserver://@localhost:1434?database=BIS&trusted_connection=yes")
 	// sqldb, err := sql.Open("sqlserver", "server=localhost;user id=SA;password=asdQWE123;port=1434;database=BIS")
-	//sqldb, err := sql.Open("sqlserver", "sqlserver://testUser:123123@localhost:1434?database=BIS")
+	// sqldb, err := sql.Open("sqlserver", "sqlserver://testUser:123123@localhost:1434?database=BIS")
+	sqldb, err := sql.Open("sqlserver", "server=localhost;user id=SA;password=Ethernal!123;port=1434;database=BIS")
 
 	if err != nil {
 		log.Panic(err)
