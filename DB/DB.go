@@ -33,7 +33,7 @@ func InitDb() *DBWrapper {
 	return wrapper
 }
 
-func (wrapper *DBWrapper) Login(username string, password string) BankEmployee {
+func (wrapper *DBWrapper) Login(username string, password string) *BankEmployee {
 	query := `SELECT Name
 					,Username
 					,Password
@@ -50,12 +50,13 @@ func (wrapper *DBWrapper) Login(username string, password string) BankEmployee {
 		log.Fatal(err)
 	}
 
-	var user BankEmployee
 	for rows.Next() {
+		var user BankEmployee
 		rows.Scan(&user.Name, &user.Username, &user.Password, &user.BankId)
+		return &user
 	}
 
-	return user
+	return nil
 }
 
 func (wrapper *DBWrapper) GetTransactionsForAddress(address uint64) []TransactionModel {
