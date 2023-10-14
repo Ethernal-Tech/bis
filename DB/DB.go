@@ -14,9 +14,9 @@ type DBWrapper struct {
 
 func InitDb() *DBWrapper {
 	// Windows authentication
-	// sqldb, err := sql.Open("sqlserver", "sqlserver://@localhost:1434?database=BIS&trusted_connection=yes")
+	sqldb, err := sql.Open("sqlserver", "sqlserver://@localhost:1434?database=BIS&trusted_connection=yes")
 	// sqldb, err := sql.Open("sqlserver", "server=localhost;user id=SA;password=asdQWE123;port=1434;database=BIS")
-	sqldb, err := sql.Open("sqlserver", "sqlserver://testUser:123123@localhost:1434?database=BIS")
+	// sqldb, err := sql.Open("sqlserver", "sqlserver://testUser:123123@localhost:1434?database=BIS")
 
 	if err != nil {
 		log.Panic(err)
@@ -33,16 +33,17 @@ func InitDb() *DBWrapper {
 	return wrapper
 }
 
-func (wrapper *DBWrapper) Login(username string, password string) *BankEmployee {
-	query := `SELECT Name
+func (wrapper *DBWrapper) Login(username string, password string) *BankEmployeeModel {
+	query := `SELECT [BankEmployee].Name Name
 					,Username
 					,Password
-					,BankId 
-				FROM [dbo].[BankEmployee] 
-				WHERE Username = @p1 AND Password = @p2`
+					,BankId
+					,[Bank].Name BankName
+				FROM [dbo].[BankEmployee], [dbo].[Bank]
+				WHERE BankId = [Bank].Id AND Username = @p1 AND Password = @p2`
 
-	rows, err := wrapper.db.Query(query, 
-		sql.Named("p1", username), 
+	rows, err := wrapper.db.Query(query,
+		sql.Named("p1", username),
 		sql.Named("p2", password))
 	defer rows.Close()
 
@@ -51,8 +52,8 @@ func (wrapper *DBWrapper) Login(username string, password string) *BankEmployee 
 	}
 
 	for rows.Next() {
-		var user BankEmployee
-		rows.Scan(&user.Name, &user.Username, &user.Password, &user.BankId)
+		var user BankEmployeeModel
+		rows.Scan(&user.Name, &user.Username, &user.Password, &user.BankId, &user.BankName)
 		return &user
 	}
 
@@ -79,8 +80,8 @@ func (wrapper *DBWrapper) GetTransactionsForAddress(address uint64) []Transactio
 				JOIN BankClient as bcr ON bcr.Id = t.Receiver
 				WHERE t.OriginatorBank = @p1 OR t.BeneficiaryBank = @p2`
 
-	rows, err := wrapper.db.Query(query, 
-		sql.Named("p1", address), 
+	rows, err := wrapper.db.Query(query,
+		sql.Named("p1", address),
 		sql.Named("p2", address))
 	defer rows.Close()
 

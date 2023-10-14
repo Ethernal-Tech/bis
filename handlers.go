@@ -2,6 +2,8 @@ package main
 
 import (
 	// "io/ioutil"
+
+	"fmt"
 	"log"
 	"net/http"
 	"text/template"
@@ -24,11 +26,20 @@ func (app *application) index(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) login(w http.ResponseWriter, r *http.Request) {
 	r.ParseForm()
-	username := r.Form.Get("username")
-	password := r.Form.Get("password")
-	if username == "admin" && password == "password" {
-		app.sessionManager.Put(r.Context(), "inside", "yes")
+	user := app.db.Login(r.Form.Get("username"), r.Form.Get("password"))
+
+	if user == nil {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+
+		return
 	}
+
+	app.sessionManager.Put(r.Context(), "inside", "yes")
+	app.sessionManager.Put(r.Context(), "username", user.Name)
+	app.sessionManager.Put(r.Context(), "bankId", user.BankId)
+	app.sessionManager.Put(r.Context(), "bankName", user.BankName)
+
+	fmt.Println(app.sessionManager.Get(r.Context(), "bankName"))
 
 	http.Redirect(w, r, "/home", http.StatusSeeOther)
 }
@@ -40,9 +51,19 @@ func (app *application) logout(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) home(w http.ResponseWriter, r *http.Request) {
-	if loggedIn := app.sessionManager.GetString(r.Context(), "inside"); loggedIn != "yes" {
+	if app.sessionManager.GetString(r.Context(), "inside") != "yes" {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
+
+		return
 	}
+
+	transactions := app.db.GetTransactionsForAddress(app.sessionManager.Get(r.Context(), "bankId").(uint64))
+
+	viewData := map[string]any{}
+
+	viewData["username"] = app.sessionManager.GetString(r.Context(), "username")
+	viewData["transactions"] = transactions
+	viewData["bankName"] = app.sessionManager.GetString(r.Context(), "bankName")
 
 	ts, err := template.ParseFiles("./static/views/home.html")
 	if err != nil {
@@ -51,7 +72,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ts.Execute(w, struct{}{})
+	ts.Execute(w, viewData)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error 2", 500)
