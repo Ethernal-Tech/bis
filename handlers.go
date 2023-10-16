@@ -103,6 +103,27 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
+	r.ParseForm()
+
+	transactionId, _ := strconv.Atoi(r.Form.Get("transaction"))
+
+	transaction := app.db.GetTransactionHistory(uint64(transactionId))
+
+	viewData := map[string]any{}
+
+	viewData["username"] = app.sessionManager.GetString(r.Context(), "username")
+	viewData["transaction"] = transaction
+	viewData["bankName"] = app.sessionManager.GetString(r.Context(), "bankName")
+
+	viewData["Policy301"] = "false"
+	viewData["Policy707"] = "false"
+	viewData["Policy17"] = "false"
+	viewData["Policy444"] = "false"
+
+	for _, policy := range transaction.Policies {
+		viewData[policy] = "true"
+	}
+
 	ts, err := template.ParseFiles("./static/views/confirmtransaction.html")
 	if err != nil {
 		log.Println(err.Error())
@@ -110,7 +131,8 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	ts.Execute(w, struct{}{})
+	ts.Execute(w, viewData)
+
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error 2", 500)

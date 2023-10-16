@@ -61,7 +61,7 @@
                 <div>{{.Status}}</div>
                 {{if and (eq .Status "CREATED") (eq .BeneficiaryBank $.bankName)}}
                 <div>
-                    <a href="/confirmtransaction" class="set-policy">CONFIRM</a>
+                    <a href="/confirmtransaction?transaction={{.Id}}" class="set-policy">CONFIRM</a>
                 </div>
                 {{else if (and (eq .Status "CREATED") (eq .OriginatorBank $.bankName))}}
                 <div>

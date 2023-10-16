@@ -11,7 +11,7 @@
     <header>
         <div>
             <a href="/home"><img src="/static/images/logo.png" alt="" height="40px"></a>
-            <div>Hello Mr Srdjan Vukmirovic, <a class="logout" href="/logout">logout</a></div>
+            <div>Hello {{.username}}, <a class="logout" href="/logout">logout</a></div>
         </div>
     </header>
 
@@ -19,33 +19,55 @@
         <div class="title">CONFIRMATION</div>
         <div class="confirmation-row">
             <div class="type">Sender:</div>
-            <div class="value">Ayanna Cross</div>
+            <div class="value">{{.transaction.SenderGlobalIdentifier}}</div>
         </div>
         <div class="confirmation-row">
             <div class="type">Receiver:</div>
-            <div class="value">Matteo Lewis</div>
+            <div class="value">{{.transaction.ReceiverGlobalIdedntifier}}</div>
         </div>
         <div class="confirmation-row">
             <div class="type">Bank:</div>
-            <div class="value">BNM</div>
+                {{if eq .transaction.OriginatorBank .bankName}}
+                <div class="value">{{.transaction.BeneficiaryBank}}</div>
+                {{else}}
+                <div class="value">{{.transaction.OriginatorBank}}</div>
+                {{end}}
         </div>
         <div class="confirmation-row">
             <div class="type">Amount:</div>
-            <div class="value">1000 -€-</div>
+            <div class="value">{{.transaction.Amount}} -{{.transaction.Curency}}-</div>
         </div>
         <div class="confirmation-row">
             <div class="type">Type:</div>
-            <div class="value">303</div>
+            <div class="value">{{.transaction.Type}}</div>
         </div>
         <div class="policies-type">
-            <div>Policy 22</div>
-            <div>Policy 33</div>
-            <div>Policy 44</div>
+            <div>Policy 301</div>
+            <div>Policy 707</div>
+            <div>Policy 17</div>
+            <div>Policy 444</div>
         </div>
         <div class="policies-checked">
-            <div><div style="background-color: #706f6f;"></div></div>
-            <div><div></div></div>
-            <div><div style="background-color: #706f6f;"></div></div>
+            {{if eq .Policy301 "true"}}
+                <div><div style="background-color: #706f6f;"></div></div>
+            {{else}}
+                <div><div></div></div>
+            {{end}}
+            {{if eq .Policy707 "true"}}
+                <div><div style="background-color: #706f6f;"></div></div>
+            {{else}}
+                <div><div></div></div>
+            {{end}}
+            {{if eq .Policy17 "true"}}
+                <div><div style="background-color: #706f6f;"></div></div>
+            {{else}}
+                <div><div></div></div>
+            {{end}}
+            {{if eq .Policy444 "true"}}
+                <div><div style="background-color: #706f6f;"></div></div>
+            {{else}}
+                <div><div></div></div>
+            {{end}}
         </div>
         <div class="buttons">
             <a class="confirm">CONFIRM</a>
