@@ -55,17 +55,21 @@
                     {{.OriginatorBank}}
                 </div>
                 {{end}}
-                <div>{{.Sender}}</div>
-                <div>{{.Receiver}}</div>
+                <div>{{.SenderName}}</div>
+                <div>{{.ReceiverName}}</div>
                 <div>{{.Amount}} -{{.Curency}}-</div>
                 <div>{{.Status}}</div>
-                {{if and (eq .Status "PANDING") (eq .BeneficiaryBank $.bankName)}}
+                {{if and (eq .Status "TransactionCreated") (eq .BeneficiaryBank $.bankName)}}
                 <div>
                     <a href="/confirmtransaction" class="set-policy">CONFIRM</a>
                 </div>
+                {{else if (and (eq .Status "TransactionCreated") (eq .OriginatorBank $.bankName))}}
+                <div>
+                    -
+                </div>
                 {{else}}
                 <div>
-                    <a href="/confirmtransaction" class="set-policy">CONFIRM</a>
+                    CONFIRMED
                 </div>
                 {{end}}                
                 <div>
