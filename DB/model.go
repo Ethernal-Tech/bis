@@ -73,7 +73,7 @@ type TransactionProof struct {
 }
 
 const (
-	Initiated       int = 0
+	Created         int = 0
 	PoliciesApplied int = 1
 	ProofRequested  int = 2
 	ProofReceived   int = 3
