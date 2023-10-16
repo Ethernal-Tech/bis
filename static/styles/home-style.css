@@ -101,27 +101,27 @@ header > div > div {
 }
 
 .table-header > div:nth-child(2), .table-row > div:nth-child(2) {
-    flex: 2.2;
+    flex: 1.5;
 }
 
 .table-header > div:nth-child(3), .table-row > div:nth-child(3) {
-    flex: 2.4;
+    flex: 2.2;
 }
 
 .table-header > div:nth-child(4), .table-row > div:nth-child(4) {
-    flex: 2.4;
+    flex: 2.2;
 }
 
 .table-header > div:nth-child(5), .table-row > div:nth-child(5) {
-    flex: 1.5;
+    flex: 1.8;
 }
 
 .table-header > div:nth-child(6), .table-row > div:nth-child(6) {
-    flex: 1.5;
+    flex: 2.0;
 }
 
 .table-header > div:nth-child(7), .table-row > div:nth-child(7) {
-    flex: 2;
+    flex: 1.8;
     color: #aa322f;
     display: flex;
     justify-content: center;

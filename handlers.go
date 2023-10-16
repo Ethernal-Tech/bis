@@ -3,9 +3,9 @@ package main
 import (
 	// "io/ioutil"
 
-	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 	"text/template"
 )
 
@@ -38,8 +38,6 @@ func (app *application) login(w http.ResponseWriter, r *http.Request) {
 	app.sessionManager.Put(r.Context(), "username", user.Name)
 	app.sessionManager.Put(r.Context(), "bankId", user.BankId)
 	app.sessionManager.Put(r.Context(), "bankName", user.BankName)
-
-	fmt.Println(app.sessionManager.Get(r.Context(), "bankName"))
 
 	http.Redirect(w, r, "/home", http.StatusSeeOther)
 }
@@ -99,8 +97,10 @@ func (app *application) addTransaction(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Request) {
-	if loggedIn := app.sessionManager.GetString(r.Context(), "inside"); loggedIn != "yes" {
+	if app.sessionManager.GetString(r.Context(), "inside") != "yes" {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
+
+		return
 	}
 
 	ts, err := template.ParseFiles("./static/views/confirmtransaction.html")
@@ -118,9 +118,23 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 }
 
 func (app *application) transactionHistory(w http.ResponseWriter, r *http.Request) {
-	if loggedIn := app.sessionManager.GetString(r.Context(), "inside"); loggedIn != "yes" {
+	if app.sessionManager.GetString(r.Context(), "inside") != "yes" {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
+
+		return
 	}
+
+	r.ParseForm()
+
+	transactionId, _ := strconv.Atoi(r.Form.Get("transaction"))
+
+	transaction := app.db.GetTransactionHistory(uint64(transactionId))
+
+	viewData := map[string]any{}
+
+	viewData["username"] = app.sessionManager.GetString(r.Context(), "username")
+	viewData["transaction"] = transaction
+	viewData["bankName"] = app.sessionManager.GetString(r.Context(), "bankName")
 
 	ts, err := template.ParseFiles("./static/views/transactionhistory.html")
 	if err != nil {
@@ -129,7 +143,7 @@ func (app *application) transactionHistory(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	ts.Execute(w, struct{}{})
+	ts.Execute(w, viewData)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error 2", 500)

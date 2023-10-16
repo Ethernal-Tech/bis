@@ -60,6 +60,54 @@ func (wrapper *DBWrapper) Login(username string, password string) *BankEmployeeM
 	return nil
 }
 
+func convertStatusDBtoPR(transaction *TransactionModel) *TransactionModel {
+
+	switch transaction.Status {
+	case "TransactionCreated":
+		transaction.Status = "CREATED"
+	case "PoliciesApplied":
+		transaction.Status = "POLICIES APPLIED"
+	case "ProofRequested":
+		transaction.Status = "PROOF REQUESTED"
+	case "ProofReceived":
+		transaction.Status = "PROOF RECEIVED"
+	case "ProofInvalid":
+		transaction.Status = "PROOF INVALID"
+	case "AssetSent":
+		transaction.Status = "ASSET SENT"
+	case "TransactionCompleted":
+		transaction.Status = "COMPLETED"
+	case "TransactionCanceled":
+		transaction.Status = "CANCELED"
+	}
+
+	return transaction
+}
+
+func convertStatusPRtoDB(transaction *TransactionModel) *TransactionModel {
+
+	switch transaction.Status {
+	case "CREATED":
+		transaction.Status = "TransactionCreated"
+	case "POLICIES APPLIED":
+		transaction.Status = "PoliciesApplied"
+	case "PROOF REQUESTED":
+		transaction.Status = "ProofRequested"
+	case "PROOF RECEIVED":
+		transaction.Status = "ProofReceived"
+	case "PROOF INVALID":
+		transaction.Status = "ProofInvalid"
+	case "ASSET SENT":
+		transaction.Status = "AssetSent"
+	case "COMPLETED":
+		transaction.Status = "TransactionCompleted"
+	case "CANCELED":
+		transaction.Status = "TransactionCanceled"
+	}
+
+	return transaction
+}
+
 func (wrapper *DBWrapper) GetTransactionsForAddress(address uint64) []TransactionModel {
 	query := `SELECT t.Id
 					,ob.Name
@@ -95,6 +143,7 @@ func (wrapper *DBWrapper) GetTransactionsForAddress(address uint64) []Transactio
 	for rows.Next() {
 		var trnx TransactionModel
 		rows.Scan(&trnx.Id, &trnx.OriginatorBank, &trnx.BeneficiaryBank, &trnx.SenderGlobalIdentifier, &trnx.ReceiverGlobalIdedntifier, &trnx.SenderName, &trnx.ReceiverName, &trnx.Curency, &trnx.Amount, &trnx.Type, &trnx.Status)
+		trnx = *convertStatusDBtoPR(&trnx)
 		transactions = append(transactions, trnx)
 	}
 	return transactions
@@ -125,7 +174,7 @@ func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) Transactio
 
 	var trnx TransactionModel
 	for rows.Next() {
-		rows.Scan(&trnx.Id, &trnx.BeneficiaryBank, &trnx.OriginatorBank, &trnx.SenderGlobalIdentifier, &trnx.ReceiverGlobalIdedntifier, &trnx.Curency, &trnx.Amount, &trnx.Type)
+		rows.Scan(&trnx.Id, &trnx.OriginatorBank, &trnx.BeneficiaryBank, &trnx.SenderGlobalIdentifier, &trnx.ReceiverGlobalIdedntifier, &trnx.Curency, &trnx.Amount, &trnx.Type)
 	}
 	rows.Close()
 

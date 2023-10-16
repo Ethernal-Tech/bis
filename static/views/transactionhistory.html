@@ -20,23 +20,27 @@
             <div class="title">TRANSACTION</div>
             <div class="transaction-details-row">
                 <div class="type">Sender:</div>
-                <div class="value">Kobe Baldwin</div>
+                <div class="value">{{.transaction.SenderGlobalIdentifier}}</div>
             </div>
             <div class="transaction-details-row">
                 <div class="type">Receiver:</div>
-                <div class="value">Jamison Preston</div>
+                <div class="value">{{.transaction.ReceiverGlobalIdedntifier}}</div>
             </div>
             <div class="transaction-details-row">
                 <div class="type">Bank:</div>
-                <div class="value">MAS</div>
+                {{if eq .transaction.OriginatorBank .bankName}}
+                <div class="value">{{.transaction.BeneficiaryBank}}</div>
+                {{else}}
+                <div class="value">{{.transaction.OriginatorBank}}</div>
+                {{end}}
             </div>
             <div class="transaction-details-row">
                 <div class="type">Amount:</div>
-                <div class="value">20000 -¥-</div>
+                <div class="value">{{.transaction.Amount}} -{{.transaction.Curency}}-</div>
             </div>
             <div class="transaction-details-row">
                 <div class="type">Type:</div>
-                <div class="value">303</div>
+                <div class="value">{{.transaction.Type}}</div>
             </div>
             <div class="policies-type">
                 <div>Policy 22</div>
