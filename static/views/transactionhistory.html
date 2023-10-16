@@ -11,7 +11,7 @@
     <header>
         <div>
             <a href="/home"><img src="/static/images/logo.png" alt="" height="40px"></a>
-            <div>Hello Mr Srdjan Vukmirovic, <a class="logout" href="/logout">logout</a></div>
+            <div>Hello {{.username}}, <a class="logout" href="/logout">logout</a></div>
         </div>
     </header>
 
@@ -43,14 +43,32 @@
                 <div class="value">{{.transaction.Type}}</div>
             </div>
             <div class="policies-type">
-                <div>Policy 22</div>
-                <div>Policy 33</div>
-                <div>Policy 44</div>
+                <div>Policy 301</div>
+                <div>Policy 707</div>
+                <div>Policy 17</div>
+                <div>Policy 444</div>
             </div>
             <div class="policies-checked">
+            {{if eq .Policy301 "true"}}
                 <div><div style="background-color: #706f6f;"></div></div>
-                <div><div style="background-color: #706f6f;"></div></div>
+            {{else}}
                 <div><div></div></div>
+            {{end}}
+            {{if eq .Policy707 "true"}}
+                <div><div style="background-color: #706f6f;"></div></div>
+            {{else}}
+                <div><div></div></div>
+            {{end}}
+            {{if eq .Policy17 "true"}}
+                <div><div style="background-color: #706f6f;"></div></div>
+            {{else}}
+                <div><div></div></div>
+            {{end}}
+            {{if eq .Policy444 "true"}}
+                <div><div style="background-color: #706f6f;"></div></div>
+            {{else}}
+                <div><div></div></div>
+            {{end}}
             </div>
         </div>
         <div class="transaction-history">
@@ -61,36 +79,13 @@
                     <div>DESCRIPTION</div>
                 </div>
                 <div class="table-body">
+                    {{range .transaction.StatusHistory}}
                     <div class="table-row">
-                        <div>2023-09-25 14:43:54</div>
-                        <div>INITIATED</div>
-                        <div>Description for INITIATED status.</div>
+                        <div>{{.DateString}}</div>
+                        <div>{{.Name}}</div>
+                        <div>Description!</div>
                     </div>
-                    <div class="table-row">
-                        <div>2023-09-25 14:44:12</div>
-                        <div>PENDING</div>
-                        <div>Description for PENDING status.</div>
-                    </div>
-                    <div class="table-row">
-                        <div>2023-09-25 14:44:35</div>
-                        <div>NEGOTIATED</div>
-                        <div>Description for NEGOTIATED status.</div>
-                    </div>
-                    <div class="table-row">
-                        <div>2023-09-25 14:45:12</div>
-                        <div>PROOF GEN.</div>
-                        <div>Description for PROOF GENERATED status.</div>
-                    </div>
-                    <div class="table-row">
-                        <div>2023-09-25 14:45:21</div>
-                        <div>ASSET SENT</div>
-                        <div>Description for ASSET SENT status.</div>
-                    </div>
-                    <div class="table-row">
-                        <div>2023-09-25 14:45:25</div>
-                        <div>ASSET RECEIVED</div>
-                        <div>Description for ASSET RECEIVED status.</div>
-                    </div>
+                    {{end}}
                 </div>
             </div>
         </div>

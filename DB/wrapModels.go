@@ -28,6 +28,7 @@ type TransactionModel struct {
 }
 
 type StatusHistoryModel struct {
-	Date time.Time
-	Name string
+	Date       time.Time
+	DateString string
+	Name       string
 }
