@@ -17,6 +17,8 @@ type TransactionModel struct {
 	BeneficiaryBank string
 	Sender          uint64
 	Receiver        uint64
+	SenderName      string
+	ReceiverName    string
 	Curency         string
 	Amount          int
 	Type            string

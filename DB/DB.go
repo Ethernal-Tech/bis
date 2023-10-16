@@ -66,6 +66,8 @@ func (wrapper *DBWrapper) GetTransactionsForAddress(address uint64) []Transactio
 					,bb.Name
 					,bcs.GlobalIdentifier
 					,bcr.GlobalIdentifier
+					,bcs.Name
+					,bcr.Name
 					,t.Curency
 					,t.Amount
 					,ty.Name
@@ -92,7 +94,7 @@ func (wrapper *DBWrapper) GetTransactionsForAddress(address uint64) []Transactio
 	transactions := []TransactionModel{}
 	for rows.Next() {
 		var trnx TransactionModel
-		rows.Scan(&trnx.Id, &trnx.BeneficiaryBank, &trnx.OriginatorBank, &trnx.Sender, &trnx.Receiver, &trnx.Curency, &trnx.Amount, &trnx.Type, &trnx.Status)
+		rows.Scan(&trnx.Id, &trnx.BeneficiaryBank, &trnx.OriginatorBank, &trnx.Sender, &trnx.Receiver, &trnx.SenderName, &trnx.ReceiverName, &trnx.Curency, &trnx.Amount, &trnx.Type, &trnx.Status)
 		transactions = append(transactions, trnx)
 	}
 	return transactions
