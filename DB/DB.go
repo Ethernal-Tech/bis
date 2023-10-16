@@ -60,7 +60,7 @@ func (wrapper *DBWrapper) Login(username string, password string) *BankEmployeeM
 	return nil
 }
 
-func convertStatusDBtoPR(transaction *TransactionModel) *TransactionModel {
+func convertTxStatusDBtoPR(transaction *TransactionModel) *TransactionModel {
 
 	switch transaction.Status {
 	case "TransactionCreated":
@@ -84,7 +84,7 @@ func convertStatusDBtoPR(transaction *TransactionModel) *TransactionModel {
 	return transaction
 }
 
-func convertStatusPRtoDB(transaction *TransactionModel) *TransactionModel {
+func convertTxStatusPRtoDB(transaction *TransactionModel) *TransactionModel {
 
 	switch transaction.Status {
 	case "CREATED":
@@ -106,6 +106,54 @@ func convertStatusPRtoDB(transaction *TransactionModel) *TransactionModel {
 	}
 
 	return transaction
+}
+
+func convertHistoryStatusDBtoPR(history *StatusHistoryModel) *StatusHistoryModel {
+
+	switch history.Name {
+	case "TransactionCreated":
+		history.Name = "CREATED"
+	case "PoliciesApplied":
+		history.Name = "POLICIES APPLIED"
+	case "ProofRequested":
+		history.Name = "PROOF REQUESTED"
+	case "ProofReceived":
+		history.Name = "PROOF RECEIVED"
+	case "ProofInvalid":
+		history.Name = "PROOF INVALID"
+	case "AssetSent":
+		history.Name = "ASSET SENT"
+	case "TransactionCompleted":
+		history.Name = "COMPLETED"
+	case "TransactionCanceled":
+		history.Name = "CANCELED"
+	}
+
+	return history
+}
+
+func convertHistoryStatusPRtoDB(history *StatusHistoryModel) *StatusHistoryModel {
+
+	switch history.Name {
+	case "CREATED":
+		history.Name = "TransactionCreated"
+	case "POLICIES APPLIED":
+		history.Name = "PoliciesApplied"
+	case "PROOF REQUESTED":
+		history.Name = "ProofRequested"
+	case "PROOF RECEIVED":
+		history.Name = "ProofReceived"
+	case "PROOF INVALID":
+		history.Name = "ProofInvalid"
+	case "ASSET SENT":
+		history.Name = "AssetSent"
+	case "COMPLETED":
+		history.Name = "TransactionCompleted"
+	case "CANCELED":
+		history.Name = "TransactionCanceled"
+	}
+
+	return history
 }
 
 func (wrapper *DBWrapper) GetTransactionsForAddress(address uint64) []TransactionModel {
@@ -143,7 +191,7 @@ func (wrapper *DBWrapper) GetTransactionsForAddress(address uint64) []Transactio
 	for rows.Next() {
 		var trnx TransactionModel
 		rows.Scan(&trnx.Id, &trnx.OriginatorBank, &trnx.BeneficiaryBank, &trnx.SenderGlobalIdentifier, &trnx.ReceiverGlobalIdedntifier, &trnx.SenderName, &trnx.ReceiverName, &trnx.Curency, &trnx.Amount, &trnx.Type, &trnx.Status)
-		trnx = *convertStatusDBtoPR(&trnx)
+		trnx = *convertTxStatusDBtoPR(&trnx)
 		transactions = append(transactions, trnx)
 	}
 	return transactions
@@ -193,6 +241,8 @@ func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) Transactio
 	for rows.Next() {
 		var statusHistory StatusHistoryModel
 		rows.Scan(&statusHistory.Name, &statusHistory.Date)
+		statusHistory = *convertHistoryStatusDBtoPR(&statusHistory)
+		statusHistory.DateString = statusHistory.Date.Format("2006-01-02 15:04:05")
 		trnx.StatusHistory = append(trnx.StatusHistory, statusHistory)
 	}
 	trnx.Status = trnx.StatusHistory[len(trnx.StatusHistory)-1].Name

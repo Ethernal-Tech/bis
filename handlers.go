@@ -136,6 +136,15 @@ func (app *application) transactionHistory(w http.ResponseWriter, r *http.Reques
 	viewData["transaction"] = transaction
 	viewData["bankName"] = app.sessionManager.GetString(r.Context(), "bankName")
 
+	viewData["Policy301"] = "false"
+	viewData["Policy707"] = "false"
+	viewData["Policy17"] = "false"
+	viewData["Policy444"] = "false"
+
+	for _, policy := range transaction.Policies {
+		viewData[policy] = "true"
+	}
+
 	ts, err := template.ParseFiles("./static/views/transactionhistory.html")
 	if err != nil {
 		log.Println(err.Error())
