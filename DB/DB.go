@@ -71,9 +71,9 @@ func (wrapper *DBWrapper) GetTransactionsForAddress(address uint64) []Transactio
 					,ty.Name
 					,s.Name
 				FROM [Transaction] as t
-				JOIN (SELECT MAX(StatusId) AS StatusId, Transactionid FROM TransactionHistory GROUP BY Transactionid) as th ON th.Transactionid = t.Id 
-				JOIN [Status] as s ON s.Id = th.StatusId
-				JOIN [Type] as ty ON ty.Id = t.Id
+				LEFT JOIN (SELECT MAX(StatusId) AS StatusId, Transactionid FROM TransactionHistory GROUP BY Transactionid) as th ON th.Transactionid = t.Id 
+				LEFT JOIN [Status] as s ON s.Id = th.StatusId
+				LEFT JOIN [Type] as ty ON ty.Id = t.Id
 				JOIN Bank as ob ON ob.Id = t.OriginatorBank
 				JOIN Bank as bb ON bb.Id = t.BeneficiaryBank
 				JOIN BankClient as bcs ON bcs.Id = t.Sender
