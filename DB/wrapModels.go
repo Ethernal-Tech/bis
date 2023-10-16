@@ -12,19 +12,19 @@ type BankEmployeeModel struct {
 }
 
 type TransactionModel struct {
-	Id              uint64
-	OriginatorBank  string
-	BeneficiaryBank string
-	Sender          uint64
-	Receiver        uint64
-	SenderName      string
-	ReceiverName    string
-	Curency         string
-	Amount          int
-	Type            string
-	Status          string
-	StatusHistory   []StatusHistoryModel
-	Policies        []string
+	Id                        uint64
+	OriginatorBank            string
+	BeneficiaryBank           string
+	SenderGlobalIdentifier    string
+	ReceiverGlobalIdedntifier string
+	SenderName                string
+	ReceiverName              string
+	Curency                   string
+	Amount                    int
+	Type                      string
+	Status                    string
+	StatusHistory             []StatusHistoryModel
+	Policies                  []string
 }
 
 type StatusHistoryModel struct {

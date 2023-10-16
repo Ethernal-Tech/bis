@@ -94,7 +94,7 @@ func (wrapper *DBWrapper) GetTransactionsForAddress(address uint64) []Transactio
 	transactions := []TransactionModel{}
 	for rows.Next() {
 		var trnx TransactionModel
-		rows.Scan(&trnx.Id, &trnx.BeneficiaryBank, &trnx.OriginatorBank, &trnx.Sender, &trnx.Receiver, &trnx.SenderName, &trnx.ReceiverName, &trnx.Curency, &trnx.Amount, &trnx.Type, &trnx.Status)
+		rows.Scan(&trnx.Id, &trnx.BeneficiaryBank, &trnx.OriginatorBank, &trnx.SenderGlobalIdentifier, &trnx.ReceiverGlobalIdedntifier, &trnx.SenderName, &trnx.ReceiverName, &trnx.Curency, &trnx.Amount, &trnx.Type, &trnx.Status)
 		transactions = append(transactions, trnx)
 	}
 	return transactions
@@ -125,7 +125,7 @@ func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) Transactio
 
 	var trnx TransactionModel
 	for rows.Next() {
-		rows.Scan(&trnx.Id, &trnx.BeneficiaryBank, &trnx.OriginatorBank, &trnx.Sender, &trnx.Receiver, &trnx.Curency, &trnx.Amount, &trnx.Type)
+		rows.Scan(&trnx.Id, &trnx.BeneficiaryBank, &trnx.OriginatorBank, &trnx.SenderGlobalIdentifier, &trnx.ReceiverGlobalIdedntifier, &trnx.Curency, &trnx.Amount, &trnx.Type)
 	}
 	rows.Close()
 
