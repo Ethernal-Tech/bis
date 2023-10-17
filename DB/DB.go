@@ -224,7 +224,7 @@ func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) Transactio
 
 	var trnx TransactionModel
 	for rows.Next() {
-		rows.Scan(&trnx.Id, &trnx.OriginatorBank, &trnx.BeneficiaryBank, &trnx.SenderGlobalIdentifier, &trnx.ReceiverGlobalIdedntifier, &trnx.Name, &trnx.Name, &trnx.Curency, &trnx.Amount, &trnx.Type)
+		rows.Scan(&trnx.Id, &trnx.OriginatorBank, &trnx.BeneficiaryBank, &trnx.SenderGlobalIdentifier, &trnx.ReceiverGlobalIdedntifier, &trnx.SenderName, &trnx.ReceiverName, &trnx.Curency, &trnx.Amount, &trnx.Type)
 	}
 	rows.Close()
 
