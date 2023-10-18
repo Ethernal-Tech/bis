@@ -188,7 +188,7 @@ func (wrapper *DBWrapper) GetTransactionsForAddress(address uint64) []Transactio
 	transactions := []TransactionModel{}
 	for rows.Next() {
 		var trnx TransactionModel
-		rows.Scan(&trnx.Id, &trnx.OriginatorBank, &trnx.BeneficiaryBank, &trnx.SenderGlobalIdentifier, &trnx.ReceiverGlobalIdedntifier, &trnx.SenderName, &trnx.ReceiverName, &trnx.Currency, &trnx.Amount, &trnx.Type, &trnx.Status)
+		rows.Scan(&trnx.Id, &trnx.OriginatorBank, &trnx.BeneficiaryBank, &trnx.SenderGlobalIdentifier, &trnx.ReceiverGlobalIdedntifier, &trnx.SenderName, &trnx.ReceiverName, &trnx.Currency, &trnx.Amount, &trnx.Status)
 		trnx = *convertTxStatusDBtoPR(&trnx)
 		transactions = append(transactions, trnx)
 	}
