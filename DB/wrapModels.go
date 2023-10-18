@@ -19,7 +19,7 @@ type TransactionModel struct {
 	ReceiverGlobalIdedntifier string
 	SenderName                string
 	ReceiverName              string
-	Curency                   string
+	Currency                  string
 	Amount                    int
 	Type                      string
 	Status                    string
@@ -31,4 +31,10 @@ type StatusHistoryModel struct {
 	Date       time.Time
 	DateString string
 	Name       string
+}
+
+type PolicyModel struct {
+	Country string
+	Amount  uint64
+	Name    string
 }

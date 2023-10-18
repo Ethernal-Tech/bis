@@ -34,7 +34,7 @@ type Transaction struct {
 	BeneficiaryBank uint64
 	Sender          uint64
 	Receiver        uint64
-	Curency         string
+	Currency        string
 	Amount          int
 	TypeId          int
 }

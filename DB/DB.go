@@ -164,7 +164,7 @@ func (wrapper *DBWrapper) GetTransactionsForAddress(address uint64) []Transactio
 					,bcr.GlobalIdentifier
 					,bcs.Name
 					,bcr.Name
-					,t.Curency
+					,t.Currency
 					,t.Amount
 					,s.Name
 				FROM [Transaction] as t
@@ -188,7 +188,7 @@ func (wrapper *DBWrapper) GetTransactionsForAddress(address uint64) []Transactio
 	transactions := []TransactionModel{}
 	for rows.Next() {
 		var trnx TransactionModel
-		rows.Scan(&trnx.Id, &trnx.OriginatorBank, &trnx.BeneficiaryBank, &trnx.SenderGlobalIdentifier, &trnx.ReceiverGlobalIdedntifier, &trnx.SenderName, &trnx.ReceiverName, &trnx.Curency, &trnx.Amount, &trnx.Type, &trnx.Status)
+		rows.Scan(&trnx.Id, &trnx.OriginatorBank, &trnx.BeneficiaryBank, &trnx.SenderGlobalIdentifier, &trnx.ReceiverGlobalIdedntifier, &trnx.SenderName, &trnx.ReceiverName, &trnx.Currency, &trnx.Amount, &trnx.Type, &trnx.Status)
 		trnx = *convertTxStatusDBtoPR(&trnx)
 		transactions = append(transactions, trnx)
 	}
@@ -203,7 +203,7 @@ func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) Transactio
 					,bcr.GlobalIdentifier
 					,bcs.Name
 					,bcr.Name
-					,t.Curency
+					,t.Currency
 					,t.Amount
 					,ty.Name
 				FROM [Transaction] as t
@@ -211,7 +211,7 @@ func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) Transactio
 				JOIN Bank as bb ON bb.Id = t.BeneficiaryBank
 				JOIN BankClient as bcs ON bcs.Id = t.Sender
 				JOIN BankClient as bcr ON bcr.Id = t.Receiver
-				JOIN [TransactionTypePolicy] as ty ON ty.Id = t.TransactionTypePolicyId
+				JOIN [TransactionType] as ty ON ty.Id = t.TransactionTypeId
 				WHERE t.Id = @p1`
 
 	rows, err := wrapper.db.Query(query, sql.Named("p1", transactionId))
@@ -222,7 +222,7 @@ func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) Transactio
 
 	var trnx TransactionModel
 	for rows.Next() {
-		rows.Scan(&trnx.Id, &trnx.OriginatorBank, &trnx.BeneficiaryBank, &trnx.SenderGlobalIdentifier, &trnx.ReceiverGlobalIdedntifier, &trnx.SenderName, &trnx.ReceiverName, &trnx.Curency, &trnx.Amount, &trnx.Type)
+		rows.Scan(&trnx.Id, &trnx.OriginatorBank, &trnx.BeneficiaryBank, &trnx.SenderGlobalIdentifier, &trnx.ReceiverGlobalIdedntifier, &trnx.SenderName, &trnx.ReceiverName, &trnx.Currency, &trnx.Amount, &trnx.Type)
 	}
 	rows.Close()
 
@@ -249,9 +249,14 @@ func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) Transactio
 	rows.Close()
 
 	query = `SELECT p.Name
-				FROM TransactionPolicy tp
-				JOIN Policy as p ON tp.PolicyId = p.Id
-				Where Transactionid = @p1`
+					FROM TransactionTypePolicy ttp
+					JOIN Policy as p ON ttp.PolicyId = p.Id
+					Where ttp.TransactionTypeId = (SELECT t.TransactionTypeId FROM [Transaction] as t
+													JOIN Bank as b ON b.Id = t.BeneficiaryBank
+													Where t.Id = @p1)
+						and ttp.Country = (SELECT b.Country FROM [Transaction] as t
+											JOIN Bank as b ON b.Id = t.BeneficiaryBank
+											Where t.Id = @p1)`
 
 	rows, err = wrapper.db.Query(query, sql.Named("p1", transactionId))
 	defer rows.Close()
@@ -277,7 +282,7 @@ func (wrapper *DBWrapper) InsertTransaction(t Transaction) {
 		sql.Named("p2", t.BeneficiaryBank),
 		sql.Named("p3", t.Sender),
 		sql.Named("p4", t.Receiver),
-		sql.Named("p5", t.Curency),
+		sql.Named("p5", t.Currency),
 		sql.Named("p6", t.Amount),
 		sql.Named("p7", t.TypeId))
 	if err != nil {
@@ -312,4 +317,27 @@ func (wrapper *DBWrapper) UpdateTransactionState(transactionId uint64, state int
 
 func (wrapper *DBWrapper) Close() {
 	wrapper.db.Close()
+}
+
+func (wrapper *DBWrapper) GetPolices(bankId uint64, transactionTypeId int) []PolicyModel {
+	query := `SELECT ttp.Country, ttp.Amount, p.Name
+					FROM TransactionTypePolicy ttp
+					JOIN Policy as p ON ttp.PolicyId = p.Id
+					Where ttp.TransactionTypeId = @p2
+						and ttp.Country = (SELECT Country FROM [Bank] Where Id = @p1)`
+
+	rows, err := wrapper.db.Query(query,
+		sql.Named("p1", bankId),
+		sql.Named("p2", transactionTypeId))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	policies := []PolicyModel{}
+	for rows.Next() {
+		var policy PolicyModel
+		rows.Scan(&policy.Country, &policy.Amount, &policy.Name)
+		policies = append(policies, policy)
+	}
+	return policies
 }

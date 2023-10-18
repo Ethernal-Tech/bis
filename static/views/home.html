@@ -57,7 +57,7 @@
                 {{end}}
                 <div>{{.SenderName}}</div>
                 <div>{{.ReceiverName}}</div>
-                <div>{{.Amount}} -{{.Curency}}-</div>
+                <div>{{.Amount}} -{{.Currency}}-</div>
                 <div>{{.Status}}</div>
                 {{if and (eq .Status "CREATED") (eq .BeneficiaryBank $.bankName)}}
                 <div>

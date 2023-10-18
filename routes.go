@@ -20,11 +20,5 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/confirmtransaction", app.confirmTransaction)
 	router.HandlerFunc(http.MethodGet, "/transactionhistory", app.transactionHistory)
 
-	router.HandlerFunc(http.MethodGet, "/transactions", app.transactions)
-	router.HandlerFunc(http.MethodPost, "/transactions/add", app.transactionAdd)
-	router.HandlerFunc(http.MethodGet, "/transactions/history", app.transactionHistory2)
-	router.HandlerFunc(http.MethodPost, "/transactions/addPolicy", app.transactionAddPolicy)
-	router.HandlerFunc(http.MethodPost, "/transactions/cancel", app.transactionCancel)
-
 	return app.sessionManager.LoadAndSave(router)
 }

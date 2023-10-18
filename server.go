@@ -25,7 +25,7 @@ func main() {
 	// 		BeneficiaryBank: 2,
 	// 		Sender: 1,
 	// 		Receiver: 2,
-	// 		Curency: "$$",
+	// 		Currency: "$$",
 	// 		Amount: 1234,
 	// 		TypeId: 1,
 	// 	})
