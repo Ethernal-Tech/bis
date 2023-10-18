@@ -166,12 +166,10 @@ func (wrapper *DBWrapper) GetTransactionsForAddress(address uint64) []Transactio
 					,bcr.Name
 					,t.Curency
 					,t.Amount
-					,ty.Name
 					,s.Name
 				FROM [Transaction] as t
 				LEFT JOIN (SELECT MAX(StatusId) AS StatusId, Transactionid FROM TransactionHistory GROUP BY Transactionid) as th ON th.Transactionid = t.Id 
 				LEFT JOIN [Status] as s ON s.Id = th.StatusId
-				LEFT JOIN [Type] as ty ON ty.Id = t.Id
 				JOIN Bank as ob ON ob.Id = t.OriginatorBank
 				JOIN Bank as bb ON bb.Id = t.BeneficiaryBank
 				JOIN BankClient as bcs ON bcs.Id = t.Sender
@@ -213,7 +211,7 @@ func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) Transactio
 				JOIN Bank as bb ON bb.Id = t.BeneficiaryBank
 				JOIN BankClient as bcs ON bcs.Id = t.Sender
 				JOIN BankClient as bcr ON bcr.Id = t.Receiver
-				JOIN [Type] as ty ON ty.Id = t.Id
+				JOIN [TransactionTypePolicy] as ty ON ty.Id = t.TransactionTypePolicyId
 				WHERE t.Id = @p1`
 
 	rows, err := wrapper.db.Query(query, sql.Named("p1", transactionId))
