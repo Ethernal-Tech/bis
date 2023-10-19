@@ -20,5 +20,7 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodGet, "/confirmtransaction", app.confirmTransaction)
 	router.HandlerFunc(http.MethodGet, "/transactionhistory", app.transactionHistory)
 
+	router.HandlerFunc(http.MethodPost, "/submitTransactionProof", app.submitTransactionProof)
+
 	return app.sessionManager.LoadAndSave(router)
 }

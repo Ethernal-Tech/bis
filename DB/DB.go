@@ -341,3 +341,14 @@ func (wrapper *DBWrapper) GetPolices(bankId uint64, transactionTypeId int) []Pol
 	}
 	return policies
 }
+
+func (wrapper *DBWrapper) InsertTransactionProof(transactionId uint64, value string) {
+	query := `INSERT INTO [dbo].[TransactionProof] VALUES (@p1, @p2)`
+
+	_, err := wrapper.db.Exec(query,
+		sql.Named("p1", transactionId),
+		sql.Named("p2", value))
+	if err != nil {
+		log.Fatal(err)
+	}
+}

@@ -1,8 +1,9 @@
 package main
 
 import (
-	// "io/ioutil"
-
+	"bisgo/DB"
+	"encoding/json"
+	"io/ioutil"
 	"log"
 	"net/http"
 	"strconv"
@@ -179,4 +180,19 @@ func (app *application) transactionHistory(w http.ResponseWriter, r *http.Reques
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error 2", 500)
 	}
+}
+
+func (app *application) submitTransactionProof(w http.ResponseWriter, r *http.Request) {
+	body, _ := ioutil.ReadAll(r.Body)
+
+	var messageData DB.TransactionProofRequest
+	if err := json.Unmarshal(body, &messageData); err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error 1", 500)
+		return
+	}
+
+	app.db.InsertTransactionProof(messageData.TransactionId, messageData.Value)
+
+	json.NewEncoder(w).Encode("Ok")
 }
