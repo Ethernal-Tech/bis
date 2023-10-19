@@ -39,3 +39,8 @@ type PolicyModel struct {
 	Amount  uint64
 	Name    string
 }
+
+type TransactionProofRequest struct {
+	Value 		  string
+	TransactionId uint64
+}

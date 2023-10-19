@@ -33,6 +33,8 @@ func main() {
 	// user := app.db.Login("admin", "admin")
 	// fmt.Println(user)
 
+	// app.db.InsertTransactionProof(1, "Something")
+
 	err := server.ListenAndServe()
 	app.db.Close()
 	log.Fatal(err)
