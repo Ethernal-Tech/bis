@@ -85,6 +85,10 @@ func (app *application) addTransaction(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
 
+	viewData := map[string]any{}
+
+	viewData["username"] = app.sessionManager.GetString(r.Context(), "username")
+
 	ts, err := template.ParseFiles("./static/views/addtransaction.html")
 	if err != nil {
 		log.Println(err.Error())
@@ -92,7 +96,7 @@ func (app *application) addTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ts.Execute(w, struct{}{})
+	ts.Execute(w, viewData)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error 2", 500)

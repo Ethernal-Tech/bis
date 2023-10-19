@@ -11,7 +11,7 @@
     <header>
         <div>
             <a href="/home"><img src="/static/images/logo.png" alt="" height="40px"></a>
-            <div>Hello Mr Srdjan Vukmirovic, <a class="logout" href="/logout">logout</a></div>
+            <div>Hello {{.username}}, <a class="logout" href="/logout">logout</a></div>
         </div>
     </header>
 
@@ -20,10 +20,28 @@
         <form action="#" method="post">
             <input class="input-sender" type="text" placeholder="Sender">
             <input class="input-receiver" type="text" placeholder="Receiver">
-            <input class="input-beneficiarybank" type="text" placeholder="Beneficiary Bank">
+            <select class="select-bank" name="" id="">
+                <option value="">BNM (Malaysia)</option>
+                <option value="">SNB (Singapore)</option>
+            </select>
             <input class="input-amount" type="text" placeholder="Amount">
             <input class="input-currency" type="text" placeholder="Currency">
-            <input class="input-transactiontype" type="text" placeholder="Transaction Type">
+            <select class="select-type" name="" id="">
+                <option value="">31111 Transaction Type</option>
+                <option value="">31121 Transaction Type</option>
+            </select>
+            <div class="policies">
+                <div>
+                    <div>POLICY - SCL</div>
+                    <div>(Malaysia)</div>
+                    <div></div>
+                </div>
+                <div>
+                    <div>POLICY - CFM</div>
+                    <div>(10000)</div>
+                    <div></div>
+                </div>
+            </div>
             <div class="buttons">
                 <a class="confirm">CONFIRM</a>
                 <a href="/home" class="back">

@@ -7,7 +7,7 @@ body {
     height: 100vh;
     width: 100vw;
     background-color: #3A6BAC;
-    background: linear-gradient(to bottom right, #3A6BAC 15%, #3A6BAC 49%, #3A6BAC 78%, #EAA121 78%, #EAA121 90%, #FFFFFF 90%, #FFFFFF 100%);
+    background-image: url(https://etherscan.io/images/svg/waves-light.svg);
 }
 
 header {
@@ -43,22 +43,22 @@ header > div > div {
 }
 
 .add-transaction {
-    height: 620px;
+    height: 704px;
     width: 440px;
-    margin: 100px auto;
+    margin: 90px auto;
     background-color: #ffffff;
     border-radius: 4%;
-    border: 2px solid #706f6f;
+    border: 4px solid #EAA121;
 }
 
 .add-transaction > .title {
     font-size: 38px;
     font-family: 'Segoe UI';
     text-align: center;
-    color: #EAA121;
+    color: #aa322f;
     font-weight: 700;
     margin-top: 28px;
-    margin-bottom: 50px;
+    margin-bottom: 36px;
 }
 
 input:focus {
@@ -87,6 +87,55 @@ input {
     margin-bottom: 30px;
 }
 
+select {
+    width: 80%;
+    display: block;
+    margin: 0 auto;
+    margin-bottom: 24px;
+    font-size: 24px;
+    text-align: center;
+    border: 2px solid #aa322f;
+    border-radius: 10px;
+    color: #706f6f;
+    height: 40px;
+    margin-top: 35px;
+    cursor: pointer;
+}
+
+.policies {
+    width: 80%;
+    margin: 0px auto;
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Segoe UI';   
+    color: #aa322f;
+    font-size: 22px;
+}
+
+.policies > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.policies > div > div:nth-child(1) {
+    font-weight: 600;
+}
+
+.policies > div > div:nth-child(2) {
+    font-size: 18px;
+    font-family: 'Segoe UI';  
+    color: #706f6f; 
+}
+
+.policies > div > div:nth-child(3) {
+    margin-top: 10px;
+    height: 18px;
+    width: 18px;
+    border: 1px solid #706f6f;
+    border-radius: 50%;
+}
+
 .buttons:hover {
     cursor: pointer;
 }
@@ -96,7 +145,7 @@ input {
     justify-content: space-between;
     width: 80%;
     margin: 0px auto;
-    margin-top: 46px;
+    margin-top: 24px;
     height: 50px;
 }
 

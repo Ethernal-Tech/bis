@@ -7,7 +7,7 @@ body {
     height: 100vh;
     width: 100vw;
     background-color: #3A6BAC;
-    background: linear-gradient(to bottom right, #3A6BAC 15%, #3A6BAC 49%, #3A6BAC 78%, #EAA121 78%, #EAA121 90%, #FFFFFF 90%, #FFFFFF 100%);
+    background-image: url(https://etherscan.io/images/svg/waves-light.svg);
 }
 
 header {
@@ -69,12 +69,12 @@ header > div > div {
 
 .table {
     width: 80%;
-    height: 600px;
+    height: 620px;
     position: relative;
     left: calc(50vw - 40%);
-    border-radius: 8px;
+    border-radius: 20px;
     background-color: #ffffff;
-    border: 2px solid #706f6f;
+    border: 3px solid #EAA121;
 }
 
 .table-header, .table-row {
@@ -133,6 +133,7 @@ header > div > div {
     justify-content: center;
     align-items: center;
     transition: 0.4s;
+    color: #EAA121;
 }
 
 .table-row > div:nth-child(8) > a:hover > svg {
