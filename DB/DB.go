@@ -206,6 +206,7 @@ func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) Transactio
 					,t.Currency
 					,t.Amount
 					,ty.Name
+					,ty.Id
 				FROM [Transaction] as t
 				JOIN Bank as ob ON ob.Id = t.OriginatorBank
 				JOIN Bank as bb ON bb.Id = t.BeneficiaryBank
@@ -222,7 +223,7 @@ func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) Transactio
 
 	var trnx TransactionModel
 	for rows.Next() {
-		rows.Scan(&trnx.Id, &trnx.OriginatorBank, &trnx.BeneficiaryBank, &trnx.SenderGlobalIdentifier, &trnx.ReceiverGlobalIdedntifier, &trnx.SenderName, &trnx.ReceiverName, &trnx.Currency, &trnx.Amount, &trnx.Type)
+		rows.Scan(&trnx.Id, &trnx.OriginatorBank, &trnx.BeneficiaryBank, &trnx.SenderGlobalIdentifier, &trnx.ReceiverGlobalIdedntifier, &trnx.SenderName, &trnx.ReceiverName, &trnx.Currency, &trnx.Amount, &trnx.Type, &trnx.TypeId)
 	}
 	rows.Close()
 
@@ -272,6 +273,23 @@ func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) Transactio
 	}
 
 	return trnx
+}
+
+func (wrapper *DBWrapper) GetBankId(bankName string) uint64 {
+	query := `SELECT Id FROM [Bank] WHERE name = @p1`
+
+	rows, err := wrapper.db.Query(query, sql.Named("p1", bankName))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var bankId uint64
+	for rows.Next() {
+		rows.Scan(&bankId)
+	}
+
+	return bankId
 }
 
 func (wrapper *DBWrapper) InsertTransaction(t Transaction) {

@@ -43,28 +43,30 @@
                 <div class="value">{{.transaction.Type}}</div>
             </div>
             <div class="policies-type">
-                <div>Policy 301</div>
-                <div>Policy 707</div>
-                <div>Policy 17</div>
-                <div>Policy 444</div>
+            <div>
+                <diV>POLICY - SCL</diV>
+                {{if eq .SactionCheckList "true"}}
+                  <div>({{.SactionCheckListContent.Country}})</div>
+                {{else}}
+                  <div>(-)</div>
+                {{end}}
+            </div>
+            <div>
+                <diV>POLICY - CFM</diV>
+                {{if eq .CapitalFlowManagement "true"}}
+                  <div>({{.CapitalFlowManagementContent.Amount}})</div>
+                {{else}}
+                  <div>(-)</div>
+                {{end}}
+            </div>
             </div>
             <div class="policies-checked">
-            {{if eq .Policy301 "true"}}
+            {{if eq .SactionCheckList "true"}}
                 <div><div style="background-color: #706f6f;"></div></div>
             {{else}}
                 <div><div></div></div>
             {{end}}
-            {{if eq .Policy707 "true"}}
-                <div><div style="background-color: #706f6f;"></div></div>
-            {{else}}
-                <div><div></div></div>
-            {{end}}
-            {{if eq .Policy17 "true"}}
-                <div><div style="background-color: #706f6f;"></div></div>
-            {{else}}
-                <div><div></div></div>
-            {{end}}
-            {{if eq .Policy444 "true"}}
+            {{if eq .CapitalFlowManagement "true"}}
                 <div><div style="background-color: #706f6f;"></div></div>
             {{else}}
                 <div><div></div></div>

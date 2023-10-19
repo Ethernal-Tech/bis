@@ -3,9 +3,11 @@ package main
 import (
 	// "io/ioutil"
 
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"text/template"
 )
 
@@ -109,19 +111,24 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 
 	transaction := app.db.GetTransactionHistory(uint64(transactionId))
 
+	bankId := app.db.GetBankId(transaction.BeneficiaryBank)
+
+	policies := app.db.GetPolices(bankId, transaction.TypeId)
+
 	viewData := map[string]any{}
 
 	viewData["username"] = app.sessionManager.GetString(r.Context(), "username")
 	viewData["transaction"] = transaction
 	viewData["bankName"] = app.sessionManager.GetString(r.Context(), "bankName")
 
-	viewData["Policy301"] = "false"
-	viewData["Policy707"] = "false"
-	viewData["Policy17"] = "false"
-	viewData["Policy444"] = "false"
+	viewData["CapitalFlowManagement"] = "false"
+	viewData["SactionCheckList"] = "false"
 
-	for _, policy := range transaction.Policies {
-		viewData[policy] = "true"
+	fmt.Println(policies)
+
+	for _, policy := range policies {
+		viewData[strings.ReplaceAll(policy.Name, " ", "")] = "true"
+		viewData[strings.ReplaceAll(policy.Name, " ", "")+"Content"] = policy
 	}
 
 	ts, err := template.ParseFiles("./static/views/confirmtransaction.html")
@@ -152,19 +159,24 @@ func (app *application) transactionHistory(w http.ResponseWriter, r *http.Reques
 
 	transaction := app.db.GetTransactionHistory(uint64(transactionId))
 
+	bankId := app.db.GetBankId(transaction.BeneficiaryBank)
+
+	policies := app.db.GetPolices(bankId, transaction.TypeId)
+
 	viewData := map[string]any{}
 
 	viewData["username"] = app.sessionManager.GetString(r.Context(), "username")
 	viewData["transaction"] = transaction
 	viewData["bankName"] = app.sessionManager.GetString(r.Context(), "bankName")
 
-	viewData["Policy301"] = "false"
-	viewData["Policy707"] = "false"
-	viewData["Policy17"] = "false"
-	viewData["Policy444"] = "false"
+	viewData["Capital Flow Management"] = "false"
+	viewData["Saction Check List"] = "false"
 
-	for _, policy := range transaction.Policies {
-		viewData[policy] = "true"
+	fmt.Println(policies)
+
+	for _, policy := range policies {
+		viewData[strings.ReplaceAll(policy.Name, " ", "")] = "true"
+		viewData[strings.ReplaceAll(policy.Name, " ", "")+"Content"] = policy
 	}
 
 	ts, err := template.ParseFiles("./static/views/transactionhistory.html")

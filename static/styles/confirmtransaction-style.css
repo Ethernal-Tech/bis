@@ -43,7 +43,7 @@ header > div > div {
 }
 
 .confirm-transaction {
-    height: 620px;
+    height: 646px;
     width: 470px;
     margin: 100px auto;
     background-color: #ffffff;
@@ -85,15 +85,29 @@ header > div > div {
     display: flex;
     width: 84%;
     margin: 0 auto;
-    margin-top: 40px;
+    margin-top: 36px;
 }
 
 .policies-type > div {
     flex: 1;
     text-align: center;
-    font-size: 20px;
+}
+
+.policies-type > div > div:nth-child(1) {
+    flex: 1;
+    text-align: center;
+    font-size: 24px;
     font-family: 'Segoe UI';
     color: #aa322f;
+    font-weight: 600;
+}
+
+.policies-type > div > div:nth-child(2) {
+    flex: 1;
+    text-align: center;
+    font-size: 20px;
+    font-family: 'Segoe UI';
+    color: #706f6f;
     font-weight: 600;
 }
 
@@ -127,7 +141,7 @@ header > div > div {
     justify-content: space-between;
     width: 84%;
     margin: 0px auto;
-    margin-top: 38px;
+    margin-top: 42px;
     height: 50px;
 }
 
