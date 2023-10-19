@@ -9,7 +9,7 @@ type Bank struct {
 	GlobalIdentifier string
 	Name             string
 	Address          string
-	Country          string
+	CountryId        int
 }
 
 type BankClient struct {
@@ -26,6 +26,12 @@ type BankEmployee struct {
 	Username string
 	Password string
 	BankId   uint64
+}
+
+type Country struct {
+	Id          int
+	Name        string
+	CountryCode string
 }
 
 type Transaction struct {

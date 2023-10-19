@@ -249,14 +249,13 @@ func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) Transactio
 	rows.Close()
 
 	query = `SELECT p.Name
-					FROM TransactionTypePolicy ttp
-					JOIN Policy as p ON ttp.PolicyId = p.Id
-					Where ttp.TransactionTypeId = (SELECT t.TransactionTypeId FROM [Transaction] as t
-													JOIN Bank as b ON b.Id = t.BeneficiaryBank
-													Where t.Id = @p1)
-						and ttp.Country = (SELECT b.Country FROM [Transaction] as t
-											JOIN Bank as b ON b.Id = t.BeneficiaryBank
-											Where t.Id = @p1)`
+				FROM TransactionTypePolicy ttp
+				JOIN Policy as p ON ttp.PolicyId = p.Id
+				Where ttp.TransactionTypeId = (SELECT t.TransactionTypeId FROM [Transaction] as t
+												Where t.Id = @p1)
+					and ttp.CountryId = (SELECT b.CountryId FROM [Transaction] as t
+										JOIN Bank as b ON b.Id = t.BeneficiaryBank
+										Where t.Id = @p1)`
 
 	rows, err = wrapper.db.Query(query, sql.Named("p1", transactionId))
 	defer rows.Close()
@@ -320,11 +319,12 @@ func (wrapper *DBWrapper) Close() {
 }
 
 func (wrapper *DBWrapper) GetPolices(bankId uint64, transactionTypeId int) []PolicyModel {
-	query := `SELECT ttp.Country, ttp.Amount, p.Name
+	query := `SELECT c.Name, ttp.Amount, p.Name
 					FROM TransactionTypePolicy ttp
 					JOIN Policy as p ON ttp.PolicyId = p.Id
+					Join Country as c ON ttp.CountryId = c.Id
 					Where ttp.TransactionTypeId = @p2
-						and ttp.Country = (SELECT Country FROM [Bank] Where Id = @p1)`
+						and ttp.CountryId = (SELECT CountryId FROM [Bank] Where Id = @p1)`
 
 	rows, err := wrapper.db.Query(query,
 		sql.Named("p1", bankId),
