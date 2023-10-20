@@ -4,7 +4,7 @@ import (
 	"bisgo/DB"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
+	"io"
 	"log"
 	"net/http"
 	"strconv"
@@ -238,7 +238,7 @@ func (app *application) transactionHistory(w http.ResponseWriter, r *http.Reques
 }
 
 func (app *application) submitTransactionProof(w http.ResponseWriter, r *http.Request) {
-	body, _ := ioutil.ReadAll(r.Body)
+	body, _ := io.ReadAll(r.Body)
 
 	var messageData DB.TransactionProofRequest
 	if err := json.Unmarshal(body, &messageData); err != nil {
@@ -247,7 +247,13 @@ func (app *application) submitTransactionProof(w http.ResponseWriter, r *http.Re
 		return
 	}
 
-	app.db.InsertTransactionProof(messageData.TransactionId, messageData.Value)
+	transactionId, err := strconv.Atoi(messageData.TransactionId)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error 1", 500)
+		return
+	}
+	app.db.InsertTransactionProof(uint64(transactionId), messageData.Value)
 
 	json.NewEncoder(w).Encode("Ok")
 }
