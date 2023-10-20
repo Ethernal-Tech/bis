@@ -6,6 +6,7 @@
     <title>BIS Innovation Hub</title>
     <link rel="stylesheet" href="/static/styles/addtransaction-style.css">
     <link rel="icon" href="/static/images/webpage-logo.png">
+    <script src="/static/javaScript/addtransaction-js.js"></script>
 </head>
 <body>
     <header>
@@ -20,26 +21,26 @@
         <form action="#" method="post">
             <input class="input-sender" type="text" placeholder="Sender">
             <input class="input-receiver" type="text" placeholder="Receiver">
-            <select class="select-bank" name="" id="">
-                <option value="">BNM (Malaysia)</option>
-                <option value="">SNB (Singapore)</option>
+            <select id="select-bank" class="select-bank" name="" id="">
+                <option value="1">BNM (Malaysia)</option>
+                <option value="3">SNB (Singapore)</option>
             </select>
             <input class="input-amount" type="text" placeholder="Amount">
             <input class="input-currency" type="text" placeholder="Currency">
-            <select class="select-type" name="" id="">
-                <option value="">31111 Transaction Type</option>
-                <option value="">31121 Transaction Type</option>
+            <select id="select-type" class="select-type" name="" id="">
+                <option value="31111">31111 Transaction Type</option>
+                <option value="31121">31121 Transaction Type</option>
             </select>
             <div class="policies">
                 <div>
                     <div>POLICY - SCL</div>
-                    <div>(Malaysia)</div>
-                    <div></div>
+                    <div id="country"></div>
+                    <div id="SCL-sign"></div>
                 </div>
                 <div>
                     <div>POLICY - CFM</div>
-                    <div>(10000)</div>
-                    <div></div>
+                    <div id="amount"></div>
+                    <div id="CFM-sign"></div>
                 </div>
             </div>
             <div class="buttons">

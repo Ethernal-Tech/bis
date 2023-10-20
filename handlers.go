@@ -81,8 +81,10 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) addTransaction(w http.ResponseWriter, r *http.Request) {
-	if loggedIn := app.sessionManager.GetString(r.Context(), "inside"); loggedIn != "yes" {
+	if app.sessionManager.GetString(r.Context(), "inside") != "yes" {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
+
+		return
 	}
 
 	viewData := map[string]any{}
@@ -101,6 +103,43 @@ func (app *application) addTransaction(w http.ResponseWriter, r *http.Request) {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error 2", 500)
 	}
+}
+
+func (app *application) getPolicies(w http.ResponseWriter, r *http.Request) {
+	if app.sessionManager.GetString(r.Context(), "inside") != "yes" {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+
+		return
+	}
+
+	data := struct {
+		BankId            string
+		TransactionTypeId string
+	}{}
+
+	decoder := json.NewDecoder(r.Body)
+
+	if err := decoder.Decode(&data); err != nil {
+		http.Error(w, "Invalid JSON data", http.StatusBadRequest)
+		return
+	}
+
+	bankId, _ := strconv.Atoi(data.BankId)
+
+	policies := app.db.GetPolices(uint64(bankId), app.db.GetTransactionTypeId(data.TransactionTypeId))
+
+	fmt.Println(policies)
+
+	jsonData, err := json.Marshal(policies)
+
+	if err != nil {
+		http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonData)
 }
 
 func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Request) {
