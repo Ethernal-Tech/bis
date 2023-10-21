@@ -168,17 +168,10 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 	viewData["CapitalFlowManagement"] = "false"
 	viewData["SactionCheckList"] = "false"
 
-	fmt.Println(policies)
-
 	for _, policy := range policies {
 		viewData[strings.ReplaceAll(policy.Name, " ", "")] = "true"
 		viewData[strings.ReplaceAll(policy.Name, " ", "")+"Content"] = policy
 	}
-
-	fmt.Println(viewData["CapitalFlowManagement"])
-	fmt.Println(viewData["SactionCheckList"])
-	fmt.Println(viewData["CapitalFlowManagementContent"])
-	fmt.Println(viewData["SactionCheckListContent"])
 
 	ts, err := template.ParseFiles("./static/views/confirmtransaction.html")
 	if err != nil {

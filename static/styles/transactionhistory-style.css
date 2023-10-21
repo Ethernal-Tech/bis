@@ -7,7 +7,7 @@ body {
     height: 100vh;
     width: 100vw;
     background-color: #3A6BAC;
-    background: linear-gradient(to bottom right, #3A6BAC 15%, #3A6BAC 49%, #3A6BAC 78%, #EAA121 78%, #EAA121 90%, #FFFFFF 90%, #FFFFFF 100%);
+    background-image: url(/static/images/waves.svg);
 }
 
 header {
@@ -42,141 +42,138 @@ header > div > div {
     font-weight: 700;
 }
 
-section {
-    border: 2px solid #706f6f;
+.transaction-history {
     width: 80%;
-    height: 600px;
-    margin: 0 auto;
-    margin-top: 100px;
+    height: 668px;
+    border-radius: 20px;
     background-color: #ffffff;
-    border-radius: 8px;
-    display: flex;
+    border: 3px solid #EAA121;
+    margin: 0px auto;
+    margin-top: 90px;
 }
 
-section > div:nth-child(1) {
+.transaction-history > .title {
+    font-size: 40px;
+    font-family: 'Segoe UI';   
+    color: #aa322f;
+    text-align: center;
+    margin: 0 auto;
+    margin-top: 14px;
+    font-weight: 700;
+}
+
+.content {
+    margin: 0px 40px;
+    margin-top: 40px;
+    height: 520px;
+    display: flex;
+    align-items: center;
+}
+
+.content > .informations {
+    height: 90%;
     flex: 1;
 }
 
-section > div:nth-child(2) {
-    flex: 2;
+.content > .history {
+    height: 100%;
+    flex: 3;
 }
 
-.transaction-details > .title {
-    font-size: 46px;
-    font-family: 'Segoe UI';
+.informations-title {
+    font-family: 'Segoe UI';  
+    font-weight: 600;
+    font-size: 32px;
     text-align: center;
-    color: #EAA121;
-    font-weight: 700;
-    margin-top: 28px;
-    margin-bottom: 50px;
+    color: #aa322f;
+    margin-bottom: 30px;
 }
 
-.transaction-details-row {
-    width: 80%;
+.informations-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 24px;
+    font-family: 'Segoe UI';  
+    font-weight: 600;
+    margin-top: 20px;
+}
+
+.informations-row-name {
+    color: #aa322f;
+}
+
+.informations-row-value {
+    color: #706f6f;
+}
+
+.policies {
     margin: 0px auto;
     display: flex;
     justify-content: space-between;
-    align-content: center;
-    font-size: 24px;
-    font-family: 'Segoe UI';
-    margin-top: 20px;
-    font-weight: 600;
-}
-
-.type {
+    font-family: 'Segoe UI';   
     color: #aa322f;
-}
-
-.value {
-    color: #706f6f;
-}
-
-.policies-type {
-    display: flex;
-    width: 80%;
-    margin: 0 auto;
-    margin-top: 60px;
-}
-
-.policies-type > div {
-    flex: 1;
-    text-align: center;
-}
-
-.policies-type > div > div:nth-child(1) {
-    flex: 1;
-    text-align: center;
-    font-size: 24px;
-    font-family: 'Segoe UI';
-    color: #aa322f;
-    font-weight: 600;
-}
-
-.policies-type > div > div:nth-child(2) {
-    flex: 1;
-    text-align: center;
     font-size: 20px;
-    font-family: 'Segoe UI';
-    color: #706f6f;
+    margin-top: 44px;
+}
+
+.policies > div {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.policies > div > div:nth-child(1) {
     font-weight: 600;
 }
 
-.policies-checked {
-    display: flex;
-    justify-content: space-between;
-    width: 80%;
-    margin: 0 auto;
+.policies > div > div:nth-child(2) {
+    font-size: 18px;
+    font-family: 'Segoe UI';  
+    color: #706f6f; 
+}
+
+.policies > div > div:nth-child(3) {
     margin-top: 10px;
-}
-
-.policies-checked > div {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-}
-
-.policies-checked > div > div {
-    height: 16px;
-    width: 16px;
+    height: 18px;
+    width: 18px;
     border: 1px solid #706f6f;
     border-radius: 50%;
 }
 
-.table {
-    height: 84%;
-    width: 88%;
+.history-table {
+    border: 1px solid green;
+    width: 96%;
+    height: 100%;
+    margin-left: 4%;
+    border-radius: 20px;
     border: 2px solid #706f6f;
-    border-radius: 8px;
-    margin: 0px auto;
-    margin-top: 36px;
 }
 
-.table-header, .table-row {
+.history-table-header, .history-table-row {
     display: flex;
-    font-size: 24px;
-    font-weight: 700;
+    border-bottom: 2px solid #706f6f;
+    font-size: 26px;
+    height: 42px;
+    align-items: center;
+    text-align: center;
+    font-weight: 600;
     font-family: 'Segoe UI'; 
     color: #706f6f;
-    border-bottom: 2px solid #706f6f;
 }
 
-.table-row {
-    font-size: 22px;
+.history-table-row {
+    font-size: 20px;
     font-weight: 400;
 }
 
-.table-header > div, .table-row > div {
-    text-align: center;
+.history-table-header > div:nth-child(1), .history-table-row > div:nth-child(1) {
+    flex: 1.8;
 }
 
-.table-header > div:nth-child(1), .table-row > div:nth-child(1) {
-    flex: 3;
+.history-table-header > div:nth-child(2), .history-table-row > div:nth-child(2) {
+    flex: 1.8;
 }
 
-.table-header > div:nth-child(2), .table-row > div:nth-child(2) {
-    flex: 2.5;
-}
-
-.table-header > div:nth-child(3), .table-row > div:nth-child(3) {
-    flex: 5;
+.history-table-header > div:nth-child(3), .history-table-row > div:nth-child(3) {
+    flex: 4;
 }

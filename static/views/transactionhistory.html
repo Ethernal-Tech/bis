@@ -15,82 +15,89 @@
         </div>
     </header>
 
-    <section>  
-        <div class="transaction-details">
-            <div class="title">TRANSACTION</div>
-            <div class="transaction-details-row">
-                <div class="type">Sender:</div>
-                <div class="value">{{.transaction.SenderName}}</div>
-            </div>
-            <div class="transaction-details-row">
-                <div class="type">Receiver:</div>
-                <div class="value">{{.transaction.ReceiverName}}</div>
-            </div>
-            <div class="transaction-details-row">
-                <div class="type">Bank:</div>
-                {{if eq .transaction.OriginatorBank .bankName}}
-                <div class="value">{{.transaction.BeneficiaryBank}}</div>
-                {{else}}
-                <div class="value">{{.transaction.OriginatorBank}}</div>
-                {{end}}
-            </div>
-            <div class="transaction-details-row">
-                <div class="type">Amount:</div>
-                <div class="value">{{.transaction.Amount}} -{{.transaction.Currency}}-</div>
-            </div>
-            <div class="transaction-details-row">
-                <div class="type">Type:</div>
-                <div class="value">{{.transaction.Type}}</div>
-            </div>
-            <div class="policies-type">
-            <div>
-                <div>POLICY - SCL</div>
-                {{if eq .SactionCheckList "true"}}
-                  <div>({{.SactionCheckListContent.Country}})</div>
-                {{else}}
-                  <div>(-)</div>
-                {{end}}
-            </div>
-            <div>
-                <div>POLICY - CFM</div>
-                {{if eq .CapitalFlowManagement "true"}}
-                  <div>({{.CapitalFlowManagementContent.Amount}})</div>
-                {{else}}
-                  <div>(-)</div>
-                {{end}}
-            </div>
-            </div>
-            <div class="policies-checked">
-            {{if eq .SactionCheckList "true"}}
-                <div><div style="background-color: #706f6f;"></div></div>
-            {{else}}
-                <div><div></div></div>
-            {{end}}
-            {{if eq .CapitalFlowManagement "true"}}
-                <div><div style="background-color: #706f6f;"></div></div>
-            {{else}}
-                <div><div></div></div>
-            {{end}}
-            </div>
-        </div>
-        <div class="transaction-history">
-            <div class="table">
-                <div class="table-header">
-                    <div>DATE</div>
-                    <div>STATUS</div>
-                    <div>DESCRIPTION</div>
+    <div class="transaction-history">
+        <div class="title">TRANSACTION HISTORY</div>
+        <div class="content">
+            <div class="informations">
+                <div class="informations-title">INFORMATIONS:</div>
+                <div class="informations-row">
+                    <div class="informations-row-name">Sender:</div>
+                    <div class="informations-row-value">{{.transaction.SenderName}}</div>
                 </div>
-                <div class="table-body">
-                    {{range .transaction.StatusHistory}}
-                    <div class="table-row">
-                        <div>{{.DateString}}</div>
-                        <div>{{.Name}}</div>
-                        <div>Description!</div>
-                    </div>
+                <div class="informations-row">
+                    <div class="informations-row-name">Receiver:</div>
+                    <div class="informations-row-value">{{.transaction.ReceiverName}}</div>
+                </div>
+                <div class="informations-row">
+                    <div class="informations-row-name">Bank:</div>
+                    <div class="informations-row-value">
+                    {{if eq .bankName .transaction.OriginatorBank}}
+                        {{.transaction.BeneficiaryBank}}
+                    {{else}}
+                        {{.transaction.OriginatorBank}}
                     {{end}}
+                    </div>
+                </div>
+                <div class="informations-row">
+                    <div class="informations-row-name">Amount:</div>
+                    <div class="informations-row-value">{{.transaction.Amount}} -{{.transaction.Currency}}-</div>
+                </div>
+                <div class="informations-row">
+                    <div class="informations-row-name">Type:</div>
+                    <div class="informations-row-value">{{.transaction.Type}}</div>
+                </div>
+                <div class="policies">
+                    <div>
+                        <div>POLICY - SCL</div>
+                        <div id="country">
+                        {{if eq .SactionCheckList "true"}}
+                            ({{.SactionCheckListContent.Country}})
+                        {{else}}
+                            (-)
+                        {{end}}
+                        </div>
+                        {{if eq .SactionCheckList "true"}}
+                        <div id="SCL-sign" style="background-color:#706f6f"></div>
+                        {{else}}
+                        <div id="SCL-sign"></div>
+                        {{end}}                    
+                    </div>
+                    <div>
+                        <div>POLICY - CFM</div>
+                        <div id="amount">
+                        {{if eq .CapitalFlowManagement "true"}}
+                            ({{.CapitalFlowManagementContent.Amount}})
+                        {{else}}
+                            (-)
+                        {{end}}                    
+                        </div>
+                        {{if eq .CapitalFlowManagement "true"}}
+                        <div id="CFM-sign" style="background-color:#706f6f"></div>
+                        {{else}}
+                        <div id="CFM-sign"></div>
+                        {{end}}
+                    </div>
+                </div>
+            </div>
+            <div class="history">
+                <div class="history-table">
+                    <div class="history-table-header">
+                        <div>DATE</div>
+                        <div>STATUS</div>
+                        <div>DETAILS</div>
+                    </div>
+                    <div class="history-table-body">
+                        {{range .transaction.StatusHistory}}
+                        <div class="history-table-row">
+                            <div>{{.DateString}}</div>
+                            <div>{{.Name}}</div>
+                            <div>Some description about {{.Name}} status.</div>
+                        </div>
+                        {{end}}
+                    </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
 </body>
 </html>
