@@ -41,6 +41,6 @@ type PolicyModel struct {
 }
 
 type TransactionProofRequest struct {
-	Value 		  string
-	TransactionId uint64
+	Value         string
+	TransactionId string
 }
