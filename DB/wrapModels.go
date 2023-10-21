@@ -35,6 +35,7 @@ type StatusHistoryModel struct {
 }
 
 type PolicyModel struct {
+	Id      uint64
 	Country string
 	Amount  uint64
 	Name    string

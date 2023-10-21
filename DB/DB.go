@@ -359,7 +359,7 @@ func (wrapper *DBWrapper) Close() {
 }
 
 func (wrapper *DBWrapper) GetPolices(bankId uint64, transactionTypeId int) []PolicyModel {
-	query := `SELECT c.Name, ttp.Amount, p.Name
+	query := `SELECT p.Id, c.Name, ttp.Amount, p.Name
 					FROM TransactionTypePolicy ttp
 					JOIN Policy as p ON ttp.PolicyId = p.Id
 					Join Country as c ON ttp.CountryId = c.Id
@@ -376,7 +376,7 @@ func (wrapper *DBWrapper) GetPolices(bankId uint64, transactionTypeId int) []Pol
 	policies := []PolicyModel{}
 	for rows.Next() {
 		var policy PolicyModel
-		rows.Scan(&policy.Country, &policy.Amount, &policy.Name)
+		rows.Scan(&policy.Id, &policy.Country, &policy.Amount, &policy.Name)
 		policies = append(policies, policy)
 	}
 	return policies
