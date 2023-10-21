@@ -308,20 +308,25 @@ func (wrapper *DBWrapper) GetTransactionTypeId(transactionType string) int {
 	return transactionTypeId
 }
 
-func (wrapper *DBWrapper) InsertTransaction(t Transaction) {
-	query := `INSERT INTO [dbo].[Transaction] VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7)`
+func (wrapper *DBWrapper) InsertTransaction(t Transaction) uint64 {
+	query := `INSERT INTO [dbo].[Transaction] OUTPUT INSERTED.Id VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7)`
 
-	_, err := wrapper.db.Exec(query,
+	var insertedID uint64
+
+	err := wrapper.db.QueryRow(query,
 		sql.Named("p1", t.OriginatorBank),
 		sql.Named("p2", t.BeneficiaryBank),
 		sql.Named("p3", t.Sender),
 		sql.Named("p4", t.Receiver),
 		sql.Named("p5", t.Currency),
 		sql.Named("p6", t.Amount),
-		sql.Named("p7", t.TypeId))
+		sql.Named("p7", t.TypeId)).Scan(&insertedID)
+
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	return insertedID
 }
 
 func (wrapper *DBWrapper) InsertTransactionPolicy(transactionId uint64, policies []int) {

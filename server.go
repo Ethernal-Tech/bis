@@ -17,26 +17,18 @@ func main() {
 		Addr:    "localhost:4000",
 		Handler: app.routes(),
 	}
-	// trs := app.db.GetTransactionsForAddress(1)
-	// fmt.Println(trs)
 
-	// tHistory := app.db.GetTransactionHistory(3)
-	// fmt.Println(tHistory)
+	// r := app.db.InsertTransaction(DB.Transaction{
+	// 	OriginatorBank:  1,
+	// 	BeneficiaryBank: 2,
+	// 	Sender:          1,
+	// 	Receiver:        2,
+	// 	Currency:        "$$",
+	// 	Amount:          54001,
+	// 	TypeId:          1,
+	// })
 
-	// app.db.InsertTransaction(DB.Transaction{
-	// 		OriginatorBank: 1,
-	// 		BeneficiaryBank: 2,
-	// 		Sender: 1,
-	// 		Receiver: 2,
-	// 		Currency: "$$",
-	// 		Amount: 1234,
-	// 		TypeId: 1,
-	// 	})
-
-	// user := app.db.Login("admin", "admin")
-	// fmt.Println(user)
-
-	// app.db.InsertTransactionProof(1, "Something")
+	// fmt.Println("Inserted tx with ID: ", r)
 
 	err := server.ListenAndServe()
 	app.db.Close()

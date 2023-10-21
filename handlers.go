@@ -87,22 +87,35 @@ func (app *application) addTransaction(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	viewData := map[string]any{}
+	if r.Method == http.MethodGet {
 
-	viewData["username"] = app.sessionManager.GetString(r.Context(), "username")
+		viewData := map[string]any{}
 
-	ts, err := template.ParseFiles("./static/views/addtransaction.html")
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error 1", 500)
-		return
+		viewData["username"] = app.sessionManager.GetString(r.Context(), "username")
+
+		ts, err := template.ParseFiles("./static/views/addtransaction.html")
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error 1", 500)
+			return
+		}
+
+		ts.Execute(w, viewData)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error 2", 500)
+		}
+	} else if r.Method == http.MethodPost {
+
+		r.ParseForm()
+
+		transaction := DB.Transaction{}
+
+		transactionID := app.db.InsertTransaction(transaction)
+		app.db.InsertTransactionPolicy(transactionID, []int{10, 20})
+		app.db.UpdateTransactionState(transactionID, 1)
 	}
 
-	ts.Execute(w, viewData)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error 2", 500)
-	}
 }
 
 func (app *application) getPolicies(w http.ResponseWriter, r *http.Request) {
