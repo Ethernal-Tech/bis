@@ -41,36 +41,38 @@
             <div class="type">Type:</div>
             <div class="value">{{.transaction.Type}}</div>
         </div>
-        <div class="policies-type">
-            <div>
-                <div>POLICY SCL</div>
-                {{if eq .SactionCheckList "true"}}
-                  <div>({{.SactionCheckListContent.Country}})</div>
-                {{else}}
-                  <div>(-)</div>
-                {{end}}
+            <div class="policies">
+                <div>
+                    <div>POLICY - SCL</div>
+                    <div id="country">
+                    {{if eq .SactionCheckList "true"}}
+                        ({{.SactionCheckListContent.Country}})
+                    {{else}}
+                        (-)
+                    {{end}}
+                    </div>
+                    {{if eq .SactionCheckList "true"}}
+                    <div id="SCL-sign" style="background-color:#706f6f"></div>
+                    {{else}}
+                    <div id="SCL-sign"></div>
+                    {{end}}                    
+                </div>
+                <div>
+                    <div>POLICY - CFM</div>
+                    <div id="amount">
+                    {{if eq .CapitalFlowManagement "true"}}
+                        ({{.CapitalFlowManagementContent.Amount}})
+                    {{else}}
+                        (-)
+                    {{end}}                    
+                    </div>
+                    {{if eq .CapitalFlowManagement "true"}}
+                    <div id="CFM-sign" style="background-color:#706f6f"></div>
+                    {{else}}
+                    <div id="CFM-sign"></div>
+                    {{end}}
+                </div>
             </div>
-            <div>
-                <div>POLICY CFM</div>
-                {{if eq .CapitalFlowManagement "true"}}
-                  <div>({{.CapitalFlowManagementContent.Amount}})</div>
-                {{else}}
-                  <div>(-)</div>
-                {{end}}
-            </div>
-        </div>
-        <div class="policies-checked">
-            {{if eq .SactionCheckList "true"}}
-                <div><div style="background-color: #706f6f;"></div></div>
-            {{else}}
-                <div><div></div></div>
-            {{end}}
-            {{if eq .CapitalFlowManagement "true"}}
-                <div><div style="background-color: #706f6f;"></div></div>
-            {{else}}
-                <div><div></div></div>
-            {{end}}
-        </div>
         <div class="buttons">
             <a class="confirm">CONFIRM</a>
             <a href="/home" class="back">

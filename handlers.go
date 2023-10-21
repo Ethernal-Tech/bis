@@ -175,6 +175,11 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 		viewData[strings.ReplaceAll(policy.Name, " ", "")+"Content"] = policy
 	}
 
+	fmt.Println(viewData["CapitalFlowManagement"])
+	fmt.Println(viewData["SactionCheckList"])
+	fmt.Println(viewData["CapitalFlowManagementContent"])
+	fmt.Println(viewData["SactionCheckListContent"])
+
 	ts, err := template.ParseFiles("./static/views/confirmtransaction.html")
 	if err != nil {
 		log.Println(err.Error())
