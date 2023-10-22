@@ -19,15 +19,15 @@
     <div class="add-transaction">
         <div class="title">ADD TRANSACTION</div>
         <form action="/addtransaction" method="post">
-            <input class="input-sender" type="text" placeholder="Sender">
-            <input class="input-receiver" type="text" placeholder="Receiver">
-            <select id="select-bank" class="select-bank" name="" id="">
+            <input class="input-sender" type="text" placeholder="Sender" name="sender">
+            <input class="input-receiver" type="text" placeholder="Receiver" name="receiver">
+            <select id="select-bank" class="select-bank" name="bank">
                 <option value="1">BNM (Malaysia)</option>
                 <option value="2">MAS (Singapore)</option>
             </select>
-            <input class="input-amount" type="text" placeholder="Amount">
-            <input class="input-currency" type="text" placeholder="Currency">
-            <select id="select-type" class="select-type" name="" id="">
+            <input class="input-amount" type="text" placeholder="Amount" name="amount">
+            <input class="input-currency" type="text" placeholder="Currency" name="currency">
+            <select id="select-type" class="select-type" name="type">
                 <option value="31111">31111 Transaction Type</option>
                 <option value="31121">31121 Transaction Type</option>
             </select>

@@ -105,17 +105,47 @@ func (app *application) addTransaction(w http.ResponseWriter, r *http.Request) {
 			log.Println(err.Error())
 			http.Error(w, "Internal Server Error 2", 500)
 		}
+
 	} else if r.Method == http.MethodPost {
 
 		r.ParseForm()
 
-		transaction := DB.Transaction{}
+		originatorBank := app.db.GetBankId(app.sessionManager.GetString(r.Context(), "bankName"))
+		beneficiaryBank, _ := strconv.Atoi(r.Form.Get("bank"))
+		sender := app.db.GetBankClientId(r.Form.Get("sender"))
+		receiver := app.db.GetBankClientId(r.Form.Get("receiver"))
+		currency := r.Form.Get("currency")
+		amount, _ := strconv.Atoi(r.Form.Get("amount"))
+		transactionType := app.db.GetTransactionTypeId(r.Form.Get("type"))
+
+		transaction := DB.Transaction{
+			OriginatorBank:  uint64(originatorBank),
+			BeneficiaryBank: uint64(beneficiaryBank),
+			Sender:          sender,
+			Receiver:        receiver,
+			Currency:        currency,
+			Amount:          amount,
+			TypeId:          transactionType,
+		}
+
+		fmt.Println(transaction)
+
+		policies := app.db.GetPolices(uint64(beneficiaryBank), transactionType)
+
+		var policiesID []int
+
+		for _, policy := range policies {
+			policiesID = append(policiesID, int(policy.Id))
+		}
+
+		fmt.Println(policiesID)
 
 		transactionID := app.db.InsertTransaction(transaction)
-		app.db.InsertTransactionPolicy(transactionID, []int{10, 20})
+		//app.db.InsertTransactionPolicy(transactionID, policiesID)
 		app.db.UpdateTransactionState(transactionID, 1)
-	}
 
+		http.Redirect(w, r, "/home", http.StatusSeeOther)
+	}
 }
 
 func (app *application) getPolicies(w http.ResponseWriter, r *http.Request) {
@@ -140,8 +170,6 @@ func (app *application) getPolicies(w http.ResponseWriter, r *http.Request) {
 	bankId, _ := strconv.Atoi(data.BankId)
 
 	policies := app.db.GetPolices(uint64(bankId), app.db.GetTransactionTypeId(data.TransactionTypeId))
-
-	fmt.Println(policies)
 
 	jsonData, err := json.Marshal(policies)
 
