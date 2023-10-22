@@ -3,7 +3,6 @@ package main
 import (
 	"bisgo/DB"
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -128,8 +127,6 @@ func (app *application) addTransaction(w http.ResponseWriter, r *http.Request) {
 			TypeId:          transactionType,
 		}
 
-		fmt.Println(transaction)
-
 		policies := app.db.GetPolices(uint64(beneficiaryBank), transactionType)
 
 		var policiesID []int
@@ -137,8 +134,6 @@ func (app *application) addTransaction(w http.ResponseWriter, r *http.Request) {
 		for _, policy := range policies {
 			policiesID = append(policiesID, int(policy.Id))
 		}
-
-		fmt.Println(policiesID)
 
 		transactionID := app.db.InsertTransaction(transaction)
 		//app.db.InsertTransactionPolicy(transactionID, policiesID)
@@ -254,8 +249,6 @@ func (app *application) transactionHistory(w http.ResponseWriter, r *http.Reques
 
 	viewData["Capital Flow Management"] = "false"
 	viewData["Saction Check List"] = "false"
-
-	fmt.Println(policies)
 
 	for _, policy := range policies {
 		viewData[strings.ReplaceAll(policy.Name, " ", "")] = "true"
