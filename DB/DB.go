@@ -308,6 +308,23 @@ func (wrapper *DBWrapper) GetTransactionTypeId(transactionType string) int {
 	return transactionTypeId
 }
 
+func (wrapper *DBWrapper) GetBankClientId(bankClientName string) uint64 {
+	query := `SELECT Id FROM [BankClient] WHERE Name = @p1`
+
+	rows, err := wrapper.db.Query(query, sql.Named("p1", bankClientName))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var bankClientId uint64
+	for rows.Next() {
+		rows.Scan(&bankClientId)
+	}
+
+	return bankClientId
+}
+
 func (wrapper *DBWrapper) InsertTransaction(t Transaction) uint64 {
 	query := `INSERT INTO [dbo].[Transaction] OUTPUT INSERTED.Id VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7)`
 
