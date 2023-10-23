@@ -45,11 +45,10 @@ func (wrapper *DBWrapper) Login(username string, password string) *BankEmployeeM
 	rows, err := wrapper.db.Query(query,
 		sql.Named("p1", username),
 		sql.Named("p2", password))
-	defer rows.Close()
-
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var user BankEmployeeModel
@@ -179,11 +178,10 @@ func (wrapper *DBWrapper) GetTransactionsForAddress(address uint64) []Transactio
 	rows, err := wrapper.db.Query(query,
 		sql.Named("p1", address),
 		sql.Named("p2", address))
-	defer rows.Close()
-
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer rows.Close()
 
 	transactions := []TransactionModel{}
 	for rows.Next() {
@@ -259,11 +257,10 @@ func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) Transactio
 										Where t.Id = @p1)`
 
 	rows, err = wrapper.db.Query(query, sql.Named("p1", transactionId))
-	defer rows.Close()
-
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var policyName string
@@ -344,19 +341,6 @@ func (wrapper *DBWrapper) InsertTransaction(t Transaction) uint64 {
 	}
 
 	return insertedID
-}
-
-func (wrapper *DBWrapper) InsertTransactionPolicy(transactionId uint64, policies []int) {
-	query := `INSERT INTO [dbo].[TransactionPolicy] VALUES (@p1, @p2)`
-
-	for _, policy := range policies {
-		_, err := wrapper.db.Exec(query,
-			sql.Named("p1", transactionId),
-			sql.Named("p2", policy))
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
 }
 
 func (wrapper *DBWrapper) UpdateTransactionState(transactionId uint64, state int) {
