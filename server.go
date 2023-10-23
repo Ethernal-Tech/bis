@@ -69,7 +69,7 @@ func main() {
 	url = "http://localhost:9090/api/start-client"
 
 	// Create a JSON payload (in this example).
-	jsonPayload = []byte(`{"tx_id": "3", "policy_id": "1", "to": "0.0.0.0:10501"}`)
+	jsonPayload = []byte(`{"tx_id": "3", "receiver": "ReceiverOfFunds", "to": "0.0.0.0:10501"}`)
 
 	// Create an HTTP request with the payload.
 	req, err = http.NewRequest("POST", url, bytes.NewBuffer(jsonPayload))
