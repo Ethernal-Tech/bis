@@ -14,7 +14,7 @@ function getPolicies() {
         TransactionTypeId : transactionTypeid
     }
 
-    fetch("/getpolicies", {
+    fetch("/api/getpolicies", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json', 
