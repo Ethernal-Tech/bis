@@ -128,14 +128,6 @@ func (app *application) addTransaction(w http.ResponseWriter, r *http.Request) {
 			TypeId:          transactionType,
 		}
 
-		policies := app.db.GetPolices(uint64(beneficiaryBank), transactionType)
-
-		var policiesID []int
-
-		for _, policy := range policies {
-			policiesID = append(policiesID, int(policy.Id))
-		}
-
 		transactionID := app.db.InsertTransaction(transaction)
 		app.db.UpdateTransactionState(transactionID, 1)
 
