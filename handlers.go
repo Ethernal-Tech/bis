@@ -91,6 +91,7 @@ func (app *application) addTransaction(w http.ResponseWriter, r *http.Request) {
 		viewData := map[string]any{}
 
 		viewData["username"] = app.sessionManager.GetString(r.Context(), "username")
+		viewData["bankName"] = app.sessionManager.GetString(r.Context(), "bankName")
 
 		ts, err := template.ParseFiles("./static/views/addtransaction.html")
 		if err != nil {
