@@ -33,25 +33,33 @@ function getPolicies() {
         data.forEach(function(currentValue){
             if (currentValue.Name == "Saction Check List") {
                 document.getElementById("country").innerText = "(" + currentValue.Country + ")"
-                document.getElementById("SCL-sign").style.backgroundColor = "#706f6f"
+                document.getElementById("country").style.color = "rgb(66, 127, 109)"
+                document.getElementById("SCL").style.color = "rgb(66, 127, 109)"
+                document.getElementById("SCL").style.textDecorationLine = "none"    
                 hasSCL = true
             }
 
             if (currentValue.Name == "Capital Flow Management") {
                 document.getElementById("amount").innerText = "(" + currentValue.Amount + ")"
-                document.getElementById("CFM-sign").style.backgroundColor = "#706f6f"
+                document.getElementById("amount").style.color = "rgb(66, 127, 109)"
+                document.getElementById("CFM").style.color = "rgb(66, 127, 109)"
+                document.getElementById("CFM").style.textDecorationLine = "none"       
                 hasCFM = true
             }
         })
 
         if (hasSCL == false) {
             document.getElementById("country").innerText = "(-)"
-            document.getElementById("SCL-sign").style.backgroundColor = "#ffffff"            
+            document.getElementById("country").style.color = "rgb(183, 183, 183)"
+            document.getElementById("SCL").style.color = "rgb(183, 183, 183)"  
+            document.getElementById("SCL").style.textDecorationLine = "line-through"       
         }
 
         if (hasCFM == false) {
             document.getElementById("amount").innerText = "(-)"
-            document.getElementById("CFM-sign").style.backgroundColor = "#ffffff"
+            document.getElementById("amount").style.color = "rgb(183, 183, 183)"
+            document.getElementById("CFM").style.color = "rgb(183, 183, 183)"  
+            document.getElementById("CFM").style.textDecorationLine = "line-through"       
         }
 
     })
