@@ -20,6 +20,7 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPost, "/addtransaction", app.addTransaction)
 	router.HandlerFunc(http.MethodPost, "/getpolicies", app.getPolicies)
 	router.HandlerFunc(http.MethodGet, "/confirmtransaction", app.confirmTransaction)
+	router.HandlerFunc(http.MethodPost, "/confirmtransaction", app.confirmTransaction)
 	router.HandlerFunc(http.MethodGet, "/transactionhistory", app.transactionHistory)
 
 	router.HandlerFunc(http.MethodPost, "/api/submitTransactionProof", app.submitTransactionProof)

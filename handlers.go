@@ -2,7 +2,9 @@ package main
 
 import (
 	"bisgo/DB"
+	"bytes"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -177,42 +179,92 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	r.ParseForm()
+	if r.Method == http.MethodGet {
 
-	transactionId, _ := strconv.Atoi(r.Form.Get("transaction"))
+		r.ParseForm()
 
-	transaction := app.db.GetTransactionHistory(uint64(transactionId))
+		transactionId, _ := strconv.Atoi(r.Form.Get("transaction"))
 
-	bankId := app.db.GetBankId(transaction.BeneficiaryBank)
+		transaction := app.db.GetTransactionHistory(uint64(transactionId))
 
-	policies := app.db.GetPolices(bankId, transaction.TypeId)
+		bankId := app.db.GetBankId(transaction.BeneficiaryBank)
 
-	viewData := map[string]any{}
+		policies := app.db.GetPolices(bankId, transaction.TypeId)
 
-	viewData["username"] = app.sessionManager.GetString(r.Context(), "username")
-	viewData["transaction"] = transaction
-	viewData["bankName"] = app.sessionManager.GetString(r.Context(), "bankName")
+		viewData := map[string]any{}
 
-	viewData["CapitalFlowManagement"] = "false"
-	viewData["SactionCheckList"] = "false"
+		viewData["username"] = app.sessionManager.GetString(r.Context(), "username")
+		viewData["transaction"] = transaction
+		viewData["bankName"] = app.sessionManager.GetString(r.Context(), "bankName")
 
-	for _, policy := range policies {
-		viewData[strings.ReplaceAll(policy.Name, " ", "")] = "true"
-		viewData[strings.ReplaceAll(policy.Name, " ", "")+"Content"] = policy
-	}
+		viewData["CapitalFlowManagement"] = "false"
+		viewData["SactionCheckList"] = "false"
 
-	ts, err := template.ParseFiles("./static/views/confirmtransaction.html")
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error 1", 500)
-		return
-	}
+		for _, policy := range policies {
+			viewData[strings.ReplaceAll(policy.Name, " ", "")] = "true"
+			viewData[strings.ReplaceAll(policy.Name, " ", "")+"Content"] = policy
+		}
 
-	ts.Execute(w, viewData)
+		ts, err := template.ParseFiles("./static/views/confirmtransaction.html")
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error 1", 500)
+			return
+		}
 
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error 2", 500)
+		ts.Execute(w, viewData)
+
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error 2", 500)
+		}
+
+	} else if r.Method == http.MethodPost {
+
+		r.ParseForm()
+
+		transactionId, _ := strconv.Atoi(r.Form.Get("transactionid"))
+
+		receiver := app.db.GetTransactionHistory(uint64(transactionId)).ReceiverName
+
+		urlServer := "http://localhost:9090/api/start-server"
+		urlClient := "http://localhost:9090/api/start-client"
+
+		client := &http.Client{}
+
+		jsonPayload := []byte(fmt.Sprintf(`{"tx_id": "%d", "policy_id": "1"}`, transactionId))
+
+		req, err := http.NewRequest("POST", urlServer, bytes.NewBuffer(jsonPayload))
+		if err != nil {
+			panic(err)
+		}
+
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Connection", "close")
+
+		_, err = client.Do(req)
+		if err != nil {
+			panic(err)
+		}
+
+		jsonPayload = []byte(fmt.Sprintf(`{"tx_id": "%d", "receiver": "%s", "to": "0.0.0.0:10501"}`, transactionId, receiver))
+
+		req, err = http.NewRequest("POST", urlClient, bytes.NewBuffer(jsonPayload))
+		if err != nil {
+			panic(err)
+		}
+
+		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("Connection", "close")
+
+		_, err = client.Do(req)
+		if err != nil {
+			panic(err)
+		}
+
+		// Update transaction state
+		//
+		//app.db.UpdateTransactionState(uint64(transactionId), )
 	}
 }
 
