@@ -137,7 +137,6 @@ func (app *application) addTransaction(w http.ResponseWriter, r *http.Request) {
 		}
 
 		transactionID := app.db.InsertTransaction(transaction)
-		//app.db.InsertTransactionPolicy(transactionID, policiesID)
 		app.db.UpdateTransactionState(transactionID, 1)
 
 		http.Redirect(w, r, "/home", http.StatusSeeOther)
