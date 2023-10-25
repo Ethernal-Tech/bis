@@ -18,6 +18,8 @@ func main() {
 		Handler: app.routes(),
 	}
 
+	app.db.CheckCFM(1, 1)
+
 	// r := app.db.InsertTransaction(DB.Transaction{
 	// 	OriginatorBank:  1,
 	// 	BeneficiaryBank: 2,
