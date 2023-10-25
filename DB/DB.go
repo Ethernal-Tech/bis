@@ -280,6 +280,8 @@ func (wrapper *DBWrapper) GetBankId(bankName string) uint64 {
 		log.Fatal(err)
 	}
 
+	defer rows.Close()
+
 	var bankId uint64
 	for rows.Next() {
 		rows.Scan(&bankId)
@@ -297,6 +299,8 @@ func (wrapper *DBWrapper) GetTransactionTypeId(transactionType string) int {
 		log.Fatal(err)
 	}
 
+	defer rows.Close()
+
 	var transactionTypeId int
 	for rows.Next() {
 		rows.Scan(&transactionTypeId)
@@ -313,6 +317,7 @@ func (wrapper *DBWrapper) GetBankClientId(bankClientName string) uint64 {
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer rows.Close()
 
 	var bankClientId uint64
 	for rows.Next() {
@@ -338,6 +343,20 @@ func (wrapper *DBWrapper) InsertTransaction(t Transaction) uint64 {
 
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	polices := wrapper.GetPolices(t.BeneficiaryBank, t.TypeId)
+
+	for _, policy := range polices {
+		query = `INSERT INTO [dbo].[TransactionPolicyStatus] VALUES (@p1, @p2, @p3)`
+		_, err := wrapper.db.Exec(query,
+			sql.Named("p1", insertedID),
+			sql.Named("p2", policy.Id),
+			sql.Named("p3", 0))
+
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	return insertedID
@@ -374,6 +393,8 @@ func (wrapper *DBWrapper) GetPolices(bankId uint64, transactionTypeId int) []Pol
 		log.Fatal(err)
 	}
 
+	defer rows.Close()
+
 	policies := []PolicyModel{}
 	for rows.Next() {
 		var policy PolicyModel
@@ -391,5 +412,76 @@ func (wrapper *DBWrapper) InsertTransactionProof(transactionId uint64, value str
 		sql.Named("p2", value))
 	if err != nil {
 		log.Fatal(err)
+	}
+}
+
+func (wrapper *DBWrapper) UpdateTransactionPolicyStatus(transactionId uint64, policyId int, status int) {
+	query := `UPDATE [TransactionPolicyStatus] Set Status = @p3 Where TransactionId = @p1 and PolicyId = @p2`
+
+	_, err := wrapper.db.Exec(query,
+		sql.Named("p1", transactionId),
+		sql.Named("p2", policyId),
+		sql.Named("p3", status))
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func (wrapper *DBWrapper) CheckCFM(receiverId uint64, countryId int) {
+	query := `SELECT GlobalIdentifier FROM BankClient Where Id = @p1`
+
+	rows, err := wrapper.db.Query(query,
+		sql.Named("p1", receiverId))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var globalIdentifier string
+	for rows.Next() {
+		rows.Scan(&globalIdentifier)
+	}
+
+	rows.Close()
+	query = `SELECT b.Id FROM BankClient as bc Join (SELECT * FROM Bank Where CountryId = @p2) as b ON b.Id = bc.BankId	Where bc.GlobalIdentifier = @p1`
+
+	rows, err = wrapper.db.Query(query,
+		sql.Named("p1", globalIdentifier),
+		sql.Named("p2", countryId))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var bankIds []uint64
+	for rows.Next() {
+		var bankId uint64
+		rows.Scan(&bankId)
+		bankIds = append(bankIds, bankId)
+	}
+	rows.Close()
+
+	query = `SELECT
+			(SELECT ISNULL(SUM(Amount), 0)
+			FROM [Transaction] 
+			Where Receiver = @p1 and BeneficiaryBank IN @p2 and TransactionTypeId IN (1))
+			-
+			((SELECT ISNULL(SUM(Amount), 0)
+			FROM [Transaction] 
+			Where Sender = @p1 and OriginatorBank IN @p2 and TransactionTypeId IN (3)))
+			as difference`
+
+	rows, err = wrapper.db.Query(query,
+		sql.Named("p1", receiverId),
+		sql.Named("p2", bankIds))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	var amount int64
+	for rows.Next() {
+		rows.Scan(&amount)
 	}
 }
