@@ -45,3 +45,9 @@ type TransactionProofRequest struct {
 	Value         string
 	TransactionId string
 }
+
+type BankModel struct {
+	Id      uint64
+	Name    string
+	Country string
+}

@@ -18,7 +18,10 @@ func main() {
 		Handler: app.routes(),
 	}
 
-	app.db.CheckCFM(1, 1)
+	// am := app.db.CheckCFM(1, 1)
+	// log.Println(am)
+	// b := app.db.GetBanks()
+	// log.Println(b)
 
 	// r := app.db.InsertTransaction(DB.Transaction{
 	// 	OriginatorBank:  1,

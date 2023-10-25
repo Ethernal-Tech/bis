@@ -3,6 +3,8 @@ package DB
 import (
 	"database/sql"
 	"log"
+	"strconv"
+	"strings"
 	"time"
 
 	_ "github.com/denisenkom/go-mssqldb"
@@ -378,6 +380,27 @@ func (wrapper *DBWrapper) Close() {
 	wrapper.db.Close()
 }
 
+func (wrapper *DBWrapper) GetBanks() []BankModel {
+	query := `SELECT b.Id, b.Name, c.Name
+					From Bank b
+					JOIN Country as c ON c.Id = b.CountryId`
+
+	rows, err := wrapper.db.Query(query)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer rows.Close()
+
+	banks := []BankModel{}
+	for rows.Next() {
+		var bank BankModel
+		rows.Scan(&bank.Id, &bank.Name, &bank.Country)
+		banks = append(banks, bank)
+	}
+	return banks
+}
+
 func (wrapper *DBWrapper) GetPolices(bankId uint64, transactionTypeId int) []PolicyModel {
 	query := `SELECT p.Id, c.Name, ttp.Amount, p.Name
 					FROM TransactionTypePolicy ttp
@@ -427,7 +450,7 @@ func (wrapper *DBWrapper) UpdateTransactionPolicyStatus(transactionId uint64, po
 	}
 }
 
-func (wrapper *DBWrapper) CheckCFM(receiverId uint64, countryId int) {
+func (wrapper *DBWrapper) CheckCFM(receiverId uint64, countryId int) int64 {
 	query := `SELECT GlobalIdentifier FROM BankClient Where Id = @p1`
 
 	rows, err := wrapper.db.Query(query,
@@ -453,27 +476,27 @@ func (wrapper *DBWrapper) CheckCFM(receiverId uint64, countryId int) {
 		log.Fatal(err)
 	}
 
-	var bankIds []uint64
+	var bankIds []string
 	for rows.Next() {
 		var bankId uint64
 		rows.Scan(&bankId)
-		bankIds = append(bankIds, bankId)
+		bankIds = append(bankIds, strconv.Itoa(int(bankId)))
 	}
 	rows.Close()
 
 	query = `SELECT
 			(SELECT ISNULL(SUM(Amount), 0)
 			FROM [Transaction] 
-			Where Receiver = @p1 and BeneficiaryBank IN @p2 and TransactionTypeId IN (1))
+			Where Receiver = @p1 and BeneficiaryBank IN (@p2) and TransactionTypeId IN (1, 2))
 			-
 			((SELECT ISNULL(SUM(Amount), 0)
 			FROM [Transaction] 
-			Where Sender = @p1 and OriginatorBank IN @p2 and TransactionTypeId IN (3)))
+			Where Sender = @p1 and OriginatorBank IN (@p2) and TransactionTypeId IN (3)))
 			as difference`
 
 	rows, err = wrapper.db.Query(query,
 		sql.Named("p1", receiverId),
-		sql.Named("p2", bankIds))
+		sql.Named("p2", strings.Join(bankIds, ", ")))
 
 	if err != nil {
 		log.Fatal(err)
@@ -484,4 +507,6 @@ func (wrapper *DBWrapper) CheckCFM(receiverId uint64, countryId int) {
 	for rows.Next() {
 		rows.Scan(&amount)
 	}
+
+	return amount
 }
