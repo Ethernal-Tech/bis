@@ -526,19 +526,19 @@ func (wrapper *DBWrapper) CheckCFM(receiverId uint64, countryId int) int64 {
 	}
 	rows.Close()
 
+	c := strings.Join(bankIds, ",")
 	query = `SELECT
 			(SELECT ISNULL(SUM(Amount), 0)
 			FROM [Transaction] 
-			Where Receiver = @p1 and BeneficiaryBank IN (@p2) and TransactionTypeId IN (1, 2))
+			Where Receiver = @p1 and BeneficiaryBank IN (` + c + `) and TransactionTypeId IN (1, 2))
 			-
 			((SELECT ISNULL(SUM(Amount), 0)
 			FROM [Transaction] 
-			Where Sender = @p1 and OriginatorBank IN (@p2) and TransactionTypeId IN (3)))
+			Where Sender = @p1 and OriginatorBank IN (` + c + `) and TransactionTypeId IN (3)))
 			as difference`
 
 	rows, err = wrapper.db.Query(query,
-		sql.Named("p1", receiverId),
-		sql.Named("p2", strings.Join(bankIds, ", ")))
+		sql.Named("p1", receiverId))
 
 	if err != nil {
 		log.Fatal(err)
