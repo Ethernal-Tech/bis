@@ -43,7 +43,7 @@ header > div > div {
 }
 
 .confirm-transaction {
-    height: 630px;
+    height: 590px;
     width: 440px;
     margin: 100px auto;
     background-color: #ffffff;
@@ -90,7 +90,7 @@ header > div > div {
     font-family: 'Segoe UI';   
     color: #aa322f;
     font-size: 22px;
-    margin-top: 40px;
+    margin-top: 34px;
 }
 
 .policies > div {
@@ -100,21 +100,20 @@ header > div > div {
 }
 
 .policies > div > div:nth-child(1) {
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .policies > div > div:nth-child(2) {
     font-size: 18px;
     font-family: 'Segoe UI';  
-    color: #706f6f; 
 }
 
-.policies > div > div:nth-child(3) {
-    margin-top: 10px;
-    height: 18px;
-    width: 18px;
-    border: 1px solid #706f6f;
-    border-radius: 50%;
+.policy-applied {
+    color: rgb(66, 127, 109)
+}
+
+.policy-not-applied {
+    color: rgb(183, 183, 183)
 }
 
 .buttons:hover {
