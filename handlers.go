@@ -225,16 +225,72 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 
 		transactionId, _ := strconv.Atoi(r.Form.Get("transactionid"))
 
-		receiver := app.db.GetTransactionHistory(uint64(transactionId)).ReceiverName
+		transaction := app.db.GetTransactionHistory(uint64(transactionId))
+
+		app.db.UpdateTransactionState(transaction.Id, 2)
+
+		// CFM check//
+
+		bank := app.db.GetBank(app.db.GetBankId(transaction.BeneficiaryBank))
+
+		fmt.Println(app.db.GetBankClientId(transaction.ReceiverName))
+		fmt.Println(bank.CountryId)
+
+		amount := app.db.CheckCFM(app.db.GetBankClientId(transaction.ReceiverName), bank.CountryId)
+
+		fmt.Println(amount)
+
+		policies := app.db.GetPolices(app.db.GetBankId(transaction.BeneficiaryBank), transaction.TypeId)
+
+		var CFMpolicy *DB.PolicyModel
+		SCLexists := false
+
+		for _, policy := range policies {
+			if policy.Name == "Capital Flow Management" {
+				CFMpolicy = &policy
+			} else if policy.Name == "Saction Check List" {
+				SCLexists = true
+			}
+		}
+
+		policyValid := false
+
+		if CFMpolicy != nil {
+			if amount >= int64(CFMpolicy.Amount) {
+				app.db.UpdateTransactionPolicyStatus(transaction.Id, int(CFMpolicy.Id), 2)
+			} else {
+				app.db.UpdateTransactionPolicyStatus(transaction.Id, int(CFMpolicy.Id), 1)
+
+				policyValid = true
+			}
+		}
+
+		if !SCLexists {
+			if policyValid {
+				app.db.UpdateTransactionState(transaction.Id, 6)
+				app.db.UpdateTransactionState(transaction.Id, 7)
+			} else {
+
+				app.db.UpdateTransactionState(transaction.Id, 8)
+			}
+			return
+		}
+
+		return
+
+		// SCL //
+
+		app.db.UpdateTransactionState(transaction.Id, 3)
 
 		urlServer := "http://localhost:9090/api/start-server"
+		jsonPayloadServer := []byte(fmt.Sprintf(`{"tx_id": "%d", "policy_id": "1"}`, transactionId))
+
 		urlClient := "http://localhost:9090/api/start-client"
+		jsonPayloadClient := []byte(fmt.Sprintf(`{"tx_id": "%d", "receiver": "%s", "to": "0.0.0.0:10501"}`, transactionId, transaction.ReceiverName))
 
 		client := &http.Client{}
 
-		jsonPayload := []byte(fmt.Sprintf(`{"tx_id": "%d", "policy_id": "1"}`, transactionId))
-
-		req, err := http.NewRequest("POST", urlServer, bytes.NewBuffer(jsonPayload))
+		req, err := http.NewRequest("POST", urlServer, bytes.NewBuffer(jsonPayloadServer))
 		if err != nil {
 			panic(err)
 		}
@@ -247,9 +303,7 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 			panic(err)
 		}
 
-		jsonPayload = []byte(fmt.Sprintf(`{"tx_id": "%d", "receiver": "%s", "to": "0.0.0.0:10501"}`, transactionId, receiver))
-
-		req, err = http.NewRequest("POST", urlClient, bytes.NewBuffer(jsonPayload))
+		req, err = http.NewRequest("POST", urlClient, bytes.NewBuffer(jsonPayloadClient))
 		if err != nil {
 			panic(err)
 		}
@@ -261,10 +315,6 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 		if err != nil {
 			panic(err)
 		}
-
-		// Update transaction state
-		//
-		//app.db.UpdateTransactionState(uint64(transactionId), )
 	}
 }
 
@@ -330,6 +380,31 @@ func (app *application) submitTransactionProof(w http.ResponseWriter, r *http.Re
 		return
 	}
 	app.db.InsertTransactionProof(uint64(transactionId), messageData.Value)
+
+	if messageData.Value == "0" {
+		app.db.UpdateTransactionPolicyStatus(uint64(transactionId), 2, 1)
+	} else {
+		app.db.UpdateTransactionPolicyStatus(uint64(transactionId), 2, 2)
+	}
+
+	policyStatuses := app.db.GetTransactionPolicyStatuses(uint64(transactionId))
+
+	check := true
+
+	for _, status := range policyStatuses {
+		if status != 1 {
+			check = false
+		}
+	}
+
+	if check {
+		app.db.UpdateTransactionState(uint64(transactionId), 4)
+		app.db.UpdateTransactionState(uint64(transactionId), 6)
+		app.db.UpdateTransactionState(uint64(transactionId), 7)
+	} else {
+		app.db.UpdateTransactionState(uint64(transactionId), 5)
+		app.db.UpdateTransactionState(uint64(transactionId), 8)
+	}
 
 	json.NewEncoder(w).Encode("Ok")
 }

@@ -401,6 +401,48 @@ func (wrapper *DBWrapper) GetBanks() []BankModel {
 	return banks
 }
 
+func (wrapper *DBWrapper) GetBank(bankId uint64) Bank {
+	query := `SELECT b.Id, b.Name, b.CountryId
+					From Bank b
+					WHERE b.Id = @p1`
+
+	rows, err := wrapper.db.Query(query, sql.Named("p1", bankId))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer rows.Close()
+
+	var bank Bank
+
+	for rows.Next() {
+		rows.Scan(&bank.Id, &bank.Name, &bank.CountryId)
+	}
+
+	return bank
+}
+
+func (wrapper *DBWrapper) GetTransactionPolicyStatuses(transactionId uint64) []int {
+	query := `SELECT Status FROM [TransactionPolicyStatus] WHERE TransactionId = @p1`
+
+	rows, err := wrapper.db.Query(query, sql.Named("p1", transactionId))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer rows.Close()
+
+	var ids []int
+
+	for rows.Next() {
+		var id int
+		rows.Scan(&id)
+		ids = append(ids, id)
+	}
+
+	return ids
+}
+
 func (wrapper *DBWrapper) GetPolices(bankId uint64, transactionTypeId int) []PolicyModel {
 	query := `SELECT p.Id, c.Name, ttp.Amount, p.Name
 					FROM TransactionTypePolicy ttp
