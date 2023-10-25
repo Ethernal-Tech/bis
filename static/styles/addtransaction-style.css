@@ -43,7 +43,7 @@ header > div > div {
 }
 
 .add-transaction {
-    height: 704px;
+    height: 674px;
     width: 440px;
     margin: 90px auto;
     background-color: #ffffff;
@@ -108,7 +108,7 @@ select {
     display: flex;
     justify-content: space-between;
     font-family: 'Segoe UI';   
-    color: #aa322f;
+    color: rgb(183, 183, 183);
     font-size: 22px;
 }
 
@@ -119,21 +119,13 @@ select {
 }
 
 .policies > div > div:nth-child(1) {
-    font-weight: 600;
+    font-weight: 700;
 }
 
 .policies > div > div:nth-child(2) {
     font-size: 18px;
     font-family: 'Segoe UI';  
-    color: #706f6f; 
-}
-
-.policies > div > div:nth-child(3) {
-    margin-top: 10px;
-    height: 18px;
-    width: 18px;
-    border: 1px solid #706f6f;
-    border-radius: 50%;
+    color: rgb(183, 183, 183);
 }
 
 .buttons:hover {
