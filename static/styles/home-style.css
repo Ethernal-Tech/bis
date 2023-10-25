@@ -94,41 +94,41 @@ header > div > div {
 }
 
 .table-header > div:nth-child(1), .table-row > div:nth-child(1) {
-    flex: 0.6;
+    flex: 0.5;
     display: flex;
     justify-content: center;
     align-items: center;
 }
 
 .table-header > div:nth-child(2), .table-row > div:nth-child(2) {
-    flex: 1.5;
-}
-
-.table-header > div:nth-child(3), .table-row > div:nth-child(3) {
-    flex: 2.2;
-}
-
-.table-header > div:nth-child(4), .table-row > div:nth-child(4) {
-    flex: 2.2;
-}
-
-.table-header > div:nth-child(5), .table-row > div:nth-child(5) {
-    flex: 1.8;
-}
-
-.table-header > div:nth-child(6), .table-row > div:nth-child(6) {
     flex: 2.0;
 }
 
+.table-header > div:nth-child(3), .table-row > div:nth-child(3) {
+    flex: 1.9;
+}
+
+.table-header > div:nth-child(4), .table-row > div:nth-child(4) {
+    flex: 1.9;
+}
+
+.table-header > div:nth-child(5), .table-row > div:nth-child(5) {
+    flex: 2.0;
+}
+
+.table-header > div:nth-child(6), .table-row > div:nth-child(6) {
+    flex: 2.3;
+}
+
 .table-header > div:nth-child(7), .table-row > div:nth-child(7) {
-    flex: 1.8;
+    flex: 1.7;
     color: #aa322f;
     display: flex;
     justify-content: center;
 }
 
 .table-header > div:nth-child(8), .table-row > div:nth-child(8) {
-    flex: 1.4;
+    flex: 1.3;
     display: flex;
     justify-content: center;
     align-items: center;
