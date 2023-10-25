@@ -45,34 +45,30 @@
             </div>
                 <div class="policies">
                     <div>
-                        <div>POLICY - SCL</div>
-                        <div id="country">
                         {{if eq .SactionCheckList "true"}}
+                        <div class="policy-applied">POLICY - SCL</div>
+                        <div class="policy-applied" id="country">
                             ({{.SactionCheckListContent.Country}})
+                        </div> 
                         {{else}}
+                        <div class="policy-not-applied" style="text-decoration-line: line-through">POLICY - SCL</div>
+                        <div class="policy-not-applied" id="country">
                             (-)
-                        {{end}}
-                        </div>
-                        {{if eq .SactionCheckList "true"}}
-                        <div id="SCL-sign" style="background-color:#706f6f"></div>
-                        {{else}}
-                        <div id="SCL-sign"></div>
-                        {{end}}                    
+                        </div>                         
+                        {{end}}               
                     </div>
                     <div>
-                        <div>POLICY - CFM</div>
-                        <div id="amount">
                         {{if eq .CapitalFlowManagement "true"}}
+                        <div class="policy-applied">POLICY - CFM</div>
+                        <div class="policy-applied" id="amount">
                             ({{.CapitalFlowManagementContent.Amount}})
-                        {{else}}
-                            (-)
-                        {{end}}                    
                         </div>
-                        {{if eq .CapitalFlowManagement "true"}}
-                        <div id="CFM-sign" style="background-color:#706f6f"></div>
                         {{else}}
-                        <div id="CFM-sign"></div>
-                        {{end}}
+                        <div class="policy-not-applied" style="text-decoration-line: line-through">POLICY - CFM</div>
+                        <div class="policy-not-applied" id="amount">
+                            (-)
+                        </div>
+                        {{end}}                    
                     </div>
                 </div>
             <div class="buttons">
