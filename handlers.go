@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"text/template"
+	"time"
 )
 
 func (app *application) index(w http.ResponseWriter, r *http.Request) {
@@ -283,7 +284,7 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 			return
 		}
 
-		return
+		//return
 
 		// SCL //
 
@@ -309,6 +310,8 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 		if err != nil {
 			panic(err)
 		}
+
+		time.Sleep(100 * time.Millisecond)
 
 		req, err = http.NewRequest("POST", urlClient, bytes.NewBuffer(jsonPayloadClient))
 		if err != nil {
@@ -391,8 +394,10 @@ func (app *application) submitTransactionProof(w http.ResponseWriter, r *http.Re
 
 	if messageData.Value == "0" {
 		app.db.UpdateTransactionPolicyStatus(uint64(transactionId), 2, 1)
+		app.db.UpdateTransactionState(uint64(transactionId), 4)
 	} else {
 		app.db.UpdateTransactionPolicyStatus(uint64(transactionId), 2, 2)
+		app.db.UpdateTransactionState(uint64(transactionId), 5)
 	}
 
 	policyStatuses := app.db.GetTransactionPolicyStatuses(uint64(transactionId))
@@ -406,11 +411,9 @@ func (app *application) submitTransactionProof(w http.ResponseWriter, r *http.Re
 	}
 
 	if check {
-		app.db.UpdateTransactionState(uint64(transactionId), 4)
 		app.db.UpdateTransactionState(uint64(transactionId), 6)
 		app.db.UpdateTransactionState(uint64(transactionId), 7)
 	} else {
-		app.db.UpdateTransactionState(uint64(transactionId), 5)
 		app.db.UpdateTransactionState(uint64(transactionId), 8)
 	}
 

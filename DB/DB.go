@@ -18,7 +18,6 @@ func InitDb() *DBWrapper {
 	// Windows authentication
 	sqldb, err := sql.Open("sqlserver", "sqlserver://@localhost:1434?database=BIS&trusted_connection=yes")
 	// sqldb, err := sql.Open("sqlserver", "server=localhost;user id=SA;password=asdQWE123;port=1434;database=BIS")
-	// sqldb, err := sql.Open("sqlserver", "sqlserver://testUser:123123@localhost:1434?database=BIS")
 
 	if err != nil {
 		log.Panic(err)
@@ -443,7 +442,7 @@ func (wrapper *DBWrapper) GetBank(bankId uint64) Bank {
 }
 
 func (wrapper *DBWrapper) GetTransactionPolicyStatuses(transactionId uint64) []TransactionPolicyStatus {
-	query := `SELECT TransactionId PolicyId Status FROM [TransactionPolicyStatus] WHERE TransactionId = @p1`
+	query := `SELECT TransactionId, PolicyId, Status FROM [TransactionPolicyStatus] WHERE TransactionId = @p1`
 
 	rows, err := wrapper.db.Query(query, sql.Named("p1", transactionId))
 	if err != nil {
