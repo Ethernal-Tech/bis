@@ -349,6 +349,7 @@ func (app *application) transactionHistory(w http.ResponseWriter, r *http.Reques
 	for _, policy := range policies {
 		viewData[strings.ReplaceAll(policy.Name, " ", "")] = "true"
 		viewData[strings.ReplaceAll(policy.Name, " ", "")+"Content"] = policy
+		viewData[strings.ReplaceAll(policy.Name, " ", "")+"Status"] = app.db.GetTransactionPolicyStatus(uint64(transactionId), int(policy.Id))
 	}
 
 	ts, err := template.ParseFiles("./static/views/transactionhistory.html")
