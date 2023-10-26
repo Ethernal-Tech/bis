@@ -270,6 +270,7 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 			app.db.UpdateTransactionState(transaction.Id, 6)
 			app.db.UpdateTransactionState(transaction.Id, 7)
 
+			http.Redirect(w, r, "/home", http.StatusSeeOther)
 			return
 		}
 
@@ -281,6 +282,7 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 				app.db.UpdateTransactionState(transaction.Id, 8)
 			}
 
+			http.Redirect(w, r, "/home", http.StatusSeeOther)
 			return
 		}
 
@@ -294,7 +296,7 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 		jsonPayloadServer := []byte(fmt.Sprintf(`{"tx_id": "%d", "policy_id": "1"}`, transactionId))
 
 		urlClient := "http://localhost:9090/api/start-client"
-		jsonPayloadClient := []byte(fmt.Sprintf(`{"tx_id": "%d", "receiver": "%s", "to": "0.0.0.0:10501"}`, transactionId, transaction.ReceiverName))
+		jsonPayloadClient := []byte(fmt.Sprintf(`{"tx_id": "%d", "receiver": "%s", "to": "127.0.0.1:10501"}`, transactionId, transaction.ReceiverName))
 
 		client := &http.Client{}
 
@@ -325,6 +327,8 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 		if err != nil {
 			panic(err)
 		}
+
+		http.Redirect(w, r, "/home", http.StatusSeeOther)
 	}
 }
 
