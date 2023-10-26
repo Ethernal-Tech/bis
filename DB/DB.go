@@ -441,8 +441,8 @@ func (wrapper *DBWrapper) GetBank(bankId uint64) Bank {
 	return bank
 }
 
-func (wrapper *DBWrapper) GetTransactionPolicyStatuses(transactionId uint64) []int {
-	query := `SELECT Status FROM [TransactionPolicyStatus] WHERE TransactionId = @p1`
+func (wrapper *DBWrapper) GetTransactionPolicyStatuses(transactionId uint64) []TransactionPolicyStatus {
+	query := `SELECT TransactionId PolicyId Status FROM [TransactionPolicyStatus] WHERE TransactionId = @p1`
 
 	rows, err := wrapper.db.Query(query, sql.Named("p1", transactionId))
 	if err != nil {
@@ -451,15 +451,15 @@ func (wrapper *DBWrapper) GetTransactionPolicyStatuses(transactionId uint64) []i
 
 	defer rows.Close()
 
-	var ids []int
+	var statuses []TransactionPolicyStatus
 
 	for rows.Next() {
-		var id int
-		rows.Scan(&id)
-		ids = append(ids, id)
+		var status TransactionPolicyStatus
+		rows.Scan(&status.TransactionId, &status.PolicyId, &status.Status)
+		statuses = append(statuses, status)
 	}
 
-	return ids
+	return statuses
 }
 
 func (wrapper *DBWrapper) GetPolices(bankId uint64, transactionTypeId int) []PolicyModel {

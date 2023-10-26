@@ -393,7 +393,7 @@ func (app *application) submitTransactionProof(w http.ResponseWriter, r *http.Re
 	check := true
 
 	for _, status := range policyStatuses {
-		if status != 1 {
+		if status.Status != 1 {
 			check = false
 		}
 	}

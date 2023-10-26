@@ -56,6 +56,12 @@ type Status struct {
 	Name string
 }
 
+type TransactionPolicyStatus struct {
+	TransactionId uint64
+	PolicyId      int
+	Status        int
+}
+
 type TransactionStatusHistory struct {
 	Id            int
 	TransactionId uint64
