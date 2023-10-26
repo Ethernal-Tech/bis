@@ -95,6 +95,7 @@ func (app *application) addTransaction(w http.ResponseWriter, r *http.Request) {
 		viewData["username"] = app.sessionManager.GetString(r.Context(), "username")
 		viewData["bankName"] = app.sessionManager.GetString(r.Context(), "bankName")
 		viewData["banks"] = app.db.GetBanks()
+		viewData["transactionTypes"] = app.db.GetTransactionTypes()
 
 		ts, err := template.ParseFiles("./static/views/addtransaction.html")
 		if err != nil {

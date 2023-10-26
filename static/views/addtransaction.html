@@ -29,9 +29,9 @@
             <input class="input-amount" type="text" placeholder="Amount" name="amount">
             <input class="input-currency" type="text" placeholder="Currency" name="currency">
             <select id="select-type" class="select-type" name="type">
-                <option value="31111">31111 Borrowing 1</option>
-                <option value="31121">31121 Borrowing 2</option>
-                <option value="30001">30001 Loan Repayment</option>
+                {{range .transactionTypes}}
+                <option value="{{.Code}}">{{.Code}} - {{.Name}}</option>              
+                {{end}}
             </select>
             <div class="policies">
                 <div>
