@@ -380,6 +380,25 @@ func (wrapper *DBWrapper) Close() {
 	wrapper.db.Close()
 }
 
+func (wrapper *DBWrapper) GetTransactionTypes() []TransactionType {
+	query := `SELECT Id, Name From TransactionType`
+
+	rows, err := wrapper.db.Query(query)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer rows.Close()
+
+	types := []TransactionType{}
+	for rows.Next() {
+		var tType TransactionType
+		rows.Scan(&tType.Id, &tType.Name)
+		types = append(types, tType)
+	}
+	return types
+}
+
 func (wrapper *DBWrapper) GetBanks() []BankModel {
 	query := `SELECT b.Id, b.Name, c.Name
 					From Bank b

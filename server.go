@@ -18,6 +18,8 @@ func main() {
 		Handler: app.routes(),
 	}
 
+	// log.Println(app.db.GetTransactionTypes())
+
 	// am := app.db.CheckCFM(1, 1)
 	// log.Println(am)
 	// b := app.db.GetBanks()

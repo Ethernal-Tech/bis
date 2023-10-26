@@ -45,7 +45,7 @@ type Transaction struct {
 	TypeId          int
 }
 
-type Type struct {
+type TransactionType struct {
 	Id   int
 	Name string
 }
