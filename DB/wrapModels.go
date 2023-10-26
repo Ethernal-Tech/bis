@@ -22,6 +22,7 @@ type TransactionModel struct {
 	Currency                  string
 	Amount                    int
 	Type                      string
+	TypeCode                  string
 	TypeId                    int
 	Status                    string
 	StatusHistory             []StatusHistoryModel
