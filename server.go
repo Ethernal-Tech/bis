@@ -35,6 +35,7 @@ func main() {
 
 	// fmt.Println("Inserted tx with ID: ", r)
 
+	fmt.Println("Start server...")
 	err := server.ListenAndServe()
 	app.db.Close()
 	log.Fatal(err)
