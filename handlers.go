@@ -244,12 +244,13 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 
 		policies := app.db.GetPolices(app.db.GetBankId(transaction.BeneficiaryBank), transaction.TypeId)
 
-		var CFMpolicy *DB.PolicyModel
+		var CFMpolicy DB.PolicyModel
+		CFMpolicy.Id = 0
 		SCLexists := false
 
 		for _, policy := range policies {
 			if policy.Name == "Capital Flow Management" {
-				CFMpolicy = &policy
+				CFMpolicy = policy
 			} else if policy.Name == "Saction Check List" {
 				SCLexists = true
 			}
@@ -257,7 +258,7 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 
 		policyValid := false
 
-		if CFMpolicy != nil {
+		if CFMpolicy.Id != 0 {
 			if amount+int64(transaction.Amount) >= int64(CFMpolicy.Amount) {
 				app.db.UpdateTransactionPolicyStatus(transaction.Id, int(CFMpolicy.Id), 2)
 			} else {
