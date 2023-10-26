@@ -47,6 +47,7 @@ type Transaction struct {
 
 type TransactionType struct {
 	Id   int
+	Code string
 	Name string
 }
 

@@ -381,7 +381,7 @@ func (wrapper *DBWrapper) Close() {
 }
 
 func (wrapper *DBWrapper) GetTransactionTypes() []TransactionType {
-	query := `SELECT Id, Name From TransactionType`
+	query := `SELECT Id, Code, Name From TransactionType`
 
 	rows, err := wrapper.db.Query(query)
 	if err != nil {
@@ -393,7 +393,7 @@ func (wrapper *DBWrapper) GetTransactionTypes() []TransactionType {
 	types := []TransactionType{}
 	for rows.Next() {
 		var tType TransactionType
-		rows.Scan(&tType.Id, &tType.Name)
+		rows.Scan(&tType.Id, &tType.Code, &tType.Name)
 		types = append(types, tType)
 	}
 	return types
