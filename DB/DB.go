@@ -529,11 +529,13 @@ func (wrapper *DBWrapper) CheckCFM(receiverId uint64, countryId int) int64 {
 	c := strings.Join(bankIds, ",")
 	query = `SELECT
 			(SELECT ISNULL(SUM(Amount), 0)
-			FROM [Transaction] 
+			FROM [Transaction] t
+            JOIN (SELECT TransactionId, StatusId FROM [TransactionHistory] WHERE StatusId = 7) as th on th.TransactionId = t.Id
 			Where Receiver = @p1 and BeneficiaryBank IN (` + c + `) and TransactionTypeId IN (1, 2))
 			-
 			((SELECT ISNULL(SUM(Amount), 0)
-			FROM [Transaction] 
+			FROM [Transaction] t
+            JOIN (SELECT TransactionId, StatusId FROM [TransactionHistory] WHERE StatusId = 7) as th on th.TransactionId = t.Id
 			Where Sender = @p1 and OriginatorBank IN (` + c + `) and TransactionTypeId IN (3)))
 			as difference`
 

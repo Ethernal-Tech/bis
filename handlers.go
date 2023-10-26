@@ -257,7 +257,7 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 		policyValid := false
 
 		if CFMpolicy != nil {
-			if amount >= int64(CFMpolicy.Amount) {
+			if amount+int64(transaction.Amount) >= int64(CFMpolicy.Amount) {
 				app.db.UpdateTransactionPolicyStatus(transaction.Id, int(CFMpolicy.Id), 2)
 			} else {
 				app.db.UpdateTransactionPolicyStatus(transaction.Id, int(CFMpolicy.Id), 1)
