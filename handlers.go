@@ -28,7 +28,7 @@ func (app *application) index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ts.Execute(w, app.sessionManager.GetString(r.Context(), "inside"))
+	ts.Execute(w, struct{}{})
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error 2", 500)

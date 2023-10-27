@@ -8,13 +8,6 @@
     <link rel="icon" href="/static/images/webpage-logo.png">
 </head>
 <body>
-    {{if eq . "yes"}}
-    <div class="logged-in">
-        <img src="/static/images/logo.png" alt="" height="54px">
-        <div>You are already logged in.</div>
-        <a href="/logout">Log out</a>
-    </div>
-    {{else}}
     <div class="log-in">
         <form action="/login" method="post">
             <img src="/static/images/logo.png" alt="" height="54px">
@@ -24,6 +17,5 @@
             <a href="https://ethernal.tech/">Powered by Ethernal-Tech</a>
         </form>
     </div>
-    {{end}}
 </body>
 </html>
