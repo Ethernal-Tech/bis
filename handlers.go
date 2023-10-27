@@ -15,6 +15,12 @@ import (
 )
 
 func (app *application) index(w http.ResponseWriter, r *http.Request) {
+	if app.sessionManager.GetString(r.Context(), "inside") == "yes" {
+		http.Redirect(w, r, "/home", http.StatusSeeOther)
+
+		return
+	}
+
 	ts, err := template.ParseFiles("./static/views/index.html")
 	if err != nil {
 		log.Println(err.Error())
