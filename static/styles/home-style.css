@@ -42,11 +42,29 @@ header > div > div {
     font-weight: 700;
 }
 
-.add-transaction:hover {
+.buttons {
+    width: 80%;
+    margin: 0px auto;
+    display: flex;
+}
+
+.buttons > div:nth-child(1) {
+    flex: 1.9;
+    display: flex;
+    justify-content: end;
+}
+
+.buttons > div:nth-child(2) {
+    flex: 1;
+    display: flex;
+    justify-content: end;
+}
+
+.add-transaction:hover, .show-policies:hover {
     letter-spacing: 2px;
 }
 
-.add-transaction {
+.add-transaction, .show-policies {
     text-decoration: none;
     user-select: none;
     font-size: 24px;
@@ -54,7 +72,6 @@ header > div > div {
     background-color: #ffffff;
     height: 46px;
     width: 460px;
-    margin: 0px auto;
     margin-top: 70px;
     margin-bottom: 40px;
     display: flex;
@@ -65,6 +82,15 @@ header > div > div {
     font-weight: 400;
     border: 2px solid #706f6f;
     transition: 0.4s;
+}
+
+.show-policies {
+    width: 320px;
+}
+
+.show-policies > svg {
+    margin-left: 8px;
+    margin-top: 2px;
 }
 
 .table {
@@ -192,5 +218,5 @@ header > div > div {
 
 .table-body::-webkit-scrollbar-thumb {
     border-radius: 4px;
-    background-color:#aa322f;
+    background-color:#EAA121;
 }
