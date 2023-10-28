@@ -49,6 +49,7 @@ func (app *application) login(w http.ResponseWriter, r *http.Request) {
 	app.sessionManager.Put(r.Context(), "username", user.Name)
 	app.sessionManager.Put(r.Context(), "bankId", user.BankId)
 	app.sessionManager.Put(r.Context(), "bankName", user.BankName)
+	app.sessionManager.Put(r.Context(), "country", app.db.GetCountry(uint(app.db.GetBank(user.BankId).CountryId)).Name)
 
 	http.Redirect(w, r, "/home", http.StatusSeeOther)
 }
@@ -73,6 +74,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	viewData["username"] = app.sessionManager.GetString(r.Context(), "username")
 	viewData["transactions"] = transactions
 	viewData["bankName"] = app.sessionManager.GetString(r.Context(), "bankName")
+	viewData["country"] = app.sessionManager.GetString(r.Context(), "country")
 
 	ts, err := template.ParseFiles("./static/views/home.html")
 	if err != nil {
@@ -101,6 +103,7 @@ func (app *application) addTransaction(w http.ResponseWriter, r *http.Request) {
 
 		viewData["username"] = app.sessionManager.GetString(r.Context(), "username")
 		viewData["bankName"] = app.sessionManager.GetString(r.Context(), "bankName")
+		viewData["country"] = app.sessionManager.GetString(r.Context(), "country")
 		viewData["banks"] = app.db.GetBanks()
 		viewData["transactionTypes"] = app.db.GetTransactionTypes()
 
@@ -205,6 +208,7 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 		viewData["username"] = app.sessionManager.GetString(r.Context(), "username")
 		viewData["transaction"] = transaction
 		viewData["bankName"] = app.sessionManager.GetString(r.Context(), "bankName")
+		viewData["country"] = app.sessionManager.GetString(r.Context(), "country")
 
 		viewData["CapitalFlowManagement"] = "false"
 		viewData["SactionCheckList"] = "false"
@@ -360,6 +364,7 @@ func (app *application) transactionHistory(w http.ResponseWriter, r *http.Reques
 	viewData["username"] = app.sessionManager.GetString(r.Context(), "username")
 	viewData["transaction"] = transaction
 	viewData["bankName"] = app.sessionManager.GetString(r.Context(), "bankName")
+	viewData["country"] = app.sessionManager.GetString(r.Context(), "country")
 
 	viewData["Capital Flow Management"] = "false"
 	viewData["Saction Check List"] = "false"

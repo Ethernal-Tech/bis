@@ -441,6 +441,27 @@ func (wrapper *DBWrapper) GetBank(bankId uint64) Bank {
 	return bank
 }
 
+func (wrapper *DBWrapper) GetCountry(countryId uint) Country {
+	query := `SELECT c.Id, c.Name, c.CountryCode
+					From Country c
+					WHERE c.Id = @p1`
+
+	rows, err := wrapper.db.Query(query, sql.Named("p1", countryId))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer rows.Close()
+
+	var country Country
+
+	for rows.Next() {
+		rows.Scan(&country.Id, &country.Name, &country.CountryCode)
+	}
+
+	return country
+}
+
 func (wrapper *DBWrapper) GetTransactionPolicyStatuses(transactionId uint64) []TransactionPolicyStatus {
 	query := `SELECT TransactionId, PolicyId, Status FROM [TransactionPolicyStatus] WHERE TransactionId = @p1`
 
