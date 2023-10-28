@@ -184,6 +184,33 @@ func (app *application) getPolicies(w http.ResponseWriter, r *http.Request) {
 	w.Write(jsonData)
 }
 
+func (app *application) showPolicies(w http.ResponseWriter, r *http.Request) {
+	if app.sessionManager.GetString(r.Context(), "inside") != "yes" {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+
+		return
+	}
+
+	viewData := map[string]any{}
+
+	viewData["username"] = app.sessionManager.GetString(r.Context(), "username")
+	viewData["bankName"] = app.sessionManager.GetString(r.Context(), "bankName")
+	viewData["country"] = app.sessionManager.GetString(r.Context(), "country")
+
+	ts, err := template.ParseFiles("./static/views/policies.html")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error 1", 500)
+		return
+	}
+
+	ts.Execute(w, viewData)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error 2", 500)
+	}
+}
+
 func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Request) {
 	if app.sessionManager.GetString(r.Context(), "inside") != "yes" {
 		http.Redirect(w, r, "/", http.StatusSeeOther)

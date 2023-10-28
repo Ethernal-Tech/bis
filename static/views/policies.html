@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIS Innovation Hub</title>
+    <link rel="stylesheet" href="/static/styles/policies-style.css">
+    <link rel="icon" href="/static/images/webpage-logo.png">
+</head>
+<body>
+    <header>
+        <div>
+            <a href="/home"><img src="/static/images/logo.png" alt="" height="40px"></a>
+            <div>Bank: {{.bankName}} - {{.country}}, <a class="logout" href="/logout">logout</a></div>
+        </div>
+    </header>
+
+    <div class="buttons">
+        <div>
+            <a class="back-button" href="/home">BACK TO TRANSACTIONS</a>
+        </div>
+    </div>
+
+    <div class="table">
+        <div class="table-header">
+            <div class="transactionType">TRANSACTION TYPE</div>
+            <div class="country">COUNTRY</div>
+            <div class="policyId">POLICY ID</div>
+            <div class="policyName">POLICY NAME</div>
+            <div class="parameter">PARAMETER</div>
+        </div>
+        <div class="table-body">
+            <div class="table-row">
+                <div>311111 - Borrowing 1</div>
+                <div>Malaysia</div>
+                <div>1</div>
+                <div>Capital Flow Management</div>
+                <div>150000000 -USD-</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
