@@ -323,8 +323,6 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 			return
 		}
 
-		//return
-
 		// SCL //
 
 		app.db.UpdateTransactionState(transaction.Id, 3)
