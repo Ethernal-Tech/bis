@@ -51,7 +51,7 @@ header > div > div {
 .buttons > div:nth-child(1) {
     flex: 1.9;
     display: flex;
-    justify-content: center;
+    justify-content: end;
 }
 
 .back-button:hover {
@@ -65,7 +65,7 @@ header > div > div {
     font-family: 'Segoe UI';   
     background-color: #ffffff;
     height: 46px;
-    width: 480px;
+    width: 360px;
     margin-top: 70px;
     margin-bottom: 40px;
     display: flex;
