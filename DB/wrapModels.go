@@ -36,10 +36,11 @@ type StatusHistoryModel struct {
 }
 
 type PolicyModel struct {
-	Id      uint64
-	Country string
-	Amount  uint64
-	Name    string
+	Id        uint64
+	Country   string
+	Parameter string
+	Amount    uint64
+	Name      string
 }
 
 type TransactionProofRequest struct {
