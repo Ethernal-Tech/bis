@@ -621,7 +621,7 @@ func (wrapper *DBWrapper) CheckCFM(receiverId uint64, countryId int) int64 {
 	return amount
 }
 
-func (wrapper *DBWrapper) PolicesFromCountry(bankId uint64) []PolicyModel {
+func (wrapper *DBWrapper) PoliciesFromCountry(bankId uint64) []PolicyModel {
 	query := `SELECT p.Id, c.Name, p.Code, p.Name, ttp.Amount, ttp.Checklist, tt.Name
 				FROM TransactionTypePolicy ttp
 				JOIN Policy as p ON ttp.PolicyId = p.Id
