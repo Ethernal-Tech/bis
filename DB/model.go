@@ -71,6 +71,7 @@ type TransactionStatusHistory struct {
 
 type Policy struct {
 	Id   int
+	Code string
 	Name string
 }
 
