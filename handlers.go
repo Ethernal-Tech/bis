@@ -274,25 +274,15 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 
 		transaction := app.db.GetTransactionHistory(uint64(transactionId))
 
-		fmt.Println("1")
-
 		app.db.UpdateTransactionState(transaction.Id, 2)
-
-		fmt.Println("2")
 
 		// CFM check //
 
 		bank := app.db.GetBank(app.db.GetBankId(transaction.BeneficiaryBank))
 
-		fmt.Println("3")
-
 		amount := app.db.CheckCFM(app.db.GetBankClientId(transaction.ReceiverName), bank.CountryId)
 
-		fmt.Println("4")
-
 		policies := app.db.GetPolices(app.db.GetBankId(transaction.BeneficiaryBank), transaction.TypeId)
-
-		fmt.Println("5")
 
 		var CFMpolicy DB.PolicyModel
 		CFMpolicy.Id = 0
