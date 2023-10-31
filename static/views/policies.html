@@ -24,19 +24,17 @@
     <div class="table">
         <div class="table-header">
             <div class="transactionType">TRANSACTION TYPE</div>
-            <div class="country">COUNTRY</div>
-            <div class="policyId">POLICY ID</div>
             <div class="policyName">POLICY NAME</div>
             <div class="parameter">PARAMETER</div>
         </div>
         <div class="table-body">
+            {{range .policies}}
             <div class="table-row">
-                <div>311111 - Borrowing 1</div>
-                <div>Malaysia</div>
-                <div>1</div>
-                <div>Capital Flow Management</div>
-                <div>150000000 -USD-</div>
+                <div>{{.TransactionType}}</div>
+                <div>{{.Name}}</div>
+                <div>{{.Parameter}}</div>
             </div>
+            {{end}}
         </div>
     </div>
 </body>

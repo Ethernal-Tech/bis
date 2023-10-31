@@ -43,7 +43,7 @@ header > div > div {
 }
 
 .confirm-transaction {
-    height: 590px;
+    height: 640px;
     width: 440px;
     margin: 100px auto;
     background-color: #ffffff;
@@ -86,6 +86,7 @@ header > div > div {
     width: 80%;
     margin: 0px auto;
     display: flex;
+    flex-direction: column;
     justify-content: space-between;
     font-family: 'Segoe UI';   
     color: #aa322f;
@@ -106,6 +107,7 @@ header > div > div {
 .policies > div > div:nth-child(2) {
     font-size: 18px;
     font-family: 'Segoe UI';  
+    margin-bottom: 20px;
 }
 
 .policy-applied {
@@ -125,7 +127,6 @@ header > div > div {
     justify-content: space-between;
     width: 80%;
     margin: 0px auto;
-    margin-top: 38px;
     height: 50px;
 }
 

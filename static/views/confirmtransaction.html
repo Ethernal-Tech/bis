@@ -45,10 +45,10 @@
             </div>
                 <div class="policies">
                     <div>
-                        {{if eq .SactionCheckList "true"}}
-                        <div class="policy-applied">POLICY - SCL</div>
+                        {{if eq .SCL "true"}}
+                        <div class="policy-applied">{{.SCLContent.Name}}</div>
                         <div class="policy-applied" id="country">
-                            ({{.SactionCheckListContent.Country}})
+                            ({{.SCLContent.Parameter}})
                         </div> 
                         {{else}}
                         <div class="policy-not-applied" style="text-decoration-line: line-through">POLICY - SCL</div>
@@ -58,10 +58,10 @@
                         {{end}}               
                     </div>
                     <div>
-                        {{if eq .CapitalFlowManagement "true"}}
-                        <div class="policy-applied">POLICY - CFM</div>
+                        {{if eq .CFM "true"}}
+                        <div class="policy-applied">{{.CFMContent.Name}}</div>
                         <div class="policy-applied" id="amount">
-                            ({{.CapitalFlowManagementContent.Amount}})
+                            ({{.CFMContent.Parameter}})
                         </div>
                         {{else}}
                         <div class="policy-not-applied" style="text-decoration-line: line-through">POLICY - CFM</div>

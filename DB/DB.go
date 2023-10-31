@@ -2,6 +2,7 @@ package DB
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -593,16 +594,17 @@ func (wrapper *DBWrapper) CheckCFM(receiverId uint64, countryId int) int64 {
 	rows.Close()
 
 	c := strings.Join(bankIds, ",")
+	fmt.Println(c)
 	query = `SELECT
 			(SELECT ISNULL(SUM(Amount), 0)
 			FROM [Transaction] t
             JOIN (SELECT TransactionId, StatusId FROM [TransactionHistory] WHERE StatusId = 7) as th on th.TransactionId = t.Id
-			Where Receiver = @p1 and BeneficiaryBank IN (` + c + `) and TransactionTypeId IN (1, 2))
+			Where Receiver = @p1 and BeneficiaryBank IN (` + c + `) and TransactionTypeId IN (1))
 			-
 			((SELECT ISNULL(SUM(Amount), 0)
 			FROM [Transaction] t
             JOIN (SELECT TransactionId, StatusId FROM [TransactionHistory] WHERE StatusId = 7) as th on th.TransactionId = t.Id
-			Where Sender = @p1 and OriginatorBank IN (` + c + `) and TransactionTypeId IN (3)))
+			Where Sender = @p1 and OriginatorBank IN (` + c + `) and TransactionTypeId IN (2)))
 			as difference`
 
 	rows, err = wrapper.db.Query(query,

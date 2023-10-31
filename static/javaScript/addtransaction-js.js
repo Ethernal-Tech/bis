@@ -31,7 +31,7 @@ function getPolicies() {
         hasSCL = false
         hasCFM = false
         data.forEach(function(currentValue){
-            if (currentValue.Name == "Saction Check List") {
+            if (currentValue.Code == "SCL") {
                 document.getElementById("country").innerText = "(" + currentValue.Country + ")"
                 document.getElementById("country").style.color = "rgb(66, 127, 109)"
                 document.getElementById("SCL").style.color = "rgb(66, 127, 109)"
@@ -39,7 +39,7 @@ function getPolicies() {
                 hasSCL = true
             }
 
-            if (currentValue.Name == "Capital Flow Management") {
+            if (currentValue.Code == "CFM") {
                 document.getElementById("amount").innerText = "(" + currentValue.Amount + ")"
                 document.getElementById("amount").style.color = "rgb(66, 127, 109)"
                 document.getElementById("CFM").style.color = "rgb(66, 127, 109)"

@@ -30,7 +30,7 @@
             <input class="input-currency" type="text" placeholder="Currency" name="currency">
             <select id="select-type" class="select-type" name="type">
                 {{range .transactionTypes}}
-                <option value="{{.Code}}">{{.Code}} - {{.Name}}</option>              
+                <option value="{{.Id}}">{{.Code}} - {{.Name}}</option>              
                 {{end}}
             </select>
             <div class="policies">

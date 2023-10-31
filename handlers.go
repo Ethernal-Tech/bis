@@ -130,7 +130,7 @@ func (app *application) addTransaction(w http.ResponseWriter, r *http.Request) {
 		receiver := app.db.GetBankClientId(r.Form.Get("receiver"))
 		currency := r.Form.Get("currency")
 		amount, _ := strconv.Atoi(r.Form.Get("amount"))
-		transactionType := app.db.GetTransactionTypeId(r.Form.Get("type"))
+		transactionType, _ := strconv.Atoi(r.Form.Get("type"))
 
 		transaction := DB.Transaction{
 			OriginatorBank:  uint64(originatorBank),
@@ -169,8 +169,9 @@ func (app *application) getPolicies(w http.ResponseWriter, r *http.Request) {
 	}
 
 	bankId, _ := strconv.Atoi(data.BankId)
+	transactionTypeId, _ := strconv.Atoi(data.TransactionTypeId)
 
-	policies := app.db.GetPolices(uint64(bankId), app.db.GetTransactionTypeId(data.TransactionTypeId))
+	policies := app.db.GetPolices(uint64(bankId), transactionTypeId)
 
 	jsonData, err := json.Marshal(policies)
 
@@ -196,6 +197,12 @@ func (app *application) showPolicies(w http.ResponseWriter, r *http.Request) {
 	viewData["username"] = app.sessionManager.GetString(r.Context(), "username")
 	viewData["bankName"] = app.sessionManager.GetString(r.Context(), "bankName")
 	viewData["country"] = app.sessionManager.GetString(r.Context(), "country")
+
+	policies := app.db.PoliciesFromCountry(app.sessionManager.Get(r.Context(), "bankId").(uint64))
+
+	fmt.Println(policies)
+
+	viewData["policies"] = policies
 
 	ts, err := template.ParseFiles("./static/views/policies.html")
 	if err != nil {
@@ -237,12 +244,12 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 		viewData["bankName"] = app.sessionManager.GetString(r.Context(), "bankName")
 		viewData["country"] = app.sessionManager.GetString(r.Context(), "country")
 
-		viewData["CapitalFlowManagement"] = "false"
-		viewData["SactionCheckList"] = "false"
+		viewData["CFM"] = "false"
+		viewData["SCL"] = "false"
 
 		for _, policy := range policies {
-			viewData[strings.ReplaceAll(policy.Name, " ", "")] = "true"
-			viewData[strings.ReplaceAll(policy.Name, " ", "")+"Content"] = policy
+			viewData[strings.ReplaceAll(policy.Code, " ", "")] = "true"
+			viewData[strings.ReplaceAll(policy.Code, " ", "")+"Content"] = policy
 		}
 
 		ts, err := template.ParseFiles("./static/views/confirmtransaction.html")
@@ -267,15 +274,25 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 
 		transaction := app.db.GetTransactionHistory(uint64(transactionId))
 
+		fmt.Println("1")
+
 		app.db.UpdateTransactionState(transaction.Id, 2)
+
+		fmt.Println("2")
 
 		// CFM check //
 
 		bank := app.db.GetBank(app.db.GetBankId(transaction.BeneficiaryBank))
 
+		fmt.Println("3")
+
 		amount := app.db.CheckCFM(app.db.GetBankClientId(transaction.ReceiverName), bank.CountryId)
 
+		fmt.Println("4")
+
 		policies := app.db.GetPolices(app.db.GetBankId(transaction.BeneficiaryBank), transaction.TypeId)
+
+		fmt.Println("5")
 
 		var CFMpolicy DB.PolicyModel
 		CFMpolicy.Id = 0
@@ -283,10 +300,10 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 		SCLexists := false
 
 		for _, policy := range policies {
-			if policy.Name == "Capital Flow Management" {
+			if policy.Code == "CFM" {
 				CFMpolicy = policy
 				CFMexists = true
-			} else if policy.Name == "Saction Check List" {
+			} else if policy.Code == "SCL" {
 				SCLexists = true
 			}
 		}
@@ -391,13 +408,13 @@ func (app *application) transactionHistory(w http.ResponseWriter, r *http.Reques
 	viewData["bankName"] = app.sessionManager.GetString(r.Context(), "bankName")
 	viewData["country"] = app.sessionManager.GetString(r.Context(), "country")
 
-	viewData["Capital Flow Management"] = "false"
-	viewData["Saction Check List"] = "false"
+	viewData["CFM"] = "false"
+	viewData["SCL"] = "false"
 
 	for _, policy := range policies {
-		viewData[strings.ReplaceAll(policy.Name, " ", "")] = "true"
-		viewData[strings.ReplaceAll(policy.Name, " ", "")+"Content"] = policy
-		viewData[strings.ReplaceAll(policy.Name, " ", "")+"Status"] = app.db.GetTransactionPolicyStatus(uint64(transactionId), int(policy.Id))
+		viewData[strings.ReplaceAll(policy.Code, " ", "")] = "true"
+		viewData[strings.ReplaceAll(policy.Code, " ", "")+"Content"] = policy
+		viewData[strings.ReplaceAll(policy.Code, " ", "")+"Status"] = app.db.GetTransactionPolicyStatus(uint64(transactionId), int(policy.Id))
 	}
 
 	ts, err := template.ParseFiles("./static/views/transactionhistory.html")
