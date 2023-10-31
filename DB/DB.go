@@ -620,3 +620,35 @@ func (wrapper *DBWrapper) CheckCFM(receiverId uint64, countryId int) int64 {
 
 	return amount
 }
+
+func (wrapper *DBWrapper) PolicesFromCountry(bankId uint64) []PolicyModel {
+	query := `SELECT p.Id, c.Name, p.Code, p.Name, ttp.Amount, ttp.Checklist, tt.Name
+				FROM TransactionTypePolicy ttp
+				JOIN Policy as p ON ttp.PolicyId = p.Id
+				Join Country as c ON ttp.CountryId = c.Id
+				Join TransactionType as tt ON tt.Id = ttp.TransactionTypeId
+				Where ttp.CountryId = (SELECT CountryId FROM [Bank] Where Id = @p1)`
+
+	rows, err := wrapper.db.Query(query,
+		sql.Named("p1", bankId))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer rows.Close()
+
+	policies := []PolicyModel{}
+	for rows.Next() {
+		var policy PolicyModel
+		rows.Scan(&policy.Id, &policy.Country, &policy.Code, &policy.Name, &policy.Amount, &policy.Checklist, &policy.TransactionType)
+
+		if len(policy.Checklist) > 0 {
+			policy.Parameter = policy.Checklist
+		} else {
+			policy.Parameter = strconv.FormatUint(policy.Amount, 10)
+		}
+
+		policies = append(policies, policy)
+	}
+	return policies
+}
