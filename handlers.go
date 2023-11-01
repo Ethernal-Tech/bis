@@ -200,8 +200,6 @@ func (app *application) showPolicies(w http.ResponseWriter, r *http.Request) {
 
 	policies := app.db.PoliciesFromCountry(app.sessionManager.Get(r.Context(), "bankId").(uint64))
 
-	fmt.Println(policies)
-
 	viewData["policies"] = policies
 
 	ts, err := template.ParseFiles("./static/views/policies.html")
