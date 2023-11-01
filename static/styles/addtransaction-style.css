@@ -138,6 +138,13 @@ select {
     color: rgb(66, 127, 109);
 }
 
+.policy-not-applied {
+    color: rgb(183, 183, 183);
+    margin: 0 auto;
+    margin-top: 160px;
+    display: none;
+}
+
 .buttons:hover {
     cursor: pointer;
 }
