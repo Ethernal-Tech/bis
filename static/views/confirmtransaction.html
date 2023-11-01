@@ -44,32 +44,18 @@
                 <div class="value">{{.transaction.Type}}</div>
             </div>
                 <div class="policies">
-                    <div>
-                        {{if eq .SCL "true"}}
-                        <div class="policy-applied">{{.SCLContent.Name}}</div>
-                        <div class="policy-applied" id="country">
-                            ({{.SCLContent.Parameter}})
-                        </div> 
-                        {{else}}
-                        <div class="policy-not-applied" style="text-decoration-line: line-through">POLICY - SCL</div>
-                        <div class="policy-not-applied" id="country">
-                            (-)
-                        </div>                         
-                        {{end}}               
+                    {{if eq .policiesApplied "true"}}
+                    {{range .policies}}
+                    <div class="policies-row">
+                        <div class="policy-applied">{{.Name}}</div>
+                        <div class="policy-applied">
+                            ({{.Parameter}})
+                        </div>             
                     </div>
-                    <div>
-                        {{if eq .CFM "true"}}
-                        <div class="policy-applied">{{.CFMContent.Name}}</div>
-                        <div class="policy-applied" id="amount">
-                            ({{.CFMContent.Parameter}})
-                        </div>
-                        {{else}}
-                        <div class="policy-not-applied" style="text-decoration-line: line-through">POLICY - CFM</div>
-                        <div class="policy-not-applied" id="amount">
-                            (-)
-                        </div>
-                        {{end}}                    
-                    </div>
+                    {{end}}
+                    {{else}}
+                    <div class="policy-not-applied">No policies to be applied.</div>
+                    {{end}}
                 </div>
             <div class="buttons">
                 <button class="confirm">CONFIRM</button>

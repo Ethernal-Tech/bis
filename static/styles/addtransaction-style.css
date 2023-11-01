@@ -43,7 +43,7 @@ header > div > div {
 }
 
 .add-transaction {
-    height: 674px;
+    height: 660px;
     width: 440px;
     margin: 90px auto;
     background-color: #ffffff;
@@ -84,14 +84,14 @@ input {
     color: #706f6f;
     border-bottom: 2px solid #aa322f;
     font-family: 'Segoe UI';
-    margin-bottom: 30px;
+    margin-bottom: 36px;
 }
 
 select {
     width: 80%;
     display: block;
     margin: 0 auto;
-    margin-bottom: 24px;
+    margin-bottom: 36px;
     font-size: 24px;
     text-align: center;
     border: 2px solid #aa322f;
@@ -103,29 +103,39 @@ select {
 }
 
 .policies {
+    height: 396px;
     width: 80%;
     margin: 0px auto;
-    display: flex;
-    justify-content: space-between;
+    display: none;
+    flex-direction: column;
     font-family: 'Segoe UI';   
     color: rgb(183, 183, 183);
     font-size: 22px;
 }
 
-.policies > div {
+.policies > .policies-row {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
+    height: 74px;
+    margin-top: 12px;
+    border: 1px solid rgb(183, 183, 183);
+    border-radius: 8px;
+    width: 100%;
 }
 
-.policies > div > div:nth-child(1) {
+.policies > .policies-row > div:nth-child(1) {
     font-weight: 700;
 }
 
-.policies > div > div:nth-child(2) {
+.policies > .policies-row > div:nth-child(2) {
     font-size: 18px;
     font-family: 'Segoe UI';  
-    color: rgb(183, 183, 183);
+}
+
+.policy-applied {
+    color: rgb(66, 127, 109);
 }
 
 .buttons:hover {
@@ -137,8 +147,12 @@ select {
     justify-content: space-between;
     width: 80%;
     margin: 0px auto;
-    margin-top: 24px;
+    margin-top: 64px;
     height: 50px;
+}
+
+.confirm-buttons {
+    display: none;
 }
 
 .confirm:hover {

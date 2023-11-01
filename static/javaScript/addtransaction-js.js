@@ -1,10 +1,16 @@
 window.onload = function() {
-    document.getElementById("select-bank").addEventListener("change", getPolicies)
-    document.getElementById("select-type").addEventListener("change", getPolicies)
+    document.getElementById("to-checklist-button").addEventListener("click", colapse)
+}
+
+function colapse() {
+    document.getElementById("add-transaction-data").style.display = "none"
+    document.getElementById("confirm-buttons").style.display = "flex"
+    document.getElementById("to-checklist-buttons").style.display = "none"
+    document.getElementById("policies").style.display = "flex"
 
     getPolicies()
 }
-
+ 
 function getPolicies() {
     bankId = document.getElementById("select-bank").value
     transactionTypeid = document.getElementById("select-type").value
@@ -28,40 +34,15 @@ function getPolicies() {
         return response.json();
     })
     .then(data => {
-        hasSCL = false
-        hasCFM = false
+        policiesDiv = document.getElementById("policies")
         data.forEach(function(currentValue){
-            if (currentValue.Code == "SCL") {
-                document.getElementById("country").innerText = "(" + currentValue.Country + ")"
-                document.getElementById("country").style.color = "rgb(66, 127, 109)"
-                document.getElementById("SCL").style.color = "rgb(66, 127, 109)"
-                document.getElementById("SCL").style.textDecorationLine = "none"    
-                hasSCL = true
-            }
-
-            if (currentValue.Code == "CFM") {
-                document.getElementById("amount").innerText = "(" + currentValue.Amount + ")"
-                document.getElementById("amount").style.color = "rgb(66, 127, 109)"
-                document.getElementById("CFM").style.color = "rgb(66, 127, 109)"
-                document.getElementById("CFM").style.textDecorationLine = "none"       
-                hasCFM = true
-            }
+            newDiv = document.createElement("div")
+            newDiv.classList.add("policies-row")
+            newDiv.innerHTML = `
+                <div class="policy-applied">` + currentValue.Name + `</div>
+                <div class="policy-applied">` + currentValue.Parameter + `</div>`
+            policiesDiv.appendChild(newDiv)
         })
-
-        if (hasSCL == false) {
-            document.getElementById("country").innerText = "(-)"
-            document.getElementById("country").style.color = "rgb(183, 183, 183)"
-            document.getElementById("SCL").style.color = "rgb(183, 183, 183)"  
-            document.getElementById("SCL").style.textDecorationLine = "line-through"       
-        }
-
-        if (hasCFM == false) {
-            document.getElementById("amount").innerText = "(-)"
-            document.getElementById("amount").style.color = "rgb(183, 183, 183)"
-            document.getElementById("CFM").style.color = "rgb(183, 183, 183)"  
-            document.getElementById("CFM").style.textDecorationLine = "line-through"       
-        }
-
     })
     .catch(error => {
         console.error('Fetch error:', error);

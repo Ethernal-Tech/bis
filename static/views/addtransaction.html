@@ -16,35 +16,30 @@
         </div>
     </header>
 
-    <div class="add-transaction">
+    <div class="add-transaction" id="add-transaction">
         <div class="title">ADD TRANSACTION</div>
+        <div class="policies" id="policies">
+
+        </div>
         <form action="/addtransaction" method="post">
-            <input class="input-sender" type="text" placeholder="Sender" name="sender">
-            <input class="input-receiver" type="text" placeholder="Receiver" name="receiver">
-            <select id="select-bank" class="select-bank" name="bank">
-                {{range .banks}}
-                <option value="{{.Id}}">{{.Name}} ({{.Country}})</option>
-                {{end}}
-            </select>
-            <input class="input-amount" type="text" placeholder="Amount" name="amount">
-            <input class="input-currency" type="text" placeholder="Currency" name="currency">
-            <select id="select-type" class="select-type" name="type">
-                {{range .transactionTypes}}
-                <option value="{{.Id}}">{{.Code}} - {{.Name}}</option>              
-                {{end}}
-            </select>
-            <div class="policies">
-                <div>
-                    <div id="SCL">POLICY - SCL</div>
-                    <div id="country"></div>
-                </div>
-                <div>
-                    <div id="CFM">POLICY - CFM</div>
-                    <div id="amount"></div>
-                </div>
+            <div class="add-transaction-data" id="add-transaction-data">
+                <input class="input-sender" type="text" placeholder="Sender" name="sender">
+                <input class="input-receiver" type="text" placeholder="Receiver" name="receiver" id="receiver">
+                <select id="select-bank" class="select-bank" name="bank">
+                    {{range .banks}}
+                    <option value="{{.Id}}">{{.Name}} ({{.Country}})</option>
+                    {{end}}
+                </select>
+                <input class="input-amount" type="text" placeholder="Amount" name="amount">
+                <input class="input-currency" type="text" placeholder="Currency" name="currency">
+                <select id="select-type" class="select-type" name="type">
+                    {{range .transactionTypes}}
+                    <option value="{{.Id}}">{{.Code}} - {{.Name}}</option>              
+                    {{end}}
+                </select>
             </div>
-            <div class="buttons">
-                <button class="confirm">CONFIRM</button>
+            <div class="buttons confirm-buttons" id="confirm-buttons">
+                <button class="confirm" id="confirm-button">CONFIRM</button>
                 <a href="/home" class="back">
                     <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="#ffffff" class="bi bi-x-square" viewBox="0 0 16 16">
                         <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
@@ -53,6 +48,15 @@
                 </a>
             </div>
         </form>
+        <div class="buttons to-checklist-buttons" id="to-checklist-buttons">
+            <button class="confirm" id="to-checklist-button">TO CHECKLIST</button>
+            <a href="/home" class="back">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="#ffffff" class="bi bi-x-square" viewBox="0 0 16 16">
+                    <path d="M14 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H2a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h12zM2 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2z"/>
+                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/>
+                </svg>
+            </a>
+        </div>
     </div>
 </body>
 </html>

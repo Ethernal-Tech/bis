@@ -244,12 +244,11 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 		viewData["bankName"] = app.sessionManager.GetString(r.Context(), "bankName")
 		viewData["country"] = app.sessionManager.GetString(r.Context(), "country")
 
-		viewData["CFM"] = "false"
-		viewData["SCL"] = "false"
+		viewData["policies"] = policies
+		viewData["policiesApplied"] = "false"
 
-		for _, policy := range policies {
-			viewData[strings.ReplaceAll(policy.Code, " ", "")] = "true"
-			viewData[strings.ReplaceAll(policy.Code, " ", "")+"Content"] = policy
+		if len(policies) != 0 {
+			viewData["policiesApplied"] = "true"
 		}
 
 		ts, err := template.ParseFiles("./static/views/confirmtransaction.html")
