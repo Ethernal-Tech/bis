@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 	"text/template"
 	"time"
 )
@@ -388,6 +387,19 @@ func (app *application) transactionHistory(w http.ResponseWriter, r *http.Reques
 
 	policies := app.db.GetPolices(bankId, transaction.TypeId)
 
+	policiesAndStatuses := []struct {
+		Policy DB.PolicyModel
+		Status int
+	}{}
+
+	for _, onePolicy := range policies {
+		currentStatus := app.db.GetTransactionPolicyStatus(uint64(transactionId), int(onePolicy.Id))
+		policiesAndStatuses = append(policiesAndStatuses, struct {
+			Policy DB.PolicyModel
+			Status int
+		}{onePolicy, currentStatus})
+	}
+
 	viewData := map[string]any{}
 
 	viewData["username"] = app.sessionManager.GetString(r.Context(), "username")
@@ -395,13 +407,13 @@ func (app *application) transactionHistory(w http.ResponseWriter, r *http.Reques
 	viewData["bankName"] = app.sessionManager.GetString(r.Context(), "bankName")
 	viewData["country"] = app.sessionManager.GetString(r.Context(), "country")
 
-	viewData["CFM"] = "false"
-	viewData["SCL"] = "false"
+	viewData["policies"] = policiesAndStatuses
+	viewData["policiesApplied"] = "false"
 
-	for _, policy := range policies {
-		viewData[strings.ReplaceAll(policy.Code, " ", "")] = "true"
-		viewData[strings.ReplaceAll(policy.Code, " ", "")+"Content"] = policy
-		viewData[strings.ReplaceAll(policy.Code, " ", "")+"Status"] = app.db.GetTransactionPolicyStatus(uint64(transactionId), int(policy.Id))
+	fmt.Println(policiesAndStatuses)
+
+	if len(policies) != 0 {
+		viewData["policiesApplied"] = "true"
 	}
 
 	ts, err := template.ParseFiles("./static/views/transactionhistory.html")
