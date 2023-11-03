@@ -107,38 +107,37 @@ header > div > div {
 }
 
 .policies {
+    width: 100%;
     margin: 0px auto;
-    display: flex;
-    justify-content: space-between;
-    font-family: 'Segoe UI';   
-    color: #aa322f;
-    font-size: 22px;
-    margin-top: 34px;
-}
-
-.policies > div {
     display: flex;
     flex-direction: column;
     align-items: center;
+    font-family: 'Segoe UI';   
+    color: #aa322f;
+    font-size: 22px;
+    margin-top: 14px;
 }
 
-.policies > div > div:nth-child(1) {
+.policies > .policies-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 90px;
+    margin-top: 18px;
+    border: 1px solid rgb(183, 183, 183);
+    border-radius: 8px;
+    width: 100%;
+}
+
+.policies > .policies-row > div:nth-child(1) {
     font-weight: 700;
 }
 
-.policies > div > div:nth-child(2) {
-    font-size: 20px;
+.policies > .policies-row > div:nth-child(2) {
+    font-size: 18px;
     font-family: 'Segoe UI';  
-}
-
-.policies > div > div:nth-child(3) {
-    width: 100%;
-    height: 26px;
-    box-sizing: border-box;
-    margin-top: 10px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    margin-bottom: 6px;
 }
 
 .policy-applied {
@@ -147,6 +146,7 @@ header > div > div {
 
 .policy-not-applied {
     color: rgb(183, 183, 183);
+    margin-top: 76px;
 }
 
 .legend {

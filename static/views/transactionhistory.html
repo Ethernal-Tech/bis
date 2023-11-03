@@ -47,84 +47,33 @@
                     <div class="informations-row-value">{{.transaction.TypeCode}} - {{.transaction.Type}}</div>
                 </div>
                 <div class="policies">
-                    <div>
-                        {{if eq .SCL "true"}}
-                        <div class="policy-applied">POLICY - SCL</div>
-                        <div class="policy-applied" id="country">
-                            ({{.SCLContent.Country}})
+                    {{if eq .policiesApplied "true"}}
+                    {{range .policies}}
+                    <div class="policies-row">
+                        <div class="policy-applied">{{.Policy.Name}}</div>
+                        <div class="policy-applied">
+                            ({{.Policy.Parameter}})
                         </div> 
-                        <div>
-                            {{if eq .SCLStatus 0}}
-                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="#EAA121" class="bi bi-hourglass-split" viewBox="0 0 16 16">
+                        <div>     
+                        {{if eq .Status 0}} 
+                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="#EAA121" class="bi bi-hourglass-split" viewBox="0 0 16 16">
                                 <path d="M2.5 15a.5.5 0 1 1 0-1h1v-1a4.5 4.5 0 0 1 2.557-4.06c.29-.139.443-.377.443-.59v-.7c0-.213-.154-.451-.443-.59A4.5 4.5 0 0 1 3.5 3V2h-1a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-1v1a4.5 4.5 0 0 1-2.557 4.06c-.29.139-.443.377-.443.59v.7c0 .213.154.451.443.59A4.5 4.5 0 0 1 12.5 13v1h1a.5.5 0 0 1 0 1h-11zm2-13v1c0 .537.12 1.045.337 1.5h6.326c.216-.455.337-.963.337-1.5V2h-7zm3 6.35c0 .701-.478 1.236-1.011 1.492A3.5 3.5 0 0 0 4.5 13s.866-1.299 3-1.48V8.35zm1 0v3.17c2.134.181 3 1.48 3 1.48a3.5 3.5 0 0 0-1.989-3.158C8.978 9.586 8.5 9.052 8.5 8.351z"/>
                             </svg>      
-                            {{else if eq .SCLStatus 1}}
-                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="rgb(66, 127, 109)" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                        {{else if eq .Status 1}} 
+                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="rgb(66, 127, 109)" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
                                 <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
                             </svg>
-                            {{else}}
-                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="rgb(170, 50, 47)" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
+                        {{else}} 
+                            <svg xmlns="http://www.w3.org/2000/svg" width="25" height="25" fill="rgb(170, 50, 47)" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
                                 <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"/>
-                            </svg>
-                            {{end}}
+                            </svg>  
+                        {{end}}
                         </div>
-                        {{else}}
-                        <div class="policy-not-applied" style="text-decoration-line: line-through">POLICY - SCL</div>
-                        <div class="policy-not-applied" id="country">
-                            (-)
-                        </div>
-                        <div style="border: none; font-size: 14px; color: rgb(183, 183, 183); width: 150px; text-align: center;">Doesn't apply!</div>
-                        {{end}}               
                     </div>
-                    <div>
-                        {{if eq .CFM "true"}}
-                        <div class="policy-applied">POLICY - CFM</div>
-                        <div class="policy-applied" id="amount">
-                            ({{.CFMContent.Amount}})
-                        </div>
-                        <div>
-                            {{if eq .CFMStatus 0}}
-                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="#EAA121" class="bi bi-hourglass-split" viewBox="0 0 16 16">
-                                <path d="M2.5 15a.5.5 0 1 1 0-1h1v-1a4.5 4.5 0 0 1 2.557-4.06c.29-.139.443-.377.443-.59v-.7c0-.213-.154-.451-.443-.59A4.5 4.5 0 0 1 3.5 3V2h-1a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-1v1a4.5 4.5 0 0 1-2.557 4.06c-.29.139-.443.377-.443.59v.7c0 .213.154.451.443.59A4.5 4.5 0 0 1 12.5 13v1h1a.5.5 0 0 1 0 1h-11zm2-13v1c0 .537.12 1.045.337 1.5h6.326c.216-.455.337-.963.337-1.5V2h-7zm3 6.35c0 .701-.478 1.236-1.011 1.492A3.5 3.5 0 0 0 4.5 13s.866-1.299 3-1.48V8.35zm1 0v3.17c2.134.181 3 1.48 3 1.48a3.5 3.5 0 0 0-1.989-3.158C8.978 9.586 8.5 9.052 8.5 8.351z"/>
-                            </svg>      
-                            {{else if eq .CFMStatus 1}}
-                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="rgb(66, 127, 109)" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
-                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
-                            </svg>
-                            {{else}}
-                            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="rgb(170, 50, 47)" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
-                                <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"/>
-                            </svg>
-                            {{end}}
-                        </div>
-                        {{else}}
-                        <div class="policy-not-applied" style="text-decoration-line: line-through">POLICY - CFM</div>
-                        <div class="policy-not-applied" id="amount">
-                            (-)
-                        </div>
-                        <div style="border: none; font-size: 14px; color: rgb(183, 183, 183); width: 150px; text-align: center;">Doesn't apply!</div>
-                        {{end}}                    
-                    </div>
-                </div>
-                <div class="legend">
-                    <div class="legend-row">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="rgb(66, 127, 109)" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
-                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
-                        </svg>
-                        <span>- The Policy check was successful</span>
-                    </div>
-                    <div class="legend-row">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="rgb(170, 50, 47)" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
-                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"/>
-                        </svg>
-                        <span>- The Policy check was not successful</span>
-                    </div>
-                    <div class="legend-row">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#EAA121" class="bi bi-hourglass-split" viewBox="0 0 16 16">
-                            <path d="M2.5 15a.5.5 0 1 1 0-1h1v-1a4.5 4.5 0 0 1 2.557-4.06c.29-.139.443-.377.443-.59v-.7c0-.213-.154-.451-.443-.59A4.5 4.5 0 0 1 3.5 3V2h-1a.5.5 0 0 1 0-1h11a.5.5 0 0 1 0 1h-1v1a4.5 4.5 0 0 1-2.557 4.06c-.29.139-.443.377-.443.59v.7c0 .213.154.451.443.59A4.5 4.5 0 0 1 12.5 13v1h1a.5.5 0 0 1 0 1h-11zm2-13v1c0 .537.12 1.045.337 1.5h6.326c.216-.455.337-.963.337-1.5V2h-7zm3 6.35c0 .701-.478 1.236-1.011 1.492A3.5 3.5 0 0 0 4.5 13s.866-1.299 3-1.48V8.35zm1 0v3.17c2.134.181 3 1.48 3 1.48a3.5 3.5 0 0 0-1.989-3.158C8.978 9.586 8.5 9.052 8.5 8.351z"/>
-                        </svg>
-                        <span>- The Policy is being checked</span>
-                    </div>
+                    {{end}}
+                    {{else}}
+                    <div class="policy-not-applied">No policies to be applied.</div>
+                    {{end}}
                 </div>
             </div>
             <div class="history">

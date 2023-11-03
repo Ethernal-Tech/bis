@@ -2,7 +2,6 @@ package DB
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"strconv"
 	"strings"
@@ -594,7 +593,7 @@ func (wrapper *DBWrapper) CheckCFM(receiverId uint64, countryId int) int64 {
 	rows.Close()
 
 	c := strings.Join(bankIds, ",")
-	fmt.Println(c)
+
 	query = `SELECT
 			(SELECT ISNULL(SUM(Amount), 0)
 			FROM [Transaction] t

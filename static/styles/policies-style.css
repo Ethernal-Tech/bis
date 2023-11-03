@@ -105,15 +105,15 @@ header > div > div {
 }
 
 .table-header > div:nth-child(1), .table-row > div:nth-child(1) {
-    flex: 2.4;
+    flex: 1;
 }
 
 .table-header > div:nth-child(2), .table-row > div:nth-child(2) {
-    flex: 2.2;
+    flex: 1;
 }
 
 .table-header > div:nth-child(3), .table-row > div:nth-child(3) {
-    flex: 5;
+    flex: 1;
 }
 
 .table-body {

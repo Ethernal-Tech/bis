@@ -34,15 +34,21 @@ function getPolicies() {
         return response.json();
     })
     .then(data => {
-        policiesDiv = document.getElementById("policies")
-        data.forEach(function(currentValue){
-            newDiv = document.createElement("div")
-            newDiv.classList.add("policies-row")
-            newDiv.innerHTML = `
-                <div class="policy-applied">` + currentValue.Name + `</div>
-                <div class="policy-applied">` + currentValue.Parameter + `</div>`
-            policiesDiv.appendChild(newDiv)
-        })
+
+        if (data.length == 0) {
+            document.getElementById("policy-not-applied").style.display = "flex"
+        }
+        else {
+            policiesDiv = document.getElementById("policies")
+            data.forEach(function(currentValue){
+                newDiv = document.createElement("div")
+                newDiv.classList.add("policies-row")
+                newDiv.innerHTML = `
+                    <div class="policy-applied">` + currentValue.Name + `</div>
+                    <div class="policy-applied">` + currentValue.Parameter + `</div>`
+                policiesDiv.appendChild(newDiv)
+            })
+        }
     })
     .catch(error => {
         console.error('Fetch error:', error);
