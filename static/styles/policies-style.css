@@ -114,6 +114,7 @@ header > div > div {
 
 .table-header > div:nth-child(3), .table-row > div:nth-child(3) {
     flex: 1;
+    color: #aa322f;
 }
 
 .table-body {
