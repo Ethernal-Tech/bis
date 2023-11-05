@@ -16,7 +16,7 @@ func main() {
 		Handler: app.routes(),
 	}
 
-	fmt.Println("Start server...")
+	fmt.Println("Start server at", server.Addr)
 	err := server.ListenAndServe()
 	app.db.Close()
 	log.Fatal(err)
