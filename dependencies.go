@@ -18,7 +18,7 @@ func (app *application) dependencies() {
 
 	sessionManager := scs.New()
 	sessionManager.Store = memstore.New()
-	sessionManager.Lifetime = 6 * time.Hour
+	sessionManager.Lifetime = time.Hour
 
 	app.sessionManager = sessionManager
 }
