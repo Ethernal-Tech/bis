@@ -410,8 +410,6 @@ func (app *application) transactionHistory(w http.ResponseWriter, r *http.Reques
 	viewData["policies"] = policiesAndStatuses
 	viewData["policiesApplied"] = "false"
 
-	fmt.Println(policiesAndStatuses)
-
 	if len(policies) != 0 {
 		viewData["policiesApplied"] = "true"
 	}
