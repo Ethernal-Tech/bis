@@ -106,7 +106,7 @@ header > div > div {
     display: flex;
     border-bottom: 2px solid #706f6f;
     font-size: 20px;
-    height: 48px;
+    height: 50px;
     align-items: center;
     font-weight: 700;
     font-family: 'Segoe UI'; 
@@ -119,7 +119,7 @@ header > div > div {
 }
 
 .table-header > div:nth-child(1), .table-row > div:nth-child(1) {
-    flex: 0.5;
+    flex: 0.4;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -185,7 +185,7 @@ header > div > div {
     text-align: center;
     background-color: #ffffff;
     font-size: 20px;
-    height: 32px;
+    height: 34px;
     border-radius: 6px;
     width: 150px;
     display: block;

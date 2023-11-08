@@ -6,6 +6,7 @@
     <title>BIS Innovation Hub</title>
     <link rel="stylesheet" href="/static/styles/transactionhistory-style.css">
     <link rel="icon" href="/static/images/webpage-logo.png">
+    <script src="/static/javaScript/transactionhistory-js.js"></script>
 </head>
 <body>
     <header>
@@ -42,7 +43,7 @@
                 </div>
                 <div class="informations-row">
                     <div class="informations-row-name">Amount:</div>
-                    <div class="informations-row-value">{{.transaction.Amount}} -{{.transaction.Currency}}-</div>
+                    <div class="informations-row-value"><span name="Amount">{{.transaction.Amount}}</span> -{{.transaction.Currency}}-</div>
                 </div>
                 <div class="informations-row">
                     <div class="informations-row-name">Type:</div>
@@ -54,7 +55,11 @@
                     <div class="policies-row">
                         <div class="policy-applied">{{.Policy.Name}}</div>
                         <div class="policy-applied">
-                            ({{.Policy.Parameter}})
+                            {{if eq .Policy.Code "CFM"}}
+                                <span name="Amount">{{.Policy.Parameter}}</span> (Loan ID = {{$.transaction.LoanId}})
+                            {{else}}
+                                {{.Policy.Parameter}}
+                            {{end}}
                         </div> 
                         <div>     
                         {{if eq .Status 0}} 
