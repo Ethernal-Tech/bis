@@ -135,6 +135,7 @@ func (app *application) addTransaction(w http.ResponseWriter, r *http.Request) {
 		currency := r.Form.Get("currency")
 		amount, _ := strconv.Atoi(strings.Replace(r.Form.Get("amount"), ",", "", -1))
 		transactionType, _ := strconv.Atoi(r.Form.Get("type"))
+		loanId, _ := strconv.Atoi(strings.Replace(r.Form.Get("loanId"), ",", "", -1))
 
 		transaction := DB.Transaction{
 			OriginatorBank:  uint64(originatorBank),
@@ -144,6 +145,7 @@ func (app *application) addTransaction(w http.ResponseWriter, r *http.Request) {
 			Currency:        currency,
 			Amount:          amount,
 			TypeId:          transactionType,
+			LoanId:          loanId,
 		}
 
 		transactionID := app.db.InsertTransaction(transaction)
