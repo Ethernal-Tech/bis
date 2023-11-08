@@ -204,6 +204,7 @@ func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) Transactio
 					,bcr.Name
 					,t.Currency
 					,t.Amount
+					,t.LoanId
 					,ty.Code
 					,ty.Name
 					,ty.Id
@@ -223,7 +224,7 @@ func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) Transactio
 
 	var trnx TransactionModel
 	for rows.Next() {
-		rows.Scan(&trnx.Id, &trnx.OriginatorBank, &trnx.BeneficiaryBank, &trnx.SenderGlobalIdentifier, &trnx.ReceiverGlobalIdedntifier, &trnx.SenderName, &trnx.ReceiverName, &trnx.Currency, &trnx.Amount, &trnx.TypeCode, &trnx.Type, &trnx.TypeId)
+		rows.Scan(&trnx.Id, &trnx.OriginatorBank, &trnx.BeneficiaryBank, &trnx.SenderGlobalIdentifier, &trnx.ReceiverGlobalIdedntifier, &trnx.SenderName, &trnx.ReceiverName, &trnx.Currency, &trnx.Amount, &trnx.LoanId, &trnx.TypeCode, &trnx.Type, &trnx.TypeId)
 	}
 	rows.Close()
 

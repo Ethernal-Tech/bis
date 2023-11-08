@@ -21,6 +21,7 @@ type TransactionModel struct {
 	ReceiverName              string
 	Currency                  string
 	Amount                    int
+	LoanId                    int
 	Type                      string
 	TypeCode                  string
 	TypeId                    int
