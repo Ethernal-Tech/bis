@@ -6,6 +6,7 @@
     <title>BIS Innovation Hub</title>
     <link rel="stylesheet" href="/static/styles/confirmtransaction-style.css">
     <link rel="icon" href="/static/images/webpage-logo.png">
+    <script src="/static/javaScript/confirmtransaction-js.js"></script>
 </head>
 <body>
     <header>
@@ -37,7 +38,7 @@
             </div>
             <div class="confirmation-row">
                 <div class="type">Amount:</div>
-                <div class="value">{{.transaction.Amount}} -{{.transaction.Currency}}-</div>
+                <div class="value"><span name="Amount">{{.transaction.Amount}}</span> -{{.transaction.Currency}}-</div>
             </div>
             <div class="confirmation-row">
                 <div class="type">Type:</div>
@@ -49,7 +50,11 @@
                     <div class="policies-row">
                         <div class="policy-applied">{{.Name}}</div>
                         <div class="policy-applied">
-                            ({{.Parameter}})
+                            {{if eq .Code "CFM"}}
+                                <span name="Amount">{{.Parameter}}</span> (Loan ID = {{$.transaction.LoanId}})
+                            {{else}}
+                                {{.Parameter}}
+                            {{end}}
                         </div>             
                     </div>
                     {{end}}
