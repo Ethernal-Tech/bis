@@ -6,6 +6,7 @@
     <title>BIS Innovation Hub</title>
     <link rel="stylesheet" href="/static/styles/home-style.css">
     <link rel="icon" href="/static/images/webpage-logo.png">
+    <script src="/static/javaScript/home-js.js"></script>
 </head>
 <body>
     <header>
@@ -67,7 +68,7 @@
                 </div>
                 <div>{{.SenderName}}</div>
                 <div>{{.ReceiverName}}</div>
-                <div>{{.Amount}} -{{.Currency}}-</div>
+                <div><span name="Amount">{{.Amount}}</span> <span>-{{.Currency}}-</span></div>
                 <div>{{.Status}}</div>
                 {{if and (eq .Status "CREATED") (eq .BeneficiaryBank $.bankName)}}
                 <div>
