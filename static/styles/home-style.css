@@ -16,7 +16,7 @@ header {
 }
 
 header > div {
-    width: 80%;
+    width: 86%;
     margin: 0px auto;
     padding: 10px;
     display: flex;
@@ -29,7 +29,7 @@ header > div > a {
 }
 
 header > div > div {
-    font-size: 24px;
+    font-size: 20px;
     font-family: 'Segoe UI';
     color: #706f6f;
 }
@@ -43,7 +43,7 @@ header > div > div {
 }
 
 .buttons {
-    width: 80%;
+    width: 86%;
     margin: 0px auto;
     display: flex;
 }
@@ -67,13 +67,13 @@ header > div > div {
 .add-transaction, .show-policies {
     text-decoration: none;
     user-select: none;
-    font-size: 24px;
+    font-size: 20px;
     font-family: 'Segoe UI';   
     background-color: #ffffff;
     height: 46px;
-    width: 460px;
+    width: 420px;
     margin-top: 70px;
-    margin-bottom: 40px;
+    margin-bottom: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -85,7 +85,7 @@ header > div > div {
 }
 
 .show-policies {
-    width: 360px;
+    width: 320px;
 }
 
 .show-policies > svg {
@@ -94,10 +94,9 @@ header > div > div {
 }
 
 .table {
-    width: 80%;
+    width: 86%;
     height: 620px;
-    position: relative;
-    left: calc(50vw - 40%);
+    margin: 0 auto;
     border-radius: 20px;
     background-color: #ffffff;
     border: 3px solid #EAA121;
@@ -106,7 +105,7 @@ header > div > div {
 .table-header, .table-row {
     display: flex;
     border-bottom: 2px solid #706f6f;
-    font-size: 28px;
+    font-size: 20px;
     height: 48px;
     align-items: center;
     font-weight: 700;
@@ -131,7 +130,7 @@ header > div > div {
 }
 
 .table-header > div:nth-child(3), .table-row > div:nth-child(3) {
-    flex: 1.9;
+    flex: 2.0;
 }
 
 .table-header > div:nth-child(4), .table-row > div:nth-child(4) {
@@ -139,22 +138,26 @@ header > div > div {
 }
 
 .table-header > div:nth-child(5), .table-row > div:nth-child(5) {
-    flex: 2.0;
+    flex: 1.9;
 }
 
 .table-header > div:nth-child(6), .table-row > div:nth-child(6) {
-    flex: 2.1;
+    flex: 1.8;
 }
 
 .table-header > div:nth-child(7), .table-row > div:nth-child(7) {
-    flex: 1.7;
+    flex: 2.1;
+}
+
+.table-header > div:nth-child(8), .table-row > div:nth-child(8) {
+    flex: 1.5;
     color: #aa322f;
     display: flex;
     justify-content: center;
 }
 
-.table-header > div:nth-child(8), .table-row > div:nth-child(8) {
-    flex: 1.3;
+.table-header > div:nth-child(9), .table-row > div:nth-child(9) {
+    flex: 1;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -162,11 +165,11 @@ header > div > div {
     color: #EAA121;
 }
 
-.table-row > div:nth-child(8) > a:hover > svg {
+.table-row > div:nth-child(9) > a:hover > svg {
     color: rgb(183, 127, 31);
 }
 
-.table-row > div:nth-child(8) > a {
+.table-row > div:nth-child(9) > a {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -202,7 +205,6 @@ header > div > div {
 }
 
 .table-row {
-    font-size: 24px;
     font-weight: 400;
 }
 

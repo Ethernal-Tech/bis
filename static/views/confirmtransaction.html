@@ -20,15 +20,15 @@
         <form action="/confirmtransaction" method="POST">
             <input style="display: none;" name="transactionid" value="{{.transaction.Id}}">
             <div class="confirmation-row">
-                <div class="type">Sender:</div>
+                <div class="type">Originator:</div>
                 <div class="value">{{.transaction.SenderName}}</div>
             </div>
             <div class="confirmation-row">
-                <div class="type">Receiver:</div>
+                <div class="type">Beneficiary:</div>
                 <div class="value">{{.transaction.ReceiverName}}</div>
             </div>
             <div class="confirmation-row">
-                <div class="type">Bank:</div>
+                <div class="type">Originator Bank:</div>
                     {{if eq .transaction.OriginatorBank .bankName}}
                     <div class="value">{{.transaction.BeneficiaryBank}}</div>
                     {{else}}

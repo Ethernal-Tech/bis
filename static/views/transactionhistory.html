@@ -10,7 +10,7 @@
 <body>
     <header>
         <div>
-            <a href="/home"><img src="/static/images/logo.png" alt="" height="40px"></a>
+            <a href="/home"><img src="/static/images/logo.png" alt="" height="36px"></a>
             <div>Bank: {{.bankName}} - {{.country}}, <a class="logout" href="/logout">logout</a></div>
         </div>
     </header>
@@ -19,23 +19,25 @@
         <div class="title">TRANSACTION HISTORY</div>
         <div class="content">
             <div class="informations">
-                <div class="informations-title">INFORMATIONS:</div>
+                <div class="informations-title">INFORMATION:</div>
                 <div class="informations-row">
-                    <div class="informations-row-name">Sender:</div>
+                    <div class="informations-row-name">Originator:</div>
                     <div class="informations-row-value">{{.transaction.SenderName}}</div>
                 </div>
                 <div class="informations-row">
-                    <div class="informations-row-name">Receiver:</div>
+                    <div class="informations-row-name">Beneficiary:</div>
                     <div class="informations-row-value">{{.transaction.ReceiverName}}</div>
                 </div>
                 <div class="informations-row">
-                    <div class="informations-row-name">Bank:</div>
+                    <div class="informations-row-name">Originator Bank:</div>
                     <div class="informations-row-value">
-                    {{if eq .bankName .transaction.OriginatorBank}}
-                        {{.transaction.BeneficiaryBank}}
-                    {{else}}
                         {{.transaction.OriginatorBank}}
-                    {{end}}
+                    </div>
+                </div>
+                <div class="informations-row">
+                    <div class="informations-row-name">Beneficiary Bank:</div>
+                    <div class="informations-row-value">
+                        {{.transaction.BeneficiaryBank}}
                     </div>
                 </div>
                 <div class="informations-row">
@@ -88,7 +90,7 @@
                         <div class="history-table-row">
                             <div>{{.DateString}}</div>
                             <div>{{.Name}}</div>
-                            <div>Some description about {{.Name}} status.</div>
+                            <div></div>
                         </div>
                         {{end}}
                     </div>

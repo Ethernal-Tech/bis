@@ -67,10 +67,10 @@ func convertTxStatusDBtoPR(transaction *TransactionModel) *TransactionModel {
 		transaction.Status = "CREATED"
 	case "PoliciesApplied":
 		transaction.Status = "POLICIES APPLIED"
-	case "ProofRequested":
-		transaction.Status = "PROOF REQUESTED"
-	case "ProofReceived":
-		transaction.Status = "PROOF RECEIVED"
+	case "ComplianceProofRequested":
+		transaction.Status = "COMPLIANCE PROOF REQUESTED"
+	case "ComplianceCheckPassed":
+		transaction.Status = "COMPLIANCE CHECK PASSED"
 	case "ProofInvalid":
 		transaction.Status = "PROOF INVALID"
 	case "AssetSent":
@@ -91,10 +91,10 @@ func convertTxStatusPRtoDB(transaction *TransactionModel) *TransactionModel {
 		transaction.Status = "TransactionCreated"
 	case "POLICIES APPLIED":
 		transaction.Status = "PoliciesApplied"
-	case "PROOF REQUESTED":
-		transaction.Status = "ProofRequested"
-	case "PROOF RECEIVED":
-		transaction.Status = "ProofReceived"
+	case "COMPLIANCE PROOF REQUESTED":
+		transaction.Status = "ComplianceProofRequested"
+	case "COMPLIANCE CHECK PASSED":
+		transaction.Status = "ComplianceCheckPassed"
 	case "PROOF INVALID":
 		transaction.Status = "ProofInvalid"
 	case "ASSET SENT":
@@ -115,10 +115,10 @@ func convertHistoryStatusDBtoPR(history *StatusHistoryModel) *StatusHistoryModel
 		history.Name = "CREATED"
 	case "PoliciesApplied":
 		history.Name = "POLICIES APPLIED"
-	case "ProofRequested":
-		history.Name = "PROOF REQUESTED"
-	case "ProofReceived":
-		history.Name = "PROOF RECEIVED"
+	case "ComplianceProofRequested":
+		history.Name = "COMPLIANCE PROOF REQUESTED"
+	case "ComplianceCheckPassed":
+		history.Name = "COMPLIANCE CHECK PASSED"
 	case "ProofInvalid":
 		history.Name = "PROOF INVALID"
 	case "AssetSent":
@@ -139,10 +139,10 @@ func convertHistoryStatusPRtoDB(history *StatusHistoryModel) *StatusHistoryModel
 		history.Name = "TransactionCreated"
 	case "POLICIES APPLIED":
 		history.Name = "PoliciesApplied"
-	case "PROOF REQUESTED":
-		history.Name = "ProofRequested"
-	case "PROOF RECEIVED":
-		history.Name = "ProofReceived"
+	case "COMPLIANCE PROOF REQUESTED":
+		history.Name = "ComplianceProofRequested"
+	case "COMPLIANCE CHECK PASSED":
+		history.Name = "ComplianceCheckPassed"
 	case "PROOF INVALID":
 		history.Name = "ProofInvalid"
 	case "ASSET SENT":

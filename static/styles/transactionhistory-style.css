@@ -16,7 +16,7 @@ header {
 }
 
 header > div {
-    width: 80%;
+    width: 86%;
     margin: 0px auto;
     padding: 10px;
     display: flex;
@@ -29,7 +29,7 @@ header > div > a {
 }
 
 header > div > div {
-    font-size: 24px;
+    font-size: 20px;
     font-family: 'Segoe UI';
     color: #706f6f;
 }
@@ -43,8 +43,8 @@ header > div > div {
 }
 
 .transaction-history {
-    width: 80%;
-    height: 688px;
+    width: 86%;
+    height: 692px;
     border-radius: 20px;
     background-color: #ffffff;
     border: 3px solid #EAA121;
@@ -72,12 +72,12 @@ header > div > div {
 
 .content > .informations {
     height: 100%;
-    flex: 1;
+    flex: 1.2;
 }
 
 .content > .history {
     height: 100%;
-    flex: 3;
+    flex: 2.8;
 }
 
 .informations-title {
@@ -86,16 +86,16 @@ header > div > div {
     font-size: 32px;
     text-align: center;
     color: #aa322f;
-    margin-bottom: 30px;
+    margin-bottom: 28px;
 }
 
 .informations-row {
     display: flex;
     justify-content: space-between;
-    font-size: 24px;
+    font-size: 20px;
     font-family: 'Segoe UI';  
     font-weight: 600;
-    margin-top: 20px;
+    margin-top: 16px;
 }
 
 .informations-row-name {
@@ -114,7 +114,7 @@ header > div > div {
     align-items: center;
     font-family: 'Segoe UI';   
     color: #aa322f;
-    font-size: 22px;
+    font-size: 20px;
     margin-top: 14px;
 }
 
@@ -135,7 +135,7 @@ header > div > div {
 }
 
 .policies > .policies-row > div:nth-child(2) {
-    font-size: 18px;
+    font-size: 16px;
     font-family: 'Segoe UI';  
     margin-bottom: 6px;
 }
@@ -147,24 +147,6 @@ header > div > div {
 .policy-not-applied {
     color: rgb(183, 183, 183);
     margin-top: 76px;
-}
-
-.legend {
-    margin-top: 38px;
-}
-
-.legend-row {
-    margin-top: 4px;
-    display: flex;
-    height: 22px;
-    align-items: center;
-}
-
-.legend-row > span {
-    margin-left: 5px;
-    color: #706f6f;
-    font-size: 15px;
-    font-family: 'Segoe UI'; 
 }
 
 .history-table {
@@ -179,11 +161,11 @@ header > div > div {
 .history-table-header, .history-table-row {
     display: flex;
     border-bottom: 2px solid #706f6f;
-    font-size: 26px;
+    font-size: 20px;
     height: 42px;
     align-items: center;
     text-align: center;
-    font-weight: 600;
+    font-weight: 700;
     font-family: 'Segoe UI'; 
     color: #706f6f;
 }
@@ -194,13 +176,13 @@ header > div > div {
 }
 
 .history-table-header > div:nth-child(1), .history-table-row > div:nth-child(1) {
-    flex: 1.8;
+    flex: 2;
 }
 
 .history-table-header > div:nth-child(2), .history-table-row > div:nth-child(2) {
-    flex: 1.8;
+    flex: 3;
 }
 
 .history-table-header > div:nth-child(3), .history-table-row > div:nth-child(3) {
-    flex: 4;
+    flex: 2.8;
 }
