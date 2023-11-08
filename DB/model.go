@@ -43,6 +43,7 @@ type Transaction struct {
 	Currency        string
 	Amount          int
 	TypeId          int
+	LoanId          int
 }
 
 type TransactionType struct {

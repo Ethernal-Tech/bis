@@ -330,7 +330,7 @@ func (wrapper *DBWrapper) GetBankClientId(bankClientName string) uint64 {
 }
 
 func (wrapper *DBWrapper) InsertTransaction(t Transaction) uint64 {
-	query := `INSERT INTO [dbo].[Transaction] OUTPUT INSERTED.Id VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7)`
+	query := `INSERT INTO [dbo].[Transaction] OUTPUT INSERTED.Id VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8)`
 
 	var insertedID uint64
 
@@ -341,7 +341,8 @@ func (wrapper *DBWrapper) InsertTransaction(t Transaction) uint64 {
 		sql.Named("p4", t.Receiver),
 		sql.Named("p5", t.Currency),
 		sql.Named("p6", t.Amount),
-		sql.Named("p7", t.TypeId)).Scan(&insertedID)
+		sql.Named("p7", t.TypeId),
+		sql.Named("p8", t.LoanId)).Scan(&insertedID)
 
 	if err != nil {
 		log.Fatal(err)
