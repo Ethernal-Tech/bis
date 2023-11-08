@@ -44,9 +44,15 @@ function getPolicies() {
                 data.forEach(function (currentValue) {
                     newDiv = document.createElement("div")
                     newDiv.classList.add("policies-row")
-                    newDiv.innerHTML = `
-                    <div class="policy-applied">` + currentValue.Name + `</div>
-                    <div class="policy-applied">` + currentValue.Parameter + `</div>`
+                    if (currentValue.Code == "CFM") {
+                        newDiv.innerHTML = `
+                        <div class="policy-applied">` + currentValue.Name + `</div>
+                        <div class="policy-applied">` + parseFloat(currentValue.Parameter.replace(/,/g, '')).toLocaleString() + ` (Loan ID = ` + document.getElementById("loanId").value + `) </div>`                        
+                    } else {
+                        newDiv.innerHTML = `
+                        <div class="policy-applied">` + currentValue.Name + `</div>
+                        <div class="policy-applied">` + currentValue.Parameter + `</div>`
+                    }
                     policiesDiv.appendChild(newDiv)
                 })
             }

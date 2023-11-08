@@ -184,7 +184,7 @@ header > div > div {
 .set-policy {
     text-align: center;
     background-color: #ffffff;
-    font-size: 24px;
+    font-size: 20px;
     height: 32px;
     border-radius: 6px;
     width: 150px;
@@ -197,6 +197,9 @@ header > div > div {
     text-decoration: none;
     cursor: pointer;
     transition: 0.4s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .table-body {

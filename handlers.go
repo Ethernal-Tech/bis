@@ -7,8 +7,10 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/rand"
 	"net/http"
 	"strconv"
+	"strings"
 	"text/template"
 	"time"
 )
@@ -100,6 +102,9 @@ func (app *application) addTransaction(w http.ResponseWriter, r *http.Request) {
 
 		viewData := map[string]any{}
 
+		loanID := rand.Intn(2500000)
+
+		viewData["loanId"] = loanID
 		viewData["username"] = app.sessionManager.GetString(r.Context(), "username")
 		viewData["bankName"] = app.sessionManager.GetString(r.Context(), "bankName")
 		viewData["country"] = app.sessionManager.GetString(r.Context(), "country")
@@ -128,7 +133,7 @@ func (app *application) addTransaction(w http.ResponseWriter, r *http.Request) {
 		sender := app.db.GetBankClientId(r.Form.Get("sender"))
 		receiver := app.db.GetBankClientId(r.Form.Get("receiver"))
 		currency := r.Form.Get("currency")
-		amount, _ := strconv.Atoi(r.Form.Get("amount"))
+		amount, _ := strconv.Atoi(strings.Replace(r.Form.Get("amount"), ",", "", -1))
 		transactionType, _ := strconv.Atoi(r.Form.Get("type"))
 
 		transaction := DB.Transaction{
