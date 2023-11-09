@@ -6,6 +6,7 @@
     <title>BIS Innovation Hub</title>
     <link rel="stylesheet" href="/static/styles/policies-style.css">
     <link rel="icon" href="/static/images/webpage-logo.png">
+    <script src="/static/javaScript/policies-js.js"></script>
 </head>
 <body>
     <header>
@@ -32,7 +33,11 @@
             <div class="table-row">
                 <div>{{.TransactionType}}</div>
                 <div>{{.Name}}</div>
+                {{if eq .Code "CFM"}}
+                <div name="Amount">{{.Parameter}}</div>
+                {{else}}
                 <div>{{.Parameter}}</div>
+                {{end}}
             </div>
             {{end}}
         </div>
