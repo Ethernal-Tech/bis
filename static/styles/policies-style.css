@@ -16,7 +16,7 @@ header {
 }
 
 header > div {
-    width: 80%;
+    width: 86%;
     margin: 0px auto;
     padding: 10px;
     display: flex;
@@ -29,7 +29,7 @@ header > div > a {
 }
 
 header > div > div {
-    font-size: 24px;
+    font-size: 20px;
     font-family: 'Segoe UI';
     color: #706f6f;
 }
@@ -43,7 +43,7 @@ header > div > div {
 }
 
 .buttons {
-    width: 80%;
+    width: 86%;
     margin: 0px auto;
     display: flex;
 }
@@ -61,13 +61,13 @@ header > div > div {
 .back-button {
     text-decoration: none;
     user-select: none;
-    font-size: 24px;
+    font-size: 20px;
     font-family: 'Segoe UI';   
     background-color: #ffffff;
     height: 46px;
-    width: 360px;
+    width: 320px;
     margin-top: 70px;
-    margin-bottom: 40px;
+    margin-bottom: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -79,10 +79,9 @@ header > div > div {
 }
 
 .table {
-    width: 80%;
+    width: 86%;
     height: 620px;
-    position: relative;
-    left: calc(50vw - 40%);
+    margin: 0px auto;
     border-radius: 20px;
     background-color: #ffffff;
     border: 3px solid #EAA121;
@@ -91,8 +90,8 @@ header > div > div {
 .table-header, .table-row {
     display: flex;
     border-bottom: 2px solid #706f6f;
-    font-size: 28px;
-    height: 48px;
+    font-size: 20px;
+    height: 50px;
     align-items: center;
     font-weight: 700;
     font-family: 'Segoe UI'; 
@@ -123,7 +122,7 @@ header > div > div {
 }
 
 .table-row {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 400;
 }
 
