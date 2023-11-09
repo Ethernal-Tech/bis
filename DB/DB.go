@@ -505,7 +505,7 @@ func (wrapper *DBWrapper) GetTransactionPolicyStatus(transactionId uint64, polic
 }
 
 func (wrapper *DBWrapper) GetPolices(bankId uint64, transactionTypeId int) []PolicyModel {
-	query := `SELECT p.Id, c.Name, p.Code, p.Name, ttp.Amount, ttp.Checklist
+	query := `SELECT p.Id, c.Name, p.CountryId, p.Code, p.Name, ttp.Amount, ttp.Checklist
 					FROM TransactionTypePolicy ttp
 					JOIN Policy as p ON ttp.PolicyId = p.Id
 					Join Country as c ON ttp.CountryId = c.Id
@@ -524,7 +524,7 @@ func (wrapper *DBWrapper) GetPolices(bankId uint64, transactionTypeId int) []Pol
 	policies := []PolicyModel{}
 	for rows.Next() {
 		var policy PolicyModel
-		rows.Scan(&policy.Id, &policy.Country, &policy.Code, &policy.Name, &policy.Amount, &policy.Checklist)
+		rows.Scan(&policy.Id, &policy.Country, &policy.CountryId, &policy.Code, &policy.Name, &policy.Amount, &policy.Checklist)
 
 		if len(policy.Checklist) > 0 {
 			policy.Parameter = policy.Checklist
