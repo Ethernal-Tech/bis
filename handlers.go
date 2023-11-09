@@ -291,12 +291,14 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 		CFMpolicy.Id = 0
 		CFMexists := false
 		SCLexists := false
+		var SCLpolicyId int
 
 		for _, policy := range policies {
 			if policy.Code == "CFM" {
 				CFMpolicy = policy
 				CFMexists = true
 			} else if policy.Code == "SCL" {
+				SCLpolicyId = app.db.GetPolicyId(policy.Code, policy.CountryId)
 				SCLexists = true
 			}
 		}
@@ -340,7 +342,7 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 		app.db.UpdateTransactionState(transaction.Id, 3)
 
 		urlServer := "http://localhost:9090/api/start-server"
-		jsonPayloadServer := []byte(fmt.Sprintf(`{"tx_id": "%d", "policy_id": "1"}`, transactionId))
+		jsonPayloadServer := []byte(fmt.Sprintf(`{"tx_id": "%d", "policy_id": "%d"}`, transactionId, SCLpolicyId))
 
 		urlClient := "http://localhost:9090/api/start-client"
 		jsonPayloadClient := []byte(fmt.Sprintf(`{"tx_id": "%d", "receiver": "%s", "to": "127.0.0.1:10501"}`, transactionId, transaction.ReceiverName))
@@ -456,12 +458,12 @@ func (app *application) submitTransactionProof(w http.ResponseWriter, r *http.Re
 	app.db.InsertTransactionProof(uint64(transactionId), messageData.Value)
 
 	if messageData.Value == "0" {
-		app.db.UpdateTransactionPolicyStatus(uint64(transactionId), 2, 1)
-		app.db.UpdateTransactionPolicyStatus(uint64(transactionId), 3, 1)
+		policyId, _ := strconv.Atoi(messageData.PolicyId)
+		app.db.UpdateTransactionPolicyStatus(uint64(transactionId), policyId, 1)
 		app.db.UpdateTransactionState(uint64(transactionId), 4)
 	} else {
-		app.db.UpdateTransactionPolicyStatus(uint64(transactionId), 2, 2)
-		app.db.UpdateTransactionPolicyStatus(uint64(transactionId), 3, 2)
+		policyId, _ := strconv.Atoi(messageData.PolicyId)
+		app.db.UpdateTransactionPolicyStatus(uint64(transactionId), policyId, 2)
 		app.db.UpdateTransactionState(uint64(transactionId), 5)
 	}
 

@@ -51,6 +51,7 @@ type PolicyModel struct {
 type TransactionProofRequest struct {
 	Value         string
 	TransactionId string
+	PolicyId      string
 }
 
 type BankModel struct {

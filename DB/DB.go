@@ -548,6 +548,25 @@ func (wrapper *DBWrapper) InsertTransactionProof(transactionId uint64, value str
 	}
 }
 
+func (wrapper *DBWrapper) GetPolicyId(code string, countryId int) int {
+	query := `SELECT Id FROM [Policy] WHERE Code = @p1 and CountryId = @p2`
+
+	rows, err := wrapper.db.Query(query, sql.Named("p1", code), sql.Named("p2", countryId))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer rows.Close()
+
+	var id int
+
+	for rows.Next() {
+		rows.Scan(&id)
+	}
+
+	return id
+}
+
 func (wrapper *DBWrapper) UpdateTransactionPolicyStatus(transactionId uint64, policyId int, status int) {
 	query := `UPDATE [TransactionPolicyStatus] Set Status = @p3 Where TransactionId = @p1 and PolicyId = @p2`
 
