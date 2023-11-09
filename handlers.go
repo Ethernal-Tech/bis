@@ -457,9 +457,11 @@ func (app *application) submitTransactionProof(w http.ResponseWriter, r *http.Re
 
 	if messageData.Value == "0" {
 		app.db.UpdateTransactionPolicyStatus(uint64(transactionId), 2, 1)
+		app.db.UpdateTransactionPolicyStatus(uint64(transactionId), 3, 1)
 		app.db.UpdateTransactionState(uint64(transactionId), 4)
 	} else {
 		app.db.UpdateTransactionPolicyStatus(uint64(transactionId), 2, 2)
+		app.db.UpdateTransactionPolicyStatus(uint64(transactionId), 3, 2)
 		app.db.UpdateTransactionState(uint64(transactionId), 5)
 	}
 
