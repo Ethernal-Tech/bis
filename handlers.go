@@ -9,6 +9,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"text/template"
@@ -292,8 +293,11 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 		CFMexists := false
 		SCLexists := false
 		var SCLpolicyId int
+		var country string
 
 		for _, policy := range policies {
+			country = policy.Country
+
 			if policy.Code == "CFM" {
 				CFMpolicy = policy
 				CFMexists = true
@@ -341,11 +345,31 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 
 		app.db.UpdateTransactionState(transaction.Id, 3)
 
-		urlServer := "http://localhost:9090/api/start-server"
-		jsonPayloadServer := []byte(fmt.Sprintf(`{"tx_id": "%d", "policy_id": "%d"}`, transactionId, SCLpolicyId))
+		var urlServer string
+		var jsonPayloadServer []byte
+		var urlClient string
+		var jsonPayloadClient []byte
 
-		urlClient := "http://localhost:9090/api/start-client"
-		jsonPayloadClient := []byte(fmt.Sprintf(`{"tx_id": "%d", "receiver": "%s", "to": "127.0.0.1:10501"}`, transactionId, transaction.ReceiverName))
+		if country == "Malaysia" {
+			urlServer = "http://" + os.Getenv("API_MY") + ":9090/api/start-server"
+			jsonPayloadServer = []byte(fmt.Sprintf(`{"tx_id": "%d", "policy_id": "%d"}`, transactionId, SCLpolicyId))
+
+			urlClient = "http://" + os.Getenv("API_SG") + ":9090/api/start-client"
+			jsonPayloadClient = []byte(fmt.Sprintf(`{"tx_id": "%d", "receiver": "%s", "to": "%s:10501"}`, transactionId, transaction.ReceiverName, os.Getenv("GPJC_MY")))
+
+		} else if country == "Singapore" {
+			urlServer = "http://" + os.Getenv("API_SG") + ":9090/api/start-server"
+			jsonPayloadServer = []byte(fmt.Sprintf(`{"tx_id": "%d", "policy_id": "%d"}`, transactionId, SCLpolicyId))
+
+			urlClient = "http://" + os.Getenv("API_MY") + ":9090/api/start-client"
+			jsonPayloadClient = []byte(fmt.Sprintf(`{"tx_id": "%d", "receiver": "%s", "to": "%s:10501"}`, transactionId, transaction.ReceiverName, os.Getenv("GPJC_SG")))
+
+		} else {
+			log.Println("Error in SCL")
+			http.Error(w, "Internal Server Error", 500)
+
+			return
+		}
 
 		client := &http.Client{}
 
