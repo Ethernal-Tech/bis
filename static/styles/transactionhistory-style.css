@@ -140,7 +140,16 @@ header > div > div {
     margin-bottom: 6px;
 }
 
-.policy-applied {
+
+.policy-successful-color {
+    color: rgb(66, 127, 109);
+}
+
+.policy-not-successful-color {
+    color: rgb(170, 50, 47);
+}
+
+.policies-applied {
     color: rgb(66, 127, 109);
 }
 

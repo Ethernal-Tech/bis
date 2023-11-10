@@ -53,8 +53,13 @@
                     {{if eq .policiesApplied "true"}}
                     {{range .policies}}
                     <div class="policies-row">
-                        <div class="policy-applied">{{.Policy.Name}}</div>
-                        <div class="policy-applied">
+                        {{if eq .Status 2}}
+                        <div class="policy-not-successful-color">{{.Policy.Name}}</div>
+                        <div class="policy-not-successful-color">
+                        {{else}}
+                        <div class="policy-successful-color">{{.Policy.Name}}</div>
+                        <div class="policy-successful-color">
+                        {{end}}
                             {{if eq .Policy.Code "CFM"}}
                                 <span name="Amount">{{.Policy.Parameter}}</span> (Loan ID = {{$.transaction.LoanId}})
                             {{else}}
