@@ -56,7 +56,7 @@ Installation is very simple and consists of only a few steps:
    - `CreateBISdb.sql`
    - `InsertData.sql`
 4. Run the previously mentioned GPJC-API
-5. Modify the `.env` file (in case of running multiple machines)
+5. Modify the `.env` file (in case of running on multiple machines)
 6. Run the Golang Server (`go run .`)
 
 <br/>
