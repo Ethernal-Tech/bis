@@ -26,5 +26,5 @@ func (app *application) routes() http.Handler {
 
 	router.HandlerFunc(http.MethodPost, "/api/submitTransactionProof", app.submitTransactionProof)
 
-	return Print(app.sessionManager.LoadAndSave(router))
+	return DenyAccessToHTML(app.sessionManager.LoadAndSave(router))
 }
