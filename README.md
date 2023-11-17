@@ -57,7 +57,8 @@ Installation is very simple and consists of only a few steps:
    - `InsertData.sql`
 4. Run the previously mentioned GPJC-API
 5. Modify the `.env` file (in case of running on multiple machines)
-6. Run the Golang Server (`go run .`)
+6. Run the `go mod tidy` Golang command
+7. Run the Golang Server (`go run .`)
 
 <br/>
 <br/>
