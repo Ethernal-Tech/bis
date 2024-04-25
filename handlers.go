@@ -47,11 +47,14 @@ func (app *application) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	centralBankEmploye := app.db.IsCentralBankEmploye(user.Username)
+
 	app.sessionManager.Put(r.Context(), "inside", "yes")
 	app.sessionManager.Put(r.Context(), "username", user.Name)
 	app.sessionManager.Put(r.Context(), "bankId", user.BankId)
 	app.sessionManager.Put(r.Context(), "bankName", user.BankName)
 	app.sessionManager.Put(r.Context(), "country", app.db.GetCountry(uint(app.db.GetBank(user.BankId).CountryId)).Name)
+	app.sessionManager.Put(r.Context(), "centralBankEmployee", centralBankEmploye)
 
 	http.Redirect(w, r, "/home", http.StatusSeeOther)
 }
@@ -69,7 +72,12 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	transactions := app.db.GetTransactionsForAddress(app.sessionManager.Get(r.Context(), "bankId").(uint64))
+	var transactions []DB.TransactionModel
+	if app.sessionManager.GetBool(r.Context(), "centralBankEmployee") == true {
+		fmt.Println("Central bank employee")
+	} else {
+		transactions = app.db.GetTransactionsForAddress(app.sessionManager.Get(r.Context(), "bankId").(uint64))
+	}
 
 	viewData := map[string]any{}
 
@@ -77,6 +85,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	viewData["transactions"] = transactions
 	viewData["bankName"] = app.sessionManager.GetString(r.Context(), "bankName")
 	viewData["country"] = app.sessionManager.GetString(r.Context(), "country")
+	viewData["centralBankEmployee"] = app.sessionManager.GetBool(r.Context(), "centralBankEmployee")
 
 	ts, err := template.ParseFiles("./static/views/home.html")
 	if err != nil {

@@ -97,3 +97,8 @@ const (
 	AssetReceived   int = 6
 	Canceled        int = 7
 )
+
+const (
+	CommercialBank = iota + 1
+	CentralBank
+)
