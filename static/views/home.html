@@ -12,14 +12,16 @@
     <header>
         <div>
             <a href="/home"><img src="/static/images/logo.png" alt="" height="36px"></a>
-            <div>Bank: {{.bankName}} - {{.country}}, <a class="logout" href="/logout">logout</a></div>
+            <div>{{if eq .centralBankEmployee false}}Bank{{else}}Central Bank{{end}}: {{.bankName}} - {{.country}}, <a class="logout" href="/logout">logout</a></div>
         </div>
     </header>
 
     <div class="buttons">
-        <div>
-            <a class="add-transaction" href="/addtransaction">ADD TRANSACTION</a>
-        </div>
+        {{if eq .centralBankEmployee false}}
+            <div>
+                <a class="add-transaction" href="/addtransaction">ADD TRANSACTION</a>
+            </div>
+        {{end}}
         <div>
             <a class="show-policies" href="/policies">
                 SHOW <span style="margin-left: 8px; color:#aa322f">POLICIES</span>

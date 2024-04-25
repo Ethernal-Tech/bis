@@ -63,6 +63,35 @@ func (wrapper *DBWrapper) Login(username string, password string) *BankEmployeeM
 	return nil
 }
 
+func (wrapper *DBWrapper) IsCentralBankEmploye(username string) bool {
+	query := `SELECT CASE
+					WHEN EXISTS (
+						SELECT 1
+						FROM BankEmployee AS be
+						LEFT JOIN Bank AS b ON b.Id = be.BankId
+						WHERE be.username = @p1 AND b.BankTypeId = @p2
+					)
+					THEN 'true'
+					ELSE 'false'
+				END AS CentralBankEmploye;`
+
+	rows, err := wrapper.db.Query(query,
+		sql.Named("p1", username),
+		sql.Named("p2", CentralBank))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var CentralBankEmploye bool
+		rows.Scan(&CentralBankEmploye)
+		return CentralBankEmploye
+	}
+
+	return false
+}
+
 func convertTxStatusDBtoPR(transaction *TransactionModel) *TransactionModel {
 
 	switch transaction.Status {
