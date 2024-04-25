@@ -16,8 +16,8 @@ type DBWrapper struct {
 
 func InitDb() *DBWrapper {
 	// Windows authentication
-	sqldb, err := sql.Open("sqlserver", "sqlserver://@localhost:1434?database=BIS&trusted_connection=yes")
-	// sqldb, err := sql.Open("sqlserver", "server=localhost;user id=SA;password=asdQWE123;port=1434;database=BIS")
+	// sqldb, err := sql.Open("sqlserver", "sqlserver://@localhost:1434?database=BIS&trusted_connection=yes")
+	sqldb, err := sql.Open("sqlserver", "server=localhost;user id=SA;password=Ethernal123;port=1433;database=BIS")
 
 	if err != nil {
 		log.Panic(err)
@@ -51,9 +51,12 @@ func (wrapper *DBWrapper) Login(username string, password string) *BankEmployeeM
 	}
 	defer rows.Close()
 
-	for rows.Next() {
+	if rows.Next() {
 		var user BankEmployeeModel
-		rows.Scan(&user.Name, &user.Username, &user.Password, &user.BankId, &user.BankName)
+		if err := rows.Scan(&user.Name, &user.Username, &user.Password, &user.BankId, &user.BankName); err != nil {
+			log.Println("Error scanning row:", err)
+			return nil
+		}
 		return &user
 	}
 
@@ -113,6 +116,9 @@ func convertTxStatusDBtoPR(transaction *TransactionModel) *TransactionModel {
 	return transaction
 }
 
+// TODO: Remove if not neccessary
+//
+//nolint:unused
 func convertTxStatusPRtoDB(transaction *TransactionModel) *TransactionModel {
 
 	switch transaction.Status {
@@ -161,6 +167,9 @@ func convertHistoryStatusDBtoPR(history *StatusHistoryModel) *StatusHistoryModel
 	return history
 }
 
+// TODO: Remove if not neccessary
+//
+//nolint:unused
 func convertHistoryStatusPRtoDB(history *StatusHistoryModel) *StatusHistoryModel {
 
 	switch history.Name {
@@ -216,7 +225,10 @@ func (wrapper *DBWrapper) GetTransactionsForAddress(address uint64) []Transactio
 	transactions := []TransactionModel{}
 	for rows.Next() {
 		var trnx TransactionModel
-		rows.Scan(&trnx.Id, &trnx.OriginatorBank, &trnx.BeneficiaryBank, &trnx.SenderGlobalIdentifier, &trnx.ReceiverGlobalIdedntifier, &trnx.SenderName, &trnx.ReceiverName, &trnx.Currency, &trnx.Amount, &trnx.Status)
+		if err := rows.Scan(&trnx.Id, &trnx.OriginatorBank, &trnx.BeneficiaryBank, &trnx.SenderGlobalIdentifier, &trnx.ReceiverGlobalIdedntifier, &trnx.SenderName, &trnx.ReceiverName, &trnx.Currency, &trnx.Amount, &trnx.Status); err != nil {
+			log.Println("Error scanning row:", err)
+			return nil
+		}
 		trnx = *convertTxStatusDBtoPR(&trnx)
 		transactions = append(transactions, trnx)
 	}
@@ -250,12 +262,14 @@ func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) Transactio
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer rows.Close()
 
 	var trnx TransactionModel
-	for rows.Next() {
-		rows.Scan(&trnx.Id, &trnx.OriginatorBank, &trnx.BeneficiaryBank, &trnx.SenderGlobalIdentifier, &trnx.ReceiverGlobalIdedntifier, &trnx.SenderName, &trnx.ReceiverName, &trnx.Currency, &trnx.Amount, &trnx.LoanId, &trnx.TypeCode, &trnx.Type, &trnx.TypeId)
+	if rows.Next() {
+		if err := rows.Scan(&trnx.Id, &trnx.OriginatorBank, &trnx.BeneficiaryBank, &trnx.SenderGlobalIdentifier, &trnx.ReceiverGlobalIdedntifier, &trnx.SenderName, &trnx.ReceiverName, &trnx.Currency, &trnx.Amount, &trnx.LoanId, &trnx.TypeCode, &trnx.Type, &trnx.TypeId); err != nil {
+			log.Fatal(err)
+		}
 	}
-	rows.Close()
 
 	query = `SELECT s.Name
 					,th.Date
@@ -268,16 +282,18 @@ func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) Transactio
 	if err != nil {
 		log.Fatal(err)
 	}
+	defer rows.Close()
 
 	for rows.Next() {
 		var statusHistory StatusHistoryModel
-		rows.Scan(&statusHistory.Name, &statusHistory.Date)
+		if err := rows.Scan(&statusHistory.Name, &statusHistory.Date); err != nil {
+			log.Fatal(err)
+		}
 		statusHistory = *convertHistoryStatusDBtoPR(&statusHistory)
 		statusHistory.DateString = statusHistory.Date.Format("2006-01-02 15:04:05")
 		trnx.StatusHistory = append(trnx.StatusHistory, statusHistory)
 	}
 	trnx.Status = trnx.StatusHistory[len(trnx.StatusHistory)-1].Name
-	rows.Close()
 
 	query = `SELECT p.Name
 				FROM TransactionTypePolicy ttp
@@ -296,7 +312,9 @@ func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) Transactio
 
 	for rows.Next() {
 		var policyName string
-		rows.Scan(&policyName)
+		if err := rows.Scan(&policyName); err != nil {
+			log.Fatal(err)
+		}
 		trnx.Policies = append(trnx.Policies, policyName)
 	}
 
@@ -316,7 +334,9 @@ func (wrapper *DBWrapper) GetBankId(bankName string) uint64 {
 
 	var bankId uint64
 	for rows.Next() {
-		rows.Scan(&bankId)
+		if err := rows.Scan(&bankId); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	return bankId
@@ -335,7 +355,9 @@ func (wrapper *DBWrapper) GetTransactionTypeId(transactionType string) int {
 
 	var transactionTypeId int
 	for rows.Next() {
-		rows.Scan(&transactionTypeId)
+		if err := rows.Scan(&transactionTypeId); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	return transactionTypeId
@@ -353,7 +375,9 @@ func (wrapper *DBWrapper) GetBankClientId(bankClientName string) uint64 {
 
 	var bankClientId uint64
 	for rows.Next() {
-		rows.Scan(&bankClientId)
+		if err := rows.Scan(&bankClientId); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	return bankClientId
@@ -424,7 +448,9 @@ func (wrapper *DBWrapper) GetTransactionTypes() []TransactionType {
 	types := []TransactionType{}
 	for rows.Next() {
 		var tType TransactionType
-		rows.Scan(&tType.Id, &tType.Code, &tType.Name)
+		if err := rows.Scan(&tType.Id, &tType.Code, &tType.Name); err != nil {
+			log.Fatal(err)
+		}
 		types = append(types, tType)
 	}
 	return types
@@ -445,7 +471,9 @@ func (wrapper *DBWrapper) GetBanks() []BankModel {
 	banks := []BankModel{}
 	for rows.Next() {
 		var bank BankModel
-		rows.Scan(&bank.Id, &bank.Name, &bank.Country)
+		if err := rows.Scan(&bank.Id, &bank.Name, &bank.Country); err != nil {
+			log.Fatal(err)
+		}
 		banks = append(banks, bank)
 	}
 	return banks
@@ -466,7 +494,9 @@ func (wrapper *DBWrapper) GetBank(bankId uint64) Bank {
 	var bank Bank
 
 	for rows.Next() {
-		rows.Scan(&bank.Id, &bank.Name, &bank.CountryId)
+		if err := rows.Scan(&bank.Id, &bank.Name, &bank.CountryId); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	return bank
@@ -487,7 +517,9 @@ func (wrapper *DBWrapper) GetCountry(countryId uint) Country {
 	var country Country
 
 	for rows.Next() {
-		rows.Scan(&country.Id, &country.Name, &country.CountryCode)
+		if err := rows.Scan(&country.Id, &country.Name, &country.CountryCode); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	return country
@@ -507,7 +539,9 @@ func (wrapper *DBWrapper) GetTransactionPolicyStatuses(transactionId uint64) []T
 
 	for rows.Next() {
 		var status TransactionPolicyStatus
-		rows.Scan(&status.TransactionId, &status.PolicyId, &status.Status)
+		if err := rows.Scan(&status.TransactionId, &status.PolicyId, &status.Status); err != nil {
+			log.Fatal(err)
+		}
 		statuses = append(statuses, status)
 	}
 
@@ -527,7 +561,9 @@ func (wrapper *DBWrapper) GetTransactionPolicyStatus(transactionId uint64, polic
 	var status int
 
 	for rows.Next() {
-		rows.Scan(&status)
+		if err := rows.Scan(&status); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	return status
@@ -553,7 +589,9 @@ func (wrapper *DBWrapper) GetPolices(bankId uint64, transactionTypeId int) []Pol
 	policies := []PolicyModel{}
 	for rows.Next() {
 		var policy PolicyModel
-		rows.Scan(&policy.Id, &policy.Country, &policy.CountryId, &policy.Code, &policy.Name, &policy.Amount, &policy.Checklist)
+		if err := rows.Scan(&policy.Id, &policy.Country, &policy.CountryId, &policy.Code, &policy.Name, &policy.Amount, &policy.Checklist); err != nil {
+			log.Fatal(err)
+		}
 
 		if len(policy.Checklist) > 0 {
 			policy.Parameter = policy.Checklist
@@ -590,7 +628,9 @@ func (wrapper *DBWrapper) GetPolicyId(code string, countryId int) int {
 	var id int
 
 	for rows.Next() {
-		rows.Scan(&id)
+		if err := rows.Scan(&id); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	return id
@@ -620,7 +660,9 @@ func (wrapper *DBWrapper) CheckCFM(receiverId uint64, countryId int) int64 {
 
 	var globalIdentifier string
 	for rows.Next() {
-		rows.Scan(&globalIdentifier)
+		if err := rows.Scan(&globalIdentifier); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	rows.Close()
@@ -637,7 +679,9 @@ func (wrapper *DBWrapper) CheckCFM(receiverId uint64, countryId int) int64 {
 	var bankIds []string
 	for rows.Next() {
 		var bankId uint64
-		rows.Scan(&bankId)
+		if err := rows.Scan(&bankId); err != nil {
+			log.Fatal(err)
+		}
 		bankIds = append(bankIds, strconv.Itoa(int(bankId)))
 	}
 	rows.Close()
@@ -666,7 +710,9 @@ func (wrapper *DBWrapper) CheckCFM(receiverId uint64, countryId int) int64 {
 
 	var amount int64
 	for rows.Next() {
-		rows.Scan(&amount)
+		if err := rows.Scan(&amount); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	return amount
@@ -691,7 +737,9 @@ func (wrapper *DBWrapper) PoliciesFromCountry(bankId uint64) []PolicyModel {
 	policies := []PolicyModel{}
 	for rows.Next() {
 		var policy PolicyModel
-		rows.Scan(&policy.Id, &policy.Country, &policy.Code, &policy.Name, &policy.Amount, &policy.Checklist, &policy.TransactionType)
+		if err := rows.Scan(&policy.Id, &policy.Country, &policy.Code, &policy.Name, &policy.Amount, &policy.Checklist, &policy.TransactionType); err != nil {
+			log.Fatal(err)
+		}
 
 		if len(policy.Checklist) > 0 {
 			policy.Parameter = policy.Checklist

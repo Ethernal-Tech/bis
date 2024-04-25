@@ -30,7 +30,7 @@ func (app *application) index(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ts.Execute(w, struct{}{})
+	err = ts.Execute(w, struct{}{})
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error 2", 500)
@@ -38,7 +38,12 @@ func (app *application) index(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) login(w http.ResponseWriter, r *http.Request) {
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error parsing form", 500)
+	}
+
 	user := app.db.Login(r.Form.Get("username"), r.Form.Get("password"))
 
 	if user == nil {
@@ -94,7 +99,7 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ts.Execute(w, viewData)
+	err = ts.Execute(w, viewData)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error 2", 500)
@@ -128,7 +133,7 @@ func (app *application) addTransaction(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		ts.Execute(w, viewData)
+		err = ts.Execute(w, viewData)
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, "Internal Server Error 2", 500)
@@ -136,7 +141,11 @@ func (app *application) addTransaction(w http.ResponseWriter, r *http.Request) {
 
 	} else if r.Method == http.MethodPost {
 
-		r.ParseForm()
+		err := r.ParseForm()
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error parsing form", 500)
+		}
 
 		originatorBank := app.db.GetBankId(app.sessionManager.GetString(r.Context(), "bankName"))
 		beneficiaryBank, _ := strconv.Atoi(r.Form.Get("bank"))
@@ -198,7 +207,11 @@ func (app *application) getPolicies(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write(jsonData)
+	_, err = w.Write(jsonData)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error", 500)
+	}
 }
 
 func (app *application) showPolicies(w http.ResponseWriter, r *http.Request) {
@@ -225,7 +238,7 @@ func (app *application) showPolicies(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ts.Execute(w, viewData)
+	err = ts.Execute(w, viewData)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error 2", 500)
@@ -241,7 +254,11 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 
 	if r.Method == http.MethodGet {
 
-		r.ParseForm()
+		err := r.ParseForm()
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error parsing form", 500)
+		}
 
 		transactionId, _ := strconv.Atoi(r.Form.Get("transaction"))
 
@@ -272,7 +289,7 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 			return
 		}
 
-		ts.Execute(w, viewData)
+		err = ts.Execute(w, viewData)
 
 		if err != nil {
 			log.Println(err.Error())
@@ -281,7 +298,11 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 
 	} else if r.Method == http.MethodPost {
 
-		r.ParseForm()
+		err := r.ParseForm()
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error parsing form", 500)
+		}
 
 		transactionId, _ := strconv.Atoi(r.Form.Get("transactionid"))
 
@@ -421,7 +442,11 @@ func (app *application) transactionHistory(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	r.ParseForm()
+	err := r.ParseForm()
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error parsing form", 500)
+	}
 
 	transactionId, _ := strconv.Atoi(r.Form.Get("transaction"))
 
@@ -465,7 +490,7 @@ func (app *application) transactionHistory(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	ts.Execute(w, viewData)
+	err = ts.Execute(w, viewData)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error 2", 500)
@@ -517,5 +542,10 @@ func (app *application) submitTransactionProof(w http.ResponseWriter, r *http.Re
 		app.db.UpdateTransactionState(uint64(transactionId), 8)
 	}
 
-	json.NewEncoder(w).Encode("Ok")
+	err = json.NewEncoder(w).Encode("Ok")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error 2", 500)
+		return
+	}
 }
