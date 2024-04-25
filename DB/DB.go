@@ -3,6 +3,7 @@ package DB
 import (
 	"database/sql"
 	"log"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -15,9 +16,17 @@ type DBWrapper struct {
 }
 
 func InitDb() *DBWrapper {
-	// Windows authentication
-	// sqldb, err := sql.Open("sqlserver", "sqlserver://@localhost:1434?database=BIS&trusted_connection=yes")
-	sqldb, err := sql.Open("sqlserver", "server=localhost;user id=SA;password=Ethernal123;port=1433;database=BIS")
+	var (
+		sqldb *sql.DB
+		err   error
+	)
+
+	if runtime.GOOS == "linux" {
+		sqldb, err = sql.Open("sqlserver", "server=localhost;user id=SA;password=Ethernal123;port=1433;database=BIS")
+	} else {
+		// Windows authentication
+		sqldb, err = sql.Open("sqlserver", "sqlserver://@localhost:1434?database=BIS&trusted_connection=yes")
+	}
 
 	if err != nil {
 		log.Panic(err)
