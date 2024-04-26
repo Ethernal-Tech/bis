@@ -15,7 +15,7 @@ header {
     border-bottom: 4px solid #EAA121;
 }
 
-header > div {
+header>div {
     width: 86%;
     margin: 0px auto;
     padding: 10px;
@@ -24,11 +24,11 @@ header > div {
     align-items: center;
 }
 
-header > div > a {
+header>div>a {
     display: flex;
 }
 
-header > div > div {
+header>div>div {
     font-size: 20px;
     font-family: 'Segoe UI';
     color: #706f6f;
@@ -37,7 +37,7 @@ header > div > div {
 .logout {
     text-decoration: none;
     user-select: none;
-    font-family: 'Segoe UI';   
+    font-family: 'Segoe UI';
     color: #aa322f;
     font-weight: 700;
 }
@@ -48,7 +48,7 @@ header > div > div {
     display: flex;
 }
 
-.buttons > div:nth-child(1) {
+.buttons>div:nth-child(1) {
     flex: 1.9;
     display: flex;
     justify-content: end;
@@ -62,7 +62,7 @@ header > div > div {
     text-decoration: none;
     user-select: none;
     font-size: 20px;
-    font-family: 'Segoe UI';   
+    font-family: 'Segoe UI';
     background-color: #ffffff;
     height: 46px;
     width: 320px;
@@ -87,31 +87,42 @@ header > div > div {
     border: 3px solid #EAA121;
 }
 
-.table-header, .table-row {
+.table-header,
+.table-row {
     display: flex;
     border-bottom: 2px solid #706f6f;
     font-size: 20px;
     height: 50px;
     align-items: center;
     font-weight: 700;
-    font-family: 'Segoe UI'; 
+    font-family: 'Segoe UI';
     color: #706f6f;
     text-decoration: none;
 }
 
-.table-header > div, .table-row > div {
+.table-header>div,
+.table-row>div {
     text-align: center;
 }
 
-.table-header > div:nth-child(1), .table-row > div:nth-child(1) {
+.table-header>div:nth-child(1),
+.table-row>div:nth-child(1) {
     flex: 1;
 }
 
-.table-header > div:nth-child(2), .table-row > div:nth-child(2) {
+.table-header>div:nth-child(2),
+.table-row>div:nth-child(2) {
     flex: 1;
 }
 
-.table-header > div:nth-child(3), .table-row > div:nth-child(3) {
+.table-header>div:nth-child(3),
+.table-row>div:nth-child(3) {
+    flex: 1;
+    color: #aa322f;
+}
+
+.table-header>div:nth-child(4),
+.table-row>div:nth-child(4) {
     flex: 1;
     color: #aa322f;
 }
@@ -138,5 +149,5 @@ header > div > div {
 
 .table-body::-webkit-scrollbar-thumb {
     border-radius: 4px;
-    background-color:#EAA121;
+    background-color: #EAA121;
 }

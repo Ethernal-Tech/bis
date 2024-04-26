@@ -15,7 +15,7 @@ header {
     border-bottom: 4px solid #EAA121;
 }
 
-header > div {
+header>div {
     width: 86%;
     margin: 0px auto;
     padding: 10px;
@@ -24,11 +24,11 @@ header > div {
     align-items: center;
 }
 
-header > div > a {
+header>div>a {
     display: flex;
 }
 
-header > div > div {
+header>div>div {
     font-size: 20px;
     font-family: 'Segoe UI';
     color: #706f6f;
@@ -37,7 +37,7 @@ header > div > div {
 .logout {
     text-decoration: none;
     user-select: none;
-    font-family: 'Segoe UI';   
+    font-family: 'Segoe UI';
     color: #aa322f;
     font-weight: 700;
 }
@@ -51,7 +51,7 @@ header > div > div {
     border: 4px solid #EAA121;
 }
 
-.add-transaction > .title {
+.add-transaction>.title {
     font-size: 38px;
     font-family: 'Segoe UI';
     text-align: center;
@@ -66,11 +66,11 @@ input:focus {
 }
 
 ::placeholder {
-    font-family: 'Segoe UI';   
+    font-family: 'Segoe UI';
     color: #706f6f;
 }
-  
-::-ms-input-placeholder { 
+
+::-ms-input-placeholder {
     color: #706f6f;
 }
 
@@ -108,12 +108,12 @@ select {
     margin: 0px auto;
     display: none;
     flex-direction: column;
-    font-family: 'Segoe UI';   
+    font-family: 'Segoe UI';
     color: rgb(183, 183, 183);
     font-size: 22px;
 }
 
-.policies > .policies-row {
+.policies>.policies-row {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -125,13 +125,13 @@ select {
     width: 100%;
 }
 
-.policies > .policies-row > div:nth-child(1) {
+.policies>.policies-row>div:nth-child(1) {
     font-weight: 700;
 }
 
-.policies > .policies-row > div:nth-child(2) {
+.policies>.policies-row>div:nth-child(2) {
     font-size: 18px;
-    font-family: 'Segoe UI';  
+    font-family: 'Segoe UI';
 }
 
 .policy-applied {

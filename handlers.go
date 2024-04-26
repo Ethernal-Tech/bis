@@ -226,6 +226,7 @@ func (app *application) showPolicies(w http.ResponseWriter, r *http.Request) {
 	viewData["username"] = app.sessionManager.GetString(r.Context(), "username")
 	viewData["bankName"] = app.sessionManager.GetString(r.Context(), "bankName")
 	viewData["country"] = app.sessionManager.GetString(r.Context(), "country")
+	viewData["centralBankEmployee"] = app.sessionManager.GetBool(r.Context(), "centralBankEmployee")
 
 	policies := app.db.PoliciesFromCountry(app.sessionManager.Get(r.Context(), "bankId").(uint64))
 
@@ -547,5 +548,124 @@ func (app *application) submitTransactionProof(w http.ResponseWriter, r *http.Re
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error 2", 500)
 		return
+	}
+}
+
+func (app *application) editPolicy(w http.ResponseWriter, r *http.Request) {
+	if app.sessionManager.GetString(r.Context(), "inside") != "yes" || !app.sessionManager.GetBool(r.Context(), "centralBankEmployee") {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+
+		return
+	}
+
+	if r.Method == http.MethodGet {
+		err := r.ParseForm()
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error parsing form", 500)
+			return
+		}
+
+		policyId, _ := strconv.Atoi(r.Form.Get("policyId"))
+		fmt.Println(policyId)
+
+		viewData := map[string]any{}
+
+		viewData["username"] = app.sessionManager.GetString(r.Context(), "username")
+		viewData["bankName"] = app.sessionManager.GetString(r.Context(), "bankName")
+		viewData["country"] = app.sessionManager.GetString(r.Context(), "country")
+		viewData["policy"] = app.db.GetPolicy(viewData["country"].(string), uint64(policyId))
+
+		ts, err := template.ParseFiles("./static/views/editpolicy.html")
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error 1", 500)
+			return
+		}
+
+		err = ts.Execute(w, viewData)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error 2", 500)
+		}
+	} else {
+		err := r.ParseMultipartForm(10 << 20)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error parsing form", 500)
+			return
+		}
+
+		policyId, _ := strconv.Atoi(r.FormValue("policyId"))
+		originalPolicy := app.db.GetPolicy(app.sessionManager.GetString(r.Context(), "country"), uint64(policyId))
+
+		if originalPolicy.Code == "CFM" {
+			amount, err := strconv.Atoi(strings.Replace(r.Form.Get("amount"), ",", "", -1))
+			if err != nil {
+				log.Println(err.Error())
+				http.Error(w, "Internal Server Error parsing form", 500)
+				return
+			}
+
+			app.db.UpdatePolicyAmount(uint64(policyId), uint64(amount))
+		} else {
+			file, handler, err := r.FormFile("file")
+			if err != nil {
+				log.Println(err.Error())
+				http.Error(w, "Internal Server Error retrieving file", 500)
+				return
+			}
+			defer file.Close()
+
+			fileName := handler.Filename
+			fileName = strings.TrimSuffix(fileName, ".csv")
+
+			app.db.UpdatePolicyChecklist(uint64(policyId), fileName)
+		}
+
+		http.Redirect(w, r, "/policies", http.StatusSeeOther)
+	}
+}
+
+func (app *application) getPolicy(w http.ResponseWriter, r *http.Request) {
+	if app.sessionManager.GetString(r.Context(), "inside") != "yes" {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+
+		return
+	}
+
+	data := struct {
+		BankCountry string
+		PolicyId    string
+	}{}
+
+	decoder := json.NewDecoder(r.Body)
+
+	if err := decoder.Decode(&data); err != nil {
+		http.Error(w, "Invalid JSON data", http.StatusBadRequest)
+		return
+	}
+
+	policyId, err := strconv.Atoi(data.PolicyId)
+	if err != nil {
+		http.Error(w, "Failed to decode policy id", http.StatusInternalServerError)
+		return
+	}
+
+	policies := app.db.GetPolicy(data.BankCountry, uint64(policyId))
+
+	jsonData, err := json.Marshal(policies)
+
+	if err != nil {
+		http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	_, err = w.Write(jsonData)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error", 500)
 	}
 }
