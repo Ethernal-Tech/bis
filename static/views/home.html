@@ -12,7 +12,7 @@
     <header>
         <div>
             <a href="/home"><img src="/static/images/logo.png" alt="" height="36px"></a>
-            <div>{{if eq .centralBankEmployee false}}Bank{{else}}Central Bank{{end}}: {{.bankName}} - {{.country}}, <a class="logout" href="/logout">logout</a></div>
+            <div>{{if eq .centralBankEmployee true}}Central Bank{{else}}Bank{{end}}: {{.bankName}} - {{.country}}, <a class="logout" href="/logout">logout</a></div>
         </div>
     </header>
 
@@ -45,21 +45,33 @@
             <div class="to">BENEFICIARY</div>
             <div class="amount">AMOUNT</div>
             <div class="status">STATUS</div>
-            <div class="policy">POLICY</div>
+            {{if eq $.centralBankEmployee false}}<div class="policy">POLICY</div>{{end}}
             <div class="history">HISTORY</div>
         </div>
         <div class="table-body">
             {{range .transactions}}
             <div class="table-row">
                 <div>
-                    {{if eq .OriginatorBank $.bankName}}
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="rgb(170, 50, 47)" class="bi bi-arrow-left-circle-fill" viewBox="0 0 16 16">
-                        <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.5 7.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5z"/>
-                    </svg>
+                    {{if eq $.centralBankEmployee true}}
+                        {{if eq .OriginatorBankCountryId $.countryId}}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="rgb(170, 50, 47)" class="bi bi-arrow-left-circle-fill" viewBox="0 0 16 16">
+                            <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.5 7.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5z"/>
+                        </svg>
+                        {{else}}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="rgb(66, 127, 109)" class="bi bi-arrow-right-circle-fill" viewBox="0 0 16 16">
+                            <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zM4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H4.5z"/>
+                        </svg>
+                        {{end}}
                     {{else}}
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="rgb(66, 127, 109)" class="bi bi-arrow-right-circle-fill" viewBox="0 0 16 16">
-                        <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zM4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H4.5z"/>
-                    </svg>
+                        {{if eq .OriginatorBank $.bankName}}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="rgb(170, 50, 47)" class="bi bi-arrow-left-circle-fill" viewBox="0 0 16 16">
+                            <path d="M8 0a8 8 0 1 0 0 16A8 8 0 0 0 8 0zm3.5 7.5a.5.5 0 0 1 0 1H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5z"/>
+                        </svg>
+                        {{else}}
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="rgb(66, 127, 109)" class="bi bi-arrow-right-circle-fill" viewBox="0 0 16 16">
+                            <path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0zM4.5 7.5a.5.5 0 0 0 0 1h5.793l-2.147 2.146a.5.5 0 0 0 .708.708l3-3a.5.5 0 0 0 0-.708l-3-3a.5.5 0 1 0-.708.708L10.293 7.5H4.5z"/>
+                        </svg>
+                        {{end}}
                     {{end}}
                 </div>
                 <div>
@@ -72,19 +84,21 @@
                 <div>{{.ReceiverName}}</div>
                 <div><span name="Amount">{{.Amount}}</span> <span>-{{.Currency}}-</span></div>
                 <div>{{.Status}}</div>
-                {{if and (eq .Status "CREATED") (eq .BeneficiaryBank $.bankName)}}
-                <div>
-                    <a href="/confirmtransaction?transaction={{.Id}}" class="set-policy">CONFIRM</a>
-                </div>
-                {{else if (and (eq .Status "CREATED") (eq .OriginatorBank $.bankName))}}
-                <div>
-                    -
-                </div>
-                {{else}}
-                <div>
-                    CONFIRMED
-                </div>
-                {{end}}                
+                {{if eq $.centralBankEmployee false}}
+                    {{if and (eq .Status "CREATED") (eq .BeneficiaryBank $.bankName)}}
+                    <div>
+                        <a href="/confirmtransaction?transaction={{.Id}}" class="set-policy">CONFIRM</a>
+                    </div>
+                    {{else if (and (eq .Status "CREATED") (eq .OriginatorBank $.bankName))}}
+                    <div>
+                        -
+                    </div>
+                    {{else}}
+                    <div>
+                        CONFIRMED
+                    </div>
+                    {{end}}  
+                {{end}}              
                 <div>
                     <a href="/transactionhistory?transaction={{.Id}}">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-clock" viewBox="0 0 16 16">

@@ -71,15 +71,16 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 
 		return
 	}
+	viewData := map[string]any{}
 
 	var transactions []DB.TransactionModel
 	if app.sessionManager.GetBool(r.Context(), "centralBankEmployee") == true {
-		fmt.Println("Central bank employee")
+		var countryId int
+		transactions, countryId = app.db.GetTransactionsForCentralbank(app.sessionManager.Get(r.Context(), "bankId").(uint64))
+		viewData["countryId"] = countryId
 	} else {
 		transactions = app.db.GetTransactionsForAddress(app.sessionManager.Get(r.Context(), "bankId").(uint64))
 	}
-
-	viewData := map[string]any{}
 
 	viewData["username"] = app.sessionManager.GetString(r.Context(), "username")
 	viewData["transactions"] = transactions
