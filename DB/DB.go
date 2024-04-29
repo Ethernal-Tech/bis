@@ -244,6 +244,60 @@ func (wrapper *DBWrapper) GetTransactionsForAddress(address uint64) []Transactio
 	return transactions
 }
 
+func (wrapper *DBWrapper) GetTransactionsForCentralbank(bankId uint64) ([]TransactionModel, int) {
+	query := `SELECT CountryId FROM Bank
+			Where Id = @p1`
+
+	rows, err := wrapper.db.Query(query,
+		sql.Named("p1", bankId))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	var centralBankCountryId int
+	for rows.Next() {
+		rows.Scan(&centralBankCountryId)
+	}
+
+	query = `SELECT t.Id
+					,ob.Name
+					,ob.CountryId
+					,bb.Name
+					,bcs.GlobalIdentifier
+					,bcr.GlobalIdentifier
+					,bcs.Name
+					,bcr.Name
+					,t.Currency
+					,t.Amount
+					,s.Name
+				FROM [Transaction] as t
+				LEFT JOIN (SELECT MAX(StatusId) AS StatusId, Transactionid FROM TransactionHistory GROUP BY Transactionid) as th ON th.Transactionid = t.Id 
+				LEFT JOIN [Status] as s ON s.Id = th.StatusId
+				JOIN Bank as ob ON ob.Id = t.OriginatorBank
+				JOIN Bank as bb ON bb.Id = t.BeneficiaryBank
+				JOIN BankClient as bcs ON bcs.Id = t.Sender
+				JOIN BankClient as bcr ON bcr.Id = t.Receiver
+				WHERE ob.CountryId = @p1 OR bb.CountryId = @p2`
+
+	rows, err = wrapper.db.Query(query,
+		sql.Named("p1", centralBankCountryId),
+		sql.Named("p2", centralBankCountryId))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	transactions := []TransactionModel{}
+	for rows.Next() {
+		var trnx TransactionModel
+		rows.Scan(&trnx.Id, &trnx.OriginatorBank, &trnx.OriginatorBankCountryId, &trnx.BeneficiaryBank, &trnx.SenderGlobalIdentifier, &trnx.ReceiverGlobalIdedntifier, &trnx.SenderName, &trnx.ReceiverName, &trnx.Currency, &trnx.Amount, &trnx.Status)
+		trnx = *convertTxStatusDBtoPR(&trnx)
+		transactions = append(transactions, trnx)
+	}
+	return transactions, centralBankCountryId
+}
+
 func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) TransactionModel {
 	query := `SELECT t.Id
 					,ob.Name

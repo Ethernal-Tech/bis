@@ -28,6 +28,7 @@ type TransactionModel struct {
 	Status                    string
 	StatusHistory             []StatusHistoryModel
 	Policies                  []string
+	OriginatorBankCountryId   int
 }
 
 type StatusHistoryModel struct {
