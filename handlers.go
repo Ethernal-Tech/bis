@@ -10,6 +10,7 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"text/template"
@@ -618,8 +619,33 @@ func (app *application) editPolicy(w http.ResponseWriter, r *http.Request) {
 			}
 			defer file.Close()
 
-			fileName := handler.Filename
-			fileName = strings.TrimSuffix(fileName, ".csv")
+			// Upload file to sanction-lists
+			// Create the directory if it doesn't exist
+			dir := "./sanction-lists"
+			if _, err := os.Stat(dir); os.IsNotExist(err) {
+				err := os.Mkdir(dir, 0755)
+				if err != nil {
+					http.Error(w, "Internal Server Error creating directory", http.StatusInternalServerError)
+					return
+				}
+			}
+
+			// Create the file in the directory
+			fileName := strings.TrimSuffix(handler.Filename, filepath.Ext(handler.Filename))
+			filePath := filepath.Join(dir, handler.Filename)
+			newFile, err := os.Create(filePath)
+			if err != nil {
+				http.Error(w, "Internal Server Error creating file", http.StatusInternalServerError)
+				return
+			}
+			defer newFile.Close()
+
+			// Copy the file to the newly created file
+			_, err = io.Copy(newFile, file)
+			if err != nil {
+				http.Error(w, "Internal Server Error copying file", http.StatusInternalServerError)
+				return
+			}
 
 			app.db.UpdatePolicyChecklist(uint64(policyId), fileName)
 		}
