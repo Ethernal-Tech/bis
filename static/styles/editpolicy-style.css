@@ -154,8 +154,12 @@ select {
     justify-content: space-between;
     width: 80%;
     margin: 0px auto;
-    margin-top: 64px;
+    margin-top: 10%;
     height: 50px;
+}
+
+.edit-policy-form {
+    height: 396px;
 }
 
 .confirm-buttons {

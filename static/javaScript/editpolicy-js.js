@@ -12,6 +12,7 @@ function colapse() {
     document.getElementById("confirm-buttons").style.display = "flex"
     document.getElementById("to-checklist-buttons").style.display = "none"
     document.getElementById("policies").style.display = "flex"
+    document.getElementById("edit-policy-form").style.height = "auto"
 
     getPolicies()
 }

@@ -21,9 +21,10 @@
     <div class="add-transaction" id="add-transaction">
         <div class="title">EDIT POLICY</div>
         <div class="policies" id="policies">
-            <div class="policy-not-applied" id="policy-not-applied">No policies to be applied.</div>
+            <div class="policy-not-applied" id="policy-not-applied"></div>
         </div>
-        <form action="/editpolicy" method="post" enctype="multipart/form-data">
+        <form id="edit-policy-form" class="edit-policy-form" action="/editpolicy" method="post"
+            enctype="multipart/form-data">
             <input style="display:none" id="bankCountry" name="bankCountry" value="{{.country}}">
             <input style="display:none" id="policyId" name="policyId" value="{{.policy.Id}}">
             <div class="add-transaction-data" id="add-transaction-data">
@@ -32,7 +33,7 @@
                 {{if eq .policy.Code "CFM"}}
                 <input class="input-amount" type="text" id="amount" name="amount" value="{{.policy.Amount}}">
                 {{else}}
-                <input class="buttons" type="file" id="file" name="file" accept=".csv">
+                <input type="file" id="file" name="file" accept=".csv">
                 {{end}}
             </div>
             <div class="buttons confirm-buttons" id="confirm-buttons">
