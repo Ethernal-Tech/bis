@@ -47,7 +47,7 @@ function getPolicies() {
                 policiesDiv = document.getElementById("policies")
 
                 var centeredTextDiv = document.createElement("div");
-                centeredTextDiv.textContent = "Policy that is being updated:";
+                centeredTextDiv.textContent = "Original policy:";
                 centeredTextDiv.style.textAlign = "center";
                 centeredTextDiv.style.color = "red";
                 centeredTextDiv.style.fontFamily = "Segoe UI";
@@ -69,9 +69,9 @@ function getPolicies() {
                 policiesDiv.appendChild(newDiv)
 
                 centeredTextDiv = document.createElement("div");
-                centeredTextDiv.textContent = "Updated values:";
+                centeredTextDiv.textContent = "Updated policy:";
                 centeredTextDiv.style.textAlign = "center";
-                centeredTextDiv.style.color = "green";
+                centeredTextDiv.style.color = "rgb(66, 127, 109)";
                 centeredTextDiv.style.fontFamily = "Segoe UI";
 
                 newDiv = document.createElement("div")
