@@ -696,3 +696,30 @@ func (app *application) getPolicy(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal Server Error", 500)
 	}
 }
+
+func (app *application) showAnalytics(w http.ResponseWriter, r *http.Request) {
+	if app.sessionManager.GetString(r.Context(), "inside") != "yes" || !app.sessionManager.GetBool(r.Context(), "centralBankEmployee") {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+
+		return
+	}
+
+	viewData := map[string]any{}
+
+	viewData["username"] = app.sessionManager.GetString(r.Context(), "username")
+	viewData["bankName"] = app.sessionManager.GetString(r.Context(), "bankName")
+	viewData["country"] = app.sessionManager.GetString(r.Context(), "country")
+
+	ts, err := template.ParseFiles("./static/views/analytics.html")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error 1", 500)
+		return
+	}
+
+	err = ts.Execute(w, viewData)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error 2", 500)
+	}
+}

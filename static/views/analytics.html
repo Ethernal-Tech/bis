@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BIS Innovation Hub</title>
+    <link rel="stylesheet" href="/static/styles/analytics-style.css">
+    <link rel="icon" href="/static/images/webpage-logo.png">
+    <script src="/static/javaScript/analytics-js.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.5.0/Chart.min.js"></script>
+</head>
+
+<body>
+    <header>
+        <div>
+            <a href="/home"><img src="/static/images/logo.png" alt="" height="36px"></a>
+            <div>Bank: {{.bankName}} - {{.country}}, <a class="logout" href="/logout">logout</a></div>
+        </div>
+    </header>
+
+    <div class="buttons">
+        <div>
+            <a class="back-button" href="/home">SHOW TRANSACTIONS</a>
+        </div>
+    </div>
+
+    <div class="background-style">
+        <div style="width: 30%; align-self: center;align-content: center; text-align: center;">
+            <p>Number of initialized transactions: 2</p>
+            <p>Number of completed transactions: 2</p>
+            <p>Transactions success rate in percetages:</p>
+            <div class="pie animate" style="--p:100;--c:lightgreen"> 100%</div>
+        </div>
+
+        <div style="width: 70%;align-content: center;">
+            <canvas id="myChart" style="width:100%;max-width:1000px"></canvas>
+            <script>
+                var xValues = ["Sent", "Received"];
+                var yValues = [123456789, 1000000];
+                var barColors = ["red", "green"];
+
+                new Chart("myChart", {
+                    type: "bar",
+                    data: {
+                        labels: xValues,
+                        datasets: [{
+                            backgroundColor: barColors,
+                            data: yValues
+                        }]
+                    },
+                    options: {
+                        legend: { display: false },
+                        title: {
+                            display: true,
+                            text: "Assets"
+                        }
+                    }
+                });
+            </script>
+        </div>
+    </div>
+
+</body>
+
+</html>
