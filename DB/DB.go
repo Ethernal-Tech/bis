@@ -814,3 +814,58 @@ func (wrapper *DBWrapper) PoliciesFromCountry(bankId uint64) []PolicyModel {
 	}
 	return policies
 }
+
+func (wrapper *DBWrapper) GetPolicy(bankCountry string, policyId uint64) PolicyModel {
+	query := `SELECT p.Id, c.Name, p.CountryId, p.Code, p.Name, ttp.Amount, ttp.Checklist
+					FROM TransactionTypePolicy ttp
+					JOIN Policy as p ON ttp.PolicyId = p.Id
+					Join Country as c ON ttp.CountryId = c.Id
+					Where ttp.PolicyId = @p2
+						and ttp.CountryId = (SELECT Id FROM [Country] Where Name = @p1)`
+
+	rows, err := wrapper.db.Query(query,
+		sql.Named("p1", bankCountry),
+		sql.Named("p2", policyId))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer rows.Close()
+
+	var policy PolicyModel
+	for rows.Next() {
+		if err := rows.Scan(&policy.Id, &policy.Country, &policy.CountryId, &policy.Code, &policy.Name, &policy.Amount, &policy.Checklist); err != nil {
+			log.Fatal(err)
+		}
+
+		if len(policy.Checklist) > 0 {
+			policy.Parameter = policy.Checklist
+		} else {
+			policy.Parameter = strconv.FormatUint(policy.Amount, 10)
+		}
+	}
+
+	return policy
+}
+
+func (wrapper *DBWrapper) UpdatePolicyAmount(policyId uint64, amount uint64) {
+	query := `UPDATE [TransactionTypePolicy] Set Amount = @p2 Where PolicyId = @p1`
+
+	_, err := wrapper.db.Exec(query,
+		sql.Named("p1", policyId),
+		sql.Named("p2", amount))
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+func (wrapper *DBWrapper) UpdatePolicyChecklist(policyId uint64, checklist string) {
+	query := `UPDATE [TransactionTypePolicy] Set Checklist = @p2 Where PolicyId = @p1`
+
+	_, err := wrapper.db.Exec(query,
+		sql.Named("p1", policyId),
+		sql.Named("p2", checklist))
+	if err != nil {
+		log.Fatal(err)
+	}
+}

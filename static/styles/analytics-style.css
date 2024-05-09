@@ -78,76 +78,76 @@ header>div>div {
     transition: 0.4s;
 }
 
-.table {
+.background-style {
     width: 86%;
     height: 620px;
     margin: 0px auto;
     border-radius: 20px;
     background-color: #ffffff;
     border: 3px solid #EAA121;
-}
-
-.table-header,
-.table-row {
     display: flex;
-    border-bottom: 2px solid #706f6f;
-    font-size: 20px;
-    height: 50px;
-    align-items: center;
-    font-weight: 700;
+}
+
+/* PIE ANIMATIONS */
+@property --p {
+    syntax: '<number>';
+    inherits: true;
+    initial-value: 0;
+}
+
+.pie {
+    --p: 20;
+    --b: 22px;
+    --c: darkred;
+    --w: 150px;
+
+    width: var(--w);
+    aspect-ratio: 1;
+    position: relative;
+    display: inline-grid;
+    margin: 5px;
+    place-content: center;
+    font-size: 25px;
+    font-weight: bold;
     font-family: 'Segoe UI';
-    color: #706f6f;
-    text-decoration: none;
 }
 
-.table-header>div,
-.table-row>div {
-    text-align: center;
+.pie:before,
+.pie:after {
+    content: "";
+    position: absolute;
+    border-radius: 50%;
 }
 
-.table-header>div:nth-child(1),
-.table-row>div:nth-child(1) {
-    flex: 1;
+.pie:before {
+    inset: 0;
+    background:
+        radial-gradient(farthest-side, var(--c) 98%, #0000) top/var(--b) var(--b) no-repeat,
+        conic-gradient(var(--c) calc(var(--p)*1%), #0000 0);
+    -webkit-mask: radial-gradient(farthest-side, #0000 calc(99% - var(--b)), #000 calc(100% - var(--b)));
+    mask: radial-gradient(farthest-side, #0000 calc(99% - var(--b)), #000 calc(100% - var(--b)));
 }
 
-.table-header>div:nth-child(2),
-.table-row>div:nth-child(2) {
-    flex: 1;
+.pie:after {
+    inset: calc(50% - var(--b)/2);
+    background: var(--c);
+    transform: rotate(calc(var(--p)*3.6deg)) translateY(calc(50% - var(--w)/2));
 }
 
-.table-header>div:nth-child(3),
-.table-row>div:nth-child(3) {
-    flex: 1;
-    color: #aa322f;
+.animate {
+    animation: p 1s .5s both;
 }
 
-.table-header>div:nth-child(4),
-.table-row>div:nth-child(4) {
-    flex: 1;
-    color: #aa322f;
+.no-round:before {
+    background-size: 0 0, auto;
 }
 
-.table-body {
-    width: 100%;
-    height: 100%;
+.no-round:after {
+    content: none;
 }
 
-.table-row {
-    font-size: 20px;
-    font-weight: 400;
-}
-
-.table-body {
-    height: 550px;
-    overflow: auto;
-}
-
-.table-body::-webkit-scrollbar {
-    width: 4px;
-    visibility: hidden;
-}
-
-.table-body::-webkit-scrollbar-thumb {
-    border-radius: 4px;
-    background-color: #EAA121;
+@keyframes p {
+    from {
+        --p: 0
+    }
 }
