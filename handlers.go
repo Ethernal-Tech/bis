@@ -10,7 +10,6 @@ import (
 	"math/rand"
 	"net/http"
 	"os"
-	"path/filepath"
 	"strconv"
 	"strings"
 	"text/template"
@@ -569,7 +568,6 @@ func (app *application) editPolicy(w http.ResponseWriter, r *http.Request) {
 		}
 
 		policyId, _ := strconv.Atoi(r.Form.Get("policyId"))
-		fmt.Println(policyId)
 
 		viewData := map[string]any{}
 
@@ -611,39 +609,10 @@ func (app *application) editPolicy(w http.ResponseWriter, r *http.Request) {
 
 			app.db.UpdatePolicyAmount(uint64(policyId), uint64(amount))
 		} else {
-			file, handler, err := r.FormFile("file")
+			fileName, err := getNewestSanctionsList()
 			if err != nil {
 				log.Println(err.Error())
 				http.Error(w, "Internal Server Error retrieving file", 500)
-				return
-			}
-			defer file.Close()
-
-			// Upload file to sanction-lists
-			// Create the directory if it doesn't exist
-			dir := "./sanction-lists"
-			if _, err := os.Stat(dir); os.IsNotExist(err) {
-				err := os.Mkdir(dir, 0755)
-				if err != nil {
-					http.Error(w, "Internal Server Error creating directory", http.StatusInternalServerError)
-					return
-				}
-			}
-
-			// Create the file in the directory
-			fileName := strings.TrimSuffix(handler.Filename, filepath.Ext(handler.Filename))
-			filePath := filepath.Join(dir, handler.Filename)
-			newFile, err := os.Create(filePath)
-			if err != nil {
-				http.Error(w, "Internal Server Error creating file", http.StatusInternalServerError)
-				return
-			}
-			defer newFile.Close()
-
-			// Copy the file to the newly created file
-			_, err = io.Copy(newFile, file)
-			if err != nil {
-				http.Error(w, "Internal Server Error copying file", http.StatusInternalServerError)
 				return
 			}
 
@@ -709,7 +678,6 @@ func (app *application) showAnalytics(w http.ResponseWriter, r *http.Request) {
 	viewData["username"] = app.sessionManager.GetString(r.Context(), "username")
 	viewData["bankName"] = app.sessionManager.GetString(r.Context(), "bankName")
 	viewData["country"] = app.sessionManager.GetString(r.Context(), "country")
-
 	ts, err := template.ParseFiles("./static/views/analytics.html")
 	if err != nil {
 		log.Println(err.Error())
