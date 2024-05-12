@@ -325,7 +325,6 @@ func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) Transactio
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer rows.Close()
 
 	var trnx TransactionModel
 	if rows.Next() {
@@ -333,6 +332,8 @@ func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) Transactio
 			log.Fatal(err)
 		}
 	}
+
+	rows.Close()
 
 	query = `SELECT s.Name
 					,th.Date

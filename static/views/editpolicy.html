@@ -14,7 +14,8 @@
     <header>
         <div>
             <a href="/home"><img src="/static/images/logo.png" alt="" height="36px"></a>
-            <div>Bank: {{.bankName}} - {{.country}}, <a class="logout" href="/logout">logout</a></div>
+            <div>{{if eq .centralBankEmployee true}}Central Bank{{else}}Bank{{end}}: {{.bankName}} - {{.country}}, <a
+                class="logout" href="/logout">logout</a></div>
         </div>
     </header>
 
