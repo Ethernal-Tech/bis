@@ -21,3 +21,5 @@
 go.work
 
 /sanction-lists
+gpjc-api
+/private-join-and-compute
