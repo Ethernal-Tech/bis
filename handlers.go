@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math"
 	"math/rand"
 	"net/http"
 	"os"
@@ -718,6 +719,30 @@ func (app *application) showAnalytics(w http.ResponseWriter, r *http.Request) {
 	viewData["bankName"] = app.sessionManager.GetString(r.Context(), "bankName")
 	viewData["country"] = app.sessionManager.GetString(r.Context(), "country")
 	viewData["centralBankEmployee"] = app.sessionManager.GetBool(r.Context(), "centralBankEmployee")
+
+	transactions, countryId := app.db.GetTransactionsForCentralbank(app.sessionManager.Get(r.Context(), "bankId").(uint64), "")
+
+	sentAmount := 0
+	receivedAmount := 0
+	successfulTxs := 0
+	for _, tx := range transactions {
+		if tx.OriginatorBankCountryId == countryId {
+			sentAmount += tx.Amount
+		} else {
+			receivedAmount += tx.Amount
+		}
+
+		if strings.Compare("COMPLETED", tx.Status) == 0 {
+			successfulTxs += 1
+		}
+	}
+
+	viewData["sent"] = sentAmount
+	viewData["received"] = receivedAmount
+	viewData["successful"] = successfulTxs
+	viewData["initialized"] = len(transactions)
+	percentage := float64(successfulTxs) / float64(len(transactions)) * 100
+	viewData["percentage"] = math.Floor(percentage*100) / 100
 
 	ts, err := template.ParseFiles("./static/views/analytics.html")
 	if err != nil {

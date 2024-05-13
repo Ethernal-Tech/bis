@@ -16,7 +16,7 @@
         <div>
             <a href="/home"><img src="/static/images/logo.png" alt="" height="36px"></a>
             <div>{{if eq .centralBankEmployee true}}Central Bank{{else}}Bank{{end}}: {{.bankName}} - {{.country}}, <a
-                class="logout" href="/logout">logout</a></div>
+                    class="logout" href="/logout">logout</a></div>
         </div>
     </header>
 
@@ -28,17 +28,17 @@
 
     <div class="background-style">
         <div style="width: 30%; align-self: center;align-content: center; text-align: center;">
-            <p>Number of initialized transactions: 2</p>
-            <p>Number of completed transactions: 2</p>
+            <p>Number of initialized transactions: {{.initialized}}</p>
+            <p>Number of completed transactions: {{.successful}}</p>
             <p>Transactions success rate in percetages:</p>
-            <div class="pie animate" style="--p:100;--c:lightgreen"> 100%</div>
+            <div class="pie animate" style="--p:{{.percentage}};--c:lightgreen"> {{.percentage}}%</div>
         </div>
 
         <div style="width: 70%;align-content: center;">
             <canvas id="myChart" style="width:100%;max-width:1000px"></canvas>
             <script>
                 var xValues = ["Sent", "Received"];
-                var yValues = [123456789, 1000000];
+                var yValues = [{{.sent}}, {{.received}}];
                 var barColors = ["red", "green"];
 
                 new Chart("myChart", {
