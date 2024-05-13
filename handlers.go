@@ -477,6 +477,7 @@ func (app *application) transactionHistory(w http.ResponseWriter, r *http.Reques
 	viewData["transaction"] = transaction
 	viewData["bankName"] = app.sessionManager.GetString(r.Context(), "bankName")
 	viewData["country"] = app.sessionManager.GetString(r.Context(), "country")
+	viewData["centralBankEmployee"] = app.sessionManager.GetBool(r.Context(), "centralBankEmployee")
 
 	viewData["policies"] = policiesAndStatuses
 	viewData["policiesApplied"] = "false"
@@ -575,6 +576,7 @@ func (app *application) editPolicy(w http.ResponseWriter, r *http.Request) {
 		viewData["bankName"] = app.sessionManager.GetString(r.Context(), "bankName")
 		viewData["country"] = app.sessionManager.GetString(r.Context(), "country")
 		viewData["policy"] = app.db.GetPolicy(viewData["country"].(string), uint64(policyId))
+		viewData["centralBankEmployee"] = app.sessionManager.GetBool(r.Context(), "centralBankEmployee")
 
 		ts, err := template.ParseFiles("./static/views/editpolicy.html")
 		if err != nil {
@@ -678,6 +680,8 @@ func (app *application) showAnalytics(w http.ResponseWriter, r *http.Request) {
 	viewData["username"] = app.sessionManager.GetString(r.Context(), "username")
 	viewData["bankName"] = app.sessionManager.GetString(r.Context(), "bankName")
 	viewData["country"] = app.sessionManager.GetString(r.Context(), "country")
+	viewData["centralBankEmployee"] = app.sessionManager.GetBool(r.Context(), "centralBankEmployee")
+
 	ts, err := template.ParseFiles("./static/views/analytics.html")
 	if err != nil {
 		log.Println(err.Error())
