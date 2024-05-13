@@ -48,24 +48,31 @@ header>div>div {
     display: flex;
 }
 
-.buttons>div:nth-child(1) {
+.buttons .searchDiv {
+    display: flex;
+    align-items: center;
+}
+
+.buttons .addTrxDiv {
     flex: 1.9;
     display: flex;
-    justify-content: end;
+    justify-content: center;
 }
 
-.buttons>div:nth-child(2) {
-    flex: 1;
+.buttons .analyticsDiv {
+    flex: 1.9;
     display: flex;
-    justify-content: end;
+    justify-content: center;
 }
 
+.search-field:hover,
 .add-transaction:hover,
 .show-policies:hover,
 .show-analytics:hover {
     letter-spacing: 2px;
 }
 
+.search-field,
 .add-transaction,
 .show-policies,
 .show-analytics {
@@ -86,6 +93,10 @@ header>div>div {
     font-weight: 400;
     border: 2px solid #706f6f;
     transition: 0.4s;
+}
+
+.search-field {
+    width: 320px;
 }
 
 .show-policies {

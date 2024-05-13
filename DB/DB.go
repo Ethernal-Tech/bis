@@ -203,7 +203,7 @@ func convertHistoryStatusPRtoDB(history *StatusHistoryModel) *StatusHistoryModel
 	return history
 }
 
-func (wrapper *DBWrapper) GetTransactionsForAddress(address uint64) []TransactionModel {
+func (wrapper *DBWrapper) GetTransactionsForAddress(address uint64, searchValue string) []TransactionModel {
 	query := `SELECT t.Id
 					,ob.Name
 					,bb.Name
@@ -244,7 +244,7 @@ func (wrapper *DBWrapper) GetTransactionsForAddress(address uint64) []Transactio
 	return transactions
 }
 
-func (wrapper *DBWrapper) GetTransactionsForCentralbank(bankId uint64) ([]TransactionModel, int) {
+func (wrapper *DBWrapper) GetTransactionsForCentralbank(bankId uint64, searchValue string) ([]TransactionModel, int) {
 	query := `SELECT CountryId FROM Bank
 			Where Id = @p1`
 
@@ -278,11 +278,12 @@ func (wrapper *DBWrapper) GetTransactionsForCentralbank(bankId uint64) ([]Transa
 				JOIN Bank as bb ON bb.Id = t.BeneficiaryBank
 				JOIN BankClient as bcs ON bcs.Id = t.Sender
 				JOIN BankClient as bcr ON bcr.Id = t.Receiver
-				WHERE ob.CountryId = @p1 OR bb.CountryId = @p2`
+				WHERE (ob.CountryId = @p1 OR bb.CountryId = @p2) and (ob.Name like @p3 OR bb.Name like @p3 OR bcs.Name like @p3 OR bcr.Name like @p3)`
 
 	rows, err = wrapper.db.Query(query,
 		sql.Named("p1", centralBankCountryId),
-		sql.Named("p2", centralBankCountryId))
+		sql.Named("p2", centralBankCountryId),
+		sql.Named("p3", "%"+searchValue+"%"))
 	if err != nil {
 		log.Fatal(err)
 	}

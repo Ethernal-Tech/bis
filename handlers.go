@@ -82,10 +82,10 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	var transactions []DB.TransactionModel
 	if app.sessionManager.GetBool(r.Context(), "centralBankEmployee") == true {
 		var countryId int
-		transactions, countryId = app.db.GetTransactionsForCentralbank(app.sessionManager.Get(r.Context(), "bankId").(uint64))
+		transactions, countryId = app.db.GetTransactionsForCentralbank(app.sessionManager.Get(r.Context(), "bankId").(uint64), "")
 		viewData["countryId"] = countryId
 	} else {
-		transactions = app.db.GetTransactionsForAddress(app.sessionManager.Get(r.Context(), "bankId").(uint64))
+		transactions = app.db.GetTransactionsForAddress(app.sessionManager.Get(r.Context(), "bankId").(uint64), "")
 	}
 
 	viewData["username"] = app.sessionManager.GetString(r.Context(), "username")
@@ -95,6 +95,43 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	viewData["centralBankEmployee"] = app.sessionManager.GetBool(r.Context(), "centralBankEmployee")
 
 	ts, err := template.ParseFiles("./static/views/home.html")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error 1", 500)
+		return
+	}
+
+	err = ts.Execute(w, viewData)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error 2", 500)
+	}
+}
+
+func (app *application) searchTransaction(w http.ResponseWriter, r *http.Request) {
+	if app.sessionManager.GetString(r.Context(), "inside") != "yes" {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+
+		return
+	}
+
+	searchValue := r.URL.Query().Get("searchValue")
+
+	viewData := map[string]any{}
+	var transactions []DB.TransactionModel
+	if app.sessionManager.GetBool(r.Context(), "centralBankEmployee") == true {
+		var countryId int
+		transactions, countryId = app.db.GetTransactionsForCentralbank(app.sessionManager.Get(r.Context(), "bankId").(uint64), searchValue)
+		viewData["countryId"] = countryId
+	} else {
+		transactions = app.db.GetTransactionsForAddress(app.sessionManager.Get(r.Context(), "bankId").(uint64), searchValue)
+	}
+
+	viewData["transactions"] = transactions
+	viewData["country"] = app.sessionManager.GetString(r.Context(), "country")
+	viewData["centralBankEmployee"] = app.sessionManager.GetBool(r.Context(), "centralBankEmployee")
+
+	ts, err := template.ParseFiles("./static/views/_transactionPartial.html")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error 1", 500)

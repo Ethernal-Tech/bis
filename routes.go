@@ -16,6 +16,7 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodPost, "/login", app.login)
 	router.HandlerFunc(http.MethodGet, "/logout", app.logout)
 	router.HandlerFunc(http.MethodGet, "/home", app.home)
+	router.HandlerFunc(http.MethodGet, "/home/searchTransaction", app.searchTransaction)
 	router.HandlerFunc(http.MethodGet, "/addtransaction", app.addTransaction)
 	router.HandlerFunc(http.MethodPost, "/addtransaction", app.addTransaction)
 	router.HandlerFunc(http.MethodPost, "/api/getpolicies", app.getPolicies)
