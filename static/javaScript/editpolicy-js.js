@@ -84,13 +84,14 @@ function getPolicies() {
                         <div class="policy-applied">` + document.getElementById("amount").value + ` </div>`
                 } else {
                     newDiv.innerHTML = `
-                        <div class="policy-applied">` + document.getElementById("policyName").value + `</div>
-                        <div class="policy-applied">` + extractFilenameFromPath(document.getElementById("file").value) + `</div>`
+                        <div class="policy-applied" style="text-align: center; font-family: Segoe UI">` +
+                        "By confirming you are updateing sanctions list to the latest version pubished on " +
+                        `<a href="https://www.opensanctions.org/datasets/un_sc_sanctions/">open sactions</a>` +
+                        `</div>`
                 }
 
                 policiesDiv.appendChild(centeredTextDiv);
                 policiesDiv.appendChild(newDiv)
-
             }
         })
         .catch(error => {
