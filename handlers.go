@@ -720,20 +720,36 @@ func (app *application) showAnalytics(w http.ResponseWriter, r *http.Request) {
 	viewData["country"] = app.sessionManager.GetString(r.Context(), "country")
 	viewData["centralBankEmployee"] = app.sessionManager.GetBool(r.Context(), "centralBankEmployee")
 
-	transactions, countryId := app.db.GetTransactionsForCentralbank(app.sessionManager.Get(r.Context(), "bankId").(uint64), "")
+	centralBankId := app.sessionManager.Get(r.Context(), "bankId").(uint64)
+	transactions, countryId := app.db.GetTransactionsForCentralbank(centralBankId, "")
 
 	sentAmount := 0
 	receivedAmount := 0
 	successfulTxs := 0
-	for _, tx := range transactions {
-		if tx.OriginatorBankCountryId == countryId {
-			sentAmount += tx.Amount
-		} else {
-			receivedAmount += tx.Amount
-		}
+	failedBecauseOfSanctionsCheck := 0
+	failedBecauseOfCFMCheck := 0
 
-		if strings.Compare("COMPLETED", tx.Status) == 0 {
+	for _, tx := range transactions {
+		if tx.Status == "COMPLETED" {
 			successfulTxs += 1
+
+			if tx.OriginatorBankCountryId == countryId {
+				sentAmount += tx.Amount
+			} else {
+				receivedAmount += tx.Amount
+			}
+		} else if tx.Status == "CANCELED" {
+			policyStatuses := app.db.GetTransactionPolicyStatuses(tx.Id)
+
+			for _, policyStatus := range policyStatuses {
+				policy := app.db.GetPolicyById(policyStatus.PolicyId)
+				if policy.Code == "CFM" && policyStatus.Status == 2 {
+					failedBecauseOfCFMCheck += 1
+				}
+				if policy.Code == "SCL" && policyStatus.Status == 2 {
+					failedBecauseOfSanctionsCheck += 1
+				}
+			}
 		}
 	}
 
@@ -743,6 +759,8 @@ func (app *application) showAnalytics(w http.ResponseWriter, r *http.Request) {
 	viewData["initialized"] = len(transactions)
 	percentage := float64(successfulTxs) / float64(len(transactions)) * 100
 	viewData["percentage"] = math.Floor(percentage*100) / 100
+	viewData["sclFails"] = failedBecauseOfSanctionsCheck
+	viewData["cfmFails"] = failedBecauseOfCFMCheck
 
 	ts, err := template.ParseFiles("./static/views/analytics.html")
 	if err != nil {

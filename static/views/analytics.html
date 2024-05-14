@@ -30,6 +30,8 @@
         <div style="width: 30%; align-self: center;align-content: center; text-align: center;">
             <p>Number of initialized transactions: {{.initialized}}</p>
             <p>Number of completed transactions: {{.successful}}</p>
+            <p>Number of transactions that failed sanctions check: {{.sclFails}}</p>
+            <p>Number of transactions that failed CFM check: {{.cfmFails}}</p>
             <p>Transactions success rate in percetages:</p>
             <div class="pie animate" style="--p:{{.percentage}};--c:lightgreen"> {{.percentage}}%</div>
         </div>
@@ -38,7 +40,8 @@
             <canvas id="myChart" style="width:100%;max-width:1000px"></canvas>
             <script>
                 var xValues = ["Sent", "Received"];
-                var yValues = [{{.sent}}, {{.received}}];
+                var yValues = [{{.sent}}, {{.received}}]; 
+                <!--   var yValues = [{{.sent}}, {{.received}}];    -->
                 var barColors = ["red", "green"];
 
                 new Chart("myChart", {
@@ -55,8 +58,15 @@
                         title: {
                             display: true,
                             text: "Assets"
-                        }
-                    }
+                        },
+						scales: {
+							  yAxes: [{
+								ticks: {
+								  beginAtZero: true
+								}
+							}]
+						}						
+                    },
                 });
             </script>
         </div>

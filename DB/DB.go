@@ -701,6 +701,27 @@ func (wrapper *DBWrapper) GetPolicyId(code string, countryId int) int {
 	return id
 }
 
+func (wrapper *DBWrapper) GetPolicyById(policyID int) Policy {
+	query := `SELECT Id, Code, Name FROM [Policy] WHERE Id = @p1`
+
+	rows, err := wrapper.db.Query(query, sql.Named("p1", policyID))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer rows.Close()
+
+	var policy Policy
+
+	for rows.Next() {
+		if err := rows.Scan(&policy.Id, &policy.Code, &policy.Name); err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	return policy
+}
+
 func (wrapper *DBWrapper) UpdateTransactionPolicyStatus(transactionId uint64, policyId int, status int) {
 	query := `UPDATE [TransactionPolicyStatus] Set Status = @p3 Where TransactionId = @p1 and PolicyId = @p2`
 
