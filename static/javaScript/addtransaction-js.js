@@ -1,5 +1,7 @@
 window.onload = function () {
     document.getElementById("to-checklist-button").addEventListener("click", colapse)
+    document.getElementById("search-senders").addEventListener("click", openSendersWindow)
+    document.getElementById("senders-window-back-button").addEventListener("click", closeSendersWindow)
     addSeparators()
 }
 
@@ -60,6 +62,16 @@ function getPolicies() {
         .catch(error => {
             console.error('Fetch error:', error);
         });
+}
+
+function openSendersWindow() {
+    document.getElementById("senders-window").style.display="block"
+    document.getElementById("add-transaction").style.display="none"
+}
+
+function closeSendersWindow() {
+    document.getElementById("senders-window").style.display="none"
+    document.getElementById("add-transaction").style.display="block"
 }
 
 function addSeparators() {

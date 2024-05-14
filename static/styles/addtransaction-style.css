@@ -102,6 +102,33 @@ select {
     cursor: pointer;
 }
 
+.div-sender {
+    width: 80%;
+    margin: 0px auto;
+    position: relative;
+}
+
+.input-sender {
+    width: 100%;
+}
+
+.search-senders {
+    position: absolute;
+    top: -5px;
+    right: 0;
+    height: 30px;
+    width: 30px;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 36px;
+    border: 2px solid #aa322f;
+    border-top-left-radius: 5px;
+    border-top-right-radius: 5px;
+    cursor: pointer;
+}
+
 .policies {
     height: 396px;
     width: 80%;
@@ -192,4 +219,70 @@ select {
     background-color: #aa322f;
     border-top-right-radius: 10px;
     border-bottom-right-radius: 10px;
+}
+
+.senders-window {
+    display: none;
+    margin: 140px auto;
+    border: 4px solid #eaa121;
+    border-radius: 4%;
+    background-color: white;
+    height: 660px;
+    width: 452px;
+    position: absolute;
+    top: 0px;
+    left: calc(50vw - 230px);
+}
+
+.senders-window-back-button-container {
+    margin: 0 auto;
+    margin-top: 20px;
+    width: 380px;
+}
+
+.senders-window-back-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: auto;
+    width: 32px;
+    height: 32px;
+    cursor: pointer;
+}
+
+.senders-window-body {
+    border: 2px solid #706f6f;
+    border-radius: 10px;
+    width: 380px;
+    height: 510px;
+    margin: 0px auto;
+    margin-top: 32px;
+    overflow: auto;
+}
+
+.senders-window-body::-webkit-scrollbar {
+    width: 4px;
+    visibility: hidden;
+}
+
+.senders-window-body::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: #EAA121;
+}
+
+
+.senders-window-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-bottom: 1px solid #706f6f;
+    color: #706f6f;
+    height: 40px;
+    transition: 0.4s;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.senders-window-row:hover {
+    background-color: #e4dede;
 }

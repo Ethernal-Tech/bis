@@ -18,14 +18,21 @@
         </div>
     </header>
 
-    <div class="add-transaction" id="add-transaction">
+    <div id="add-transaction" class="add-transaction" id="add-transaction">
         <div class="title">ADD TRANSACTION</div>
         <div class="policies" id="policies">
             <div class="policy-not-applied" id="policy-not-applied">No policies to be applied.</div>
         </div>
         <form action="/addtransaction" method="post">
             <div class="add-transaction-data" id="add-transaction-data">
-                <input class="input-sender" type="text" placeholder="Sender" name="sender">
+                <div class="div-sender">
+                    <input class="input-sender" type="text" placeholder="Sender" name="sender">
+                    <div id="search-senders" class="search-senders">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" fill="#706f6f" class="bi bi-search" viewBox="0 0 16 16">
+                            <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                        </svg>
+                    </div>
+                </div>
                 <input class="input-receiver" type="text" placeholder="Receiver" name="receiver" id="receiver">
                 <select id="select-bank" class="select-bank" name="bank">
                     {{range .banks}}
@@ -65,6 +72,26 @@
                         d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z" />
                 </svg>
             </a>
+        </div>
+    </div>
+    <div id="senders-window" class="senders-window">
+        <div class="senders-window-back-button-container">
+            <div id="senders-window-back-button" class="senders-window-back-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="30" height="30" fill="#aa322f" class="bi bi-x-circle" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/>
+                    <path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/>
+                </svg>
+            </div>
+        </div>
+        <div class="senders-window-body">
+            <div class="senders-window-row">COMPANY A</div>
+            <div class="senders-window-row">COMPANY B</div>
+            <div class="senders-window-row">COMPANY C</div>
+            <div class="senders-window-row">COMPANY D</div>
+            <div class="senders-window-row">COMPANY E</div>
+            <div class="senders-window-row">COMPANY F</div>
+            <div class="senders-window-row">COMPANY G</div>
+            <div class="senders-window-row">COMPANY H</div>
         </div>
     </div>
 </body>
