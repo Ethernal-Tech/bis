@@ -30,43 +30,82 @@ function getPolicies() {
         },
         body: JSON.stringify(data)
     })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-
-            if (data.length == 0) {
-                document.getElementById("policy-not-applied").style.display = "flex"
-            }
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.length == 0) {
+            document.getElementById("policy-not-applied").style.display = "flex"
+        }
+        else {
+            policiesDiv = document.getElementById("policies")
+            data.forEach(function (currentValue) {
+            newDiv = document.createElement("div")
+            newDiv.classList.add("policies-row")
+            
+            if (currentValue.Code == "CFM") {
+                newDiv.innerHTML = `
+                    <div class="policy-applied">` + currentValue.Name + `</div>
+                    <div class="policy-applied">` + parseFloat(currentValue.Parameter.replace(/,/g, '')).toLocaleString() + ` (Loan ID = ` + document.getElementById("loanId").value + `) </div>`                        
+            } 
             else {
-                policiesDiv = document.getElementById("policies")
-                data.forEach(function (currentValue) {
-                    newDiv = document.createElement("div")
-                    newDiv.classList.add("policies-row")
-                    if (currentValue.Code == "CFM") {
-                        newDiv.innerHTML = `
-                        <div class="policy-applied">` + currentValue.Name + `</div>
-                        <div class="policy-applied">` + parseFloat(currentValue.Parameter.replace(/,/g, '')).toLocaleString() + ` (Loan ID = ` + document.getElementById("loanId").value + `) </div>`                        
-                    } else {
-                        newDiv.innerHTML = `
-                        <div class="policy-applied">` + currentValue.Name + `</div>
+                newDiv.innerHTML = `
+                    <div class="policy-applied">` + currentValue.Name + `</div>
                         <div class="policy-applied">` + currentValue.Parameter + `</div>`
-                    }
-                    policiesDiv.appendChild(newDiv)
-                })
             }
-        })
-        .catch(error => {
+            policiesDiv.appendChild(newDiv)
+            })
+        }
+    })
+    .catch(error => {
             console.error('Fetch error:', error);
-        });
+    });
 }
 
 function openSendersWindow() {
-    document.getElementById("senders-window").style.display="block"
-    document.getElementById("add-transaction").style.display="none"
+    // the API is too slow to instantly set the display property of elements
+    // document.getElementById("senders-window").style.display="block"
+    // document.getElementById("add-transaction").style.display="none"
+    
+    var value = document.getElementById("input-sender").value
+
+    var body = document.getElementById("senders-window-body")
+    body.innerHTML = ""
+
+    const apiUrl = 'https://api.gleif.org/api/v1/autocompletions?field=fulltext&q=' + value;
+    var senders = [];
+    fetch(apiUrl)
+    .then(response => {
+        if (!response.ok) {
+        throw new Error('Network response was not ok');
+        }
+
+        return response.json();
+    })
+    .then(data => {
+        data.data.forEach(el => {
+            var newRow = document.createElement("div")
+            newRow.textContent = el.attributes.value
+            newRow.classList.add("senders-window-row")
+            newRow.addEventListener('click', function () {
+                document.getElementById("input-sender").value = el.attributes.value; 
+                
+                document.getElementById("senders-window").style.display="none"
+                document.getElementById("add-transaction").style.display="block"
+              });
+            body.appendChild(newRow)
+        })
+
+        document.getElementById("senders-window").style.display="block"
+        document.getElementById("add-transaction").style.display="none"
+    })
+    .catch(error => {
+        // Handle any errors that occurred during the fetch
+        console.error('There was a problem with the fetch operation:', error);
+    });
 }
 
 function closeSendersWindow() {
