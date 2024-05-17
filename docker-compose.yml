@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  sql-database:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sql-database
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: Ethernal123
+    ports:
+      - "1433:1433"
+    networks:
+      - my-network
+    volumes:
+      - ./DB/scripts/:/docker-entrypoint-initdb/scripts/
+    command: >
+      /bin/bash -c " /opt/mssql/bin/sqlservr & sleep 30 && /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2023.10.10_CreateBISdb.sql && wait "
+
+  app:
+    build: .
+    container_name: app
+    ports:
+      - "4000:4000"
+    depends_on:
+      sql-database:
+        condition: service_started
+    networks:
+      - my-network
+
+networks:
+  my-network:

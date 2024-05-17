@@ -22,7 +22,7 @@ func InitDb() *DBWrapper {
 	)
 
 	if runtime.GOOS == "linux" {
-		sqldb, err = sql.Open("sqlserver", "server=localhost;user id=SA;password=Ethernal123;port=1433;database=BIS")
+		sqldb, err = sql.Open("sqlserver", "server=sql-database;user id=SA;password=Ethernal123;port=1433;database=BIS")
 	} else {
 		// Windows authentication
 		sqldb, err = sql.Open("sqlserver", "sqlserver://@localhost:1434?database=BIS&trusted_connection=yes")

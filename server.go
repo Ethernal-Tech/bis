@@ -47,7 +47,7 @@ func main() {
 
 	server := &http.Server{
 		//Addr:    ":443",
-		Addr:    "localhost:4000",
+		Addr:    "0.0.0.0:4000",
 		Handler: app.routes(),
 	}
 

@@ -18,3 +18,9 @@ fetch-releases:
 	curl -L $(GPJC_API_RELEASE_ULR) -o gpjc-api
 	@echo "Give permissions to API exe"
 	chmod +x gpjc-api
+
+remove_image:
+	@docker image inspect bis_app:latest &> /dev/null && docker image rm bis_app:latest || true
+
+make run-docker: remove_image
+	docker-compose up --build -d
