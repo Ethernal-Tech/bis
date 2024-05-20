@@ -1,7 +1,7 @@
 package main
 
 import (
-	"bisgo/DB"
+	"bisgo/db"
 	"time"
 
 	"github.com/alexedwards/scs/v2"
@@ -10,11 +10,11 @@ import (
 
 type application struct {
 	sessionManager *scs.SessionManager
-	db             *DB.DBWrapper
+	db             *db.DBWrapper
 }
 
 func (app *application) dependencies() {
-	app.db = DB.InitDb()
+	app.db = db.InitDb()
 
 	sessionManager := scs.New()
 	sessionManager.Store = memstore.New()

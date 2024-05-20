@@ -1,7 +1,8 @@
 package main
 
 import (
-	"bisgo/DB"
+	"bisgo/common"
+	"bisgo/db"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -53,7 +54,7 @@ func (app *application) login(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	centralBankEmploye := app.db.IsCentralBankEmploye(user.Username)
+	centralBankEmploye := app.db.IsCentralBankEmployee(user.Username)
 
 	app.sessionManager.Put(r.Context(), "inside", "yes")
 	app.sessionManager.Put(r.Context(), "username", user.Name)
@@ -79,10 +80,9 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	}
 	viewData := map[string]any{}
 
-	var transactions []DB.TransactionModel
+	var transactions []db.TransactionModel
 	if app.sessionManager.GetBool(r.Context(), "centralBankEmployee") == true {
 		var countryId int
-		transactions, countryId = app.db.GetTransactionsForCentralbank(app.sessionManager.Get(r.Context(), "bankId").(uint64), "")
 		viewData["countryId"] = countryId
 	} else {
 		transactions = app.db.GetTransactionsForAddress(app.sessionManager.Get(r.Context(), "bankId").(uint64), "")
@@ -118,7 +118,7 @@ func (app *application) searchTransaction(w http.ResponseWriter, r *http.Request
 	searchValue := r.URL.Query().Get("searchValue")
 
 	viewData := map[string]any{}
-	var transactions []DB.TransactionModel
+	var transactions []db.TransactionModel
 	if app.sessionManager.GetBool(r.Context(), "centralBankEmployee") == true {
 		var countryId int
 		transactions, countryId = app.db.GetTransactionsForCentralbank(app.sessionManager.Get(r.Context(), "bankId").(uint64), searchValue)
@@ -195,7 +195,7 @@ func (app *application) addTransaction(w http.ResponseWriter, r *http.Request) {
 		transactionType, _ := strconv.Atoi(r.Form.Get("type"))
 		loanId, _ := strconv.Atoi(strings.Replace(r.Form.Get("loanId"), ",", "", -1))
 
-		transaction := DB.Transaction{
+		transaction := common.Transaction{
 			OriginatorBank:  uint64(originatorBank),
 			BeneficiaryBank: uint64(beneficiaryBank),
 			Sender:          sender,
@@ -358,7 +358,7 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 
 		policies := app.db.GetPolices(app.db.GetBankId(transaction.BeneficiaryBank), transaction.TypeId)
 
-		var CFMpolicy DB.PolicyModel
+		var CFMpolicy db.PolicyModel
 		CFMpolicy.Id = 0
 		CFMexists := false
 		SCLexists := false
@@ -497,14 +497,14 @@ func (app *application) transactionHistory(w http.ResponseWriter, r *http.Reques
 	policies := app.db.GetPolices(bankId, transaction.TypeId)
 
 	policiesAndStatuses := []struct {
-		Policy DB.PolicyModel
+		Policy db.PolicyModel
 		Status int
 	}{}
 
 	for _, onePolicy := range policies {
 		currentStatus := app.db.GetTransactionPolicyStatus(uint64(transactionId), int(onePolicy.Id))
 		policiesAndStatuses = append(policiesAndStatuses, struct {
-			Policy DB.PolicyModel
+			Policy db.PolicyModel
 			Status int
 		}{onePolicy, currentStatus})
 	}
@@ -541,7 +541,7 @@ func (app *application) transactionHistory(w http.ResponseWriter, r *http.Reques
 func (app *application) submitTransactionProof(w http.ResponseWriter, r *http.Request) {
 	body, _ := io.ReadAll(r.Body)
 
-	var messageData DB.TransactionProofRequest
+	var messageData db.TransactionProofRequest
 	if err := json.Unmarshal(body, &messageData); err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error 1", 500)

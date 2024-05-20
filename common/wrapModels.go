@@ -1,4 +1,4 @@
-package DB
+package common
 
 import "time"
 
