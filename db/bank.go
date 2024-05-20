@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-func (wrapper *DBWrapper) Login(username, password string) *BankEmployeeModel {
+func (wrapper *DBWrapper) Login(username, password string) *common.BankEmployeeModel {
 	query := `SELECT [BankEmployee].Name Name, Username, Password, BankId, [Bank].Name BankName
 			  FROM [dbo].[BankEmployee], [dbo].[Bank]
 			  WHERE BankId = [Bank].Id AND Username = @p1 AND Password = @p2`
@@ -18,7 +18,7 @@ func (wrapper *DBWrapper) Login(username, password string) *BankEmployeeModel {
 	defer rows.Close()
 
 	if rows.Next() {
-		var user BankEmployeeModel
+		var user common.BankEmployeeModel
 		if err := rows.Scan(&user.Name, &user.Username, &user.Password, &user.BankId, &user.BankName); err != nil {
 			log.Println("Error scanning row:", err)
 			return nil
@@ -122,7 +122,7 @@ func (wrapper *DBWrapper) GetBank(bankId uint64) common.Bank {
 	return bank
 }
 
-func (wrapper *DBWrapper) GetBanks() []BankModel {
+func (wrapper *DBWrapper) GetBanks() []common.BankModel {
 	query := `SELECT b.Id, b.Name, c.Name
 					From Bank b
 					JOIN Country as c ON c.Id = b.CountryId`
@@ -134,9 +134,9 @@ func (wrapper *DBWrapper) GetBanks() []BankModel {
 
 	defer rows.Close()
 
-	banks := []BankModel{}
+	banks := []common.BankModel{}
 	for rows.Next() {
-		var bank BankModel
+		var bank common.BankModel
 		if err := rows.Scan(&bank.Id, &bank.Name, &bank.Country); err != nil {
 			log.Fatal(err)
 		}

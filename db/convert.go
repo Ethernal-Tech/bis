@@ -1,6 +1,10 @@
 package db
 
-func convertTxStatusDBtoPR(transaction *TransactionModel) *TransactionModel {
+import (
+	"bisgo/common"
+)
+
+func convertTxStatusDBtoPR(transaction *common.TransactionModel) *common.TransactionModel {
 	switch transaction.Status {
 	case "TransactionCreated":
 		transaction.Status = "CREATED"
@@ -23,7 +27,7 @@ func convertTxStatusDBtoPR(transaction *TransactionModel) *TransactionModel {
 }
 
 //nolint:unused
-func convertTxStatusPRtoDB(transaction *TransactionModel) *TransactionModel {
+func convertTxStatusPRtoDB(transaction *common.TransactionModel) *common.TransactionModel {
 	switch transaction.Status {
 	case "CREATED":
 		transaction.Status = "TransactionCreated"
@@ -45,7 +49,7 @@ func convertTxStatusPRtoDB(transaction *TransactionModel) *TransactionModel {
 	return transaction
 }
 
-func convertHistoryStatusDBtoPR(history *StatusHistoryModel) *StatusHistoryModel {
+func convertHistoryStatusDBtoPR(history *common.StatusHistoryModel) *common.StatusHistoryModel {
 	switch history.Name {
 	case "TransactionCreated":
 		history.Name = "CREATED"
@@ -68,7 +72,7 @@ func convertHistoryStatusDBtoPR(history *StatusHistoryModel) *StatusHistoryModel
 }
 
 //nolint:unused
-func convertHistoryStatusPRtoDB(history *StatusHistoryModel) *StatusHistoryModel {
+func convertHistoryStatusPRtoDB(history *common.StatusHistoryModel) *common.StatusHistoryModel {
 	switch history.Name {
 	case "CREATED":
 		history.Name = "TransactionCreated"

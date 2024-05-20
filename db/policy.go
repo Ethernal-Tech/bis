@@ -49,7 +49,7 @@ func (wrapper *DBWrapper) GetPolicyById(policyID int) common.Policy {
 	return policy
 }
 
-func (wrapper *DBWrapper) GetPolices(bankId uint64, transactionTypeId int) []PolicyModel {
+func (wrapper *DBWrapper) GetPolices(bankId uint64, transactionTypeId int) []common.PolicyModel {
 	query := `SELECT p.Id, c.Name, p.CountryId, p.Code, p.Name, ttp.Amount, ttp.Checklist
 					FROM TransactionTypePolicy ttp
 					JOIN Policy as p ON ttp.PolicyId = p.Id
@@ -66,9 +66,9 @@ func (wrapper *DBWrapper) GetPolices(bankId uint64, transactionTypeId int) []Pol
 
 	defer rows.Close()
 
-	policies := []PolicyModel{}
+	policies := []common.PolicyModel{}
 	for rows.Next() {
-		var policy PolicyModel
+		var policy common.PolicyModel
 		if err := rows.Scan(&policy.Id, &policy.Country, &policy.CountryId, &policy.Code, &policy.Name, &policy.Amount, &policy.Checklist); err != nil {
 			log.Fatal(err)
 		}
@@ -84,7 +84,7 @@ func (wrapper *DBWrapper) GetPolices(bankId uint64, transactionTypeId int) []Pol
 	return policies
 }
 
-func (wrapper *DBWrapper) PoliciesFromCountry(bankId uint64) []PolicyModel {
+func (wrapper *DBWrapper) PoliciesFromCountry(bankId uint64) []common.PolicyModel {
 	query := `SELECT p.Id, c.Name, p.Code, p.Name, ttp.Amount, ttp.Checklist, tt.Name
 				FROM TransactionTypePolicy ttp
 				JOIN Policy as p ON ttp.PolicyId = p.Id
@@ -100,9 +100,9 @@ func (wrapper *DBWrapper) PoliciesFromCountry(bankId uint64) []PolicyModel {
 
 	defer rows.Close()
 
-	policies := []PolicyModel{}
+	policies := []common.PolicyModel{}
 	for rows.Next() {
-		var policy PolicyModel
+		var policy common.PolicyModel
 		if err := rows.Scan(&policy.Id, &policy.Country, &policy.Code, &policy.Name, &policy.Amount, &policy.Checklist, &policy.TransactionType); err != nil {
 			log.Fatal(err)
 		}
@@ -118,7 +118,7 @@ func (wrapper *DBWrapper) PoliciesFromCountry(bankId uint64) []PolicyModel {
 	return policies
 }
 
-func (wrapper *DBWrapper) GetPolicy(bankCountry string, policyId uint64) PolicyModel {
+func (wrapper *DBWrapper) GetPolicy(bankCountry string, policyId uint64) common.PolicyModel {
 	query := `SELECT p.Id, c.Name, p.CountryId, p.Code, p.Name, ttp.Amount, ttp.Checklist
 					FROM TransactionTypePolicy ttp
 					JOIN Policy as p ON ttp.PolicyId = p.Id
@@ -135,7 +135,7 @@ func (wrapper *DBWrapper) GetPolicy(bankCountry string, policyId uint64) PolicyM
 
 	defer rows.Close()
 
-	var policy PolicyModel
+	var policy common.PolicyModel
 	for rows.Next() {
 		if err := rows.Scan(&policy.Id, &policy.Country, &policy.CountryId, &policy.Code, &policy.Name, &policy.Amount, &policy.Checklist); err != nil {
 			log.Fatal(err)

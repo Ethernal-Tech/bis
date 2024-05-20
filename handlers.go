@@ -2,7 +2,6 @@ package main
 
 import (
 	"bisgo/common"
-	"bisgo/db"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -80,9 +79,10 @@ func (app *application) home(w http.ResponseWriter, r *http.Request) {
 	}
 	viewData := map[string]any{}
 
-	var transactions []db.TransactionModel
-	if app.sessionManager.GetBool(r.Context(), "centralBankEmployee") == true {
+	var transactions []common.TransactionModel
+	if app.sessionManager.GetBool(r.Context(), "centralBankEmployee") {
 		var countryId int
+		transactions, countryId = app.db.GetTransactionsForCentralbank(app.sessionManager.Get(r.Context(), "bankId").(uint64), "")
 		viewData["countryId"] = countryId
 	} else {
 		transactions = app.db.GetTransactionsForAddress(app.sessionManager.Get(r.Context(), "bankId").(uint64), "")
@@ -118,8 +118,8 @@ func (app *application) searchTransaction(w http.ResponseWriter, r *http.Request
 	searchValue := r.URL.Query().Get("searchValue")
 
 	viewData := map[string]any{}
-	var transactions []db.TransactionModel
-	if app.sessionManager.GetBool(r.Context(), "centralBankEmployee") == true {
+	var transactions []common.TransactionModel
+	if app.sessionManager.GetBool(r.Context(), "centralBankEmployee") {
 		var countryId int
 		transactions, countryId = app.db.GetTransactionsForCentralbank(app.sessionManager.Get(r.Context(), "bankId").(uint64), searchValue)
 		viewData["countryId"] = countryId
@@ -358,7 +358,7 @@ func (app *application) confirmTransaction(w http.ResponseWriter, r *http.Reques
 
 		policies := app.db.GetPolices(app.db.GetBankId(transaction.BeneficiaryBank), transaction.TypeId)
 
-		var CFMpolicy db.PolicyModel
+		var CFMpolicy common.PolicyModel
 		CFMpolicy.Id = 0
 		CFMexists := false
 		SCLexists := false
@@ -497,14 +497,14 @@ func (app *application) transactionHistory(w http.ResponseWriter, r *http.Reques
 	policies := app.db.GetPolices(bankId, transaction.TypeId)
 
 	policiesAndStatuses := []struct {
-		Policy db.PolicyModel
+		Policy common.PolicyModel
 		Status int
 	}{}
 
 	for _, onePolicy := range policies {
 		currentStatus := app.db.GetTransactionPolicyStatus(uint64(transactionId), int(onePolicy.Id))
 		policiesAndStatuses = append(policiesAndStatuses, struct {
-			Policy db.PolicyModel
+			Policy common.PolicyModel
 			Status int
 		}{onePolicy, currentStatus})
 	}
@@ -541,7 +541,7 @@ func (app *application) transactionHistory(w http.ResponseWriter, r *http.Reques
 func (app *application) submitTransactionProof(w http.ResponseWriter, r *http.Request) {
 	body, _ := io.ReadAll(r.Body)
 
-	var messageData db.TransactionProofRequest
+	var messageData common.TransactionProofRequest
 	if err := json.Unmarshal(body, &messageData); err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error 1", 500)

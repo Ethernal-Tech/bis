@@ -108,7 +108,7 @@ func (wrapper *DBWrapper) GetTransactionTypes() []common.TransactionType {
 	return types
 }
 
-func (wrapper *DBWrapper) GetTransactionsForAddress(address uint64, searchValue string) []TransactionModel {
+func (wrapper *DBWrapper) GetTransactionsForAddress(address uint64, searchValue string) []common.TransactionModel {
 	query := `SELECT t.Id
 					,ob.Name
 					,bb.Name
@@ -136,9 +136,9 @@ func (wrapper *DBWrapper) GetTransactionsForAddress(address uint64, searchValue 
 	}
 	defer rows.Close()
 
-	transactions := []TransactionModel{}
+	transactions := []common.TransactionModel{}
 	for rows.Next() {
-		var trnx TransactionModel
+		var trnx common.TransactionModel
 		if err := rows.Scan(&trnx.Id, &trnx.OriginatorBank, &trnx.BeneficiaryBank, &trnx.SenderGlobalIdentifier, &trnx.ReceiverGlobalIdentifier, &trnx.SenderName, &trnx.ReceiverName, &trnx.Currency, &trnx.Amount, &trnx.Status); err != nil {
 			log.Println("Error scanning row:", err)
 			return nil
@@ -149,7 +149,7 @@ func (wrapper *DBWrapper) GetTransactionsForAddress(address uint64, searchValue 
 	return transactions
 }
 
-func (wrapper *DBWrapper) GetTransactionsForCentralbank(bankId uint64, searchValue string) ([]TransactionModel, int) {
+func (wrapper *DBWrapper) GetTransactionsForCentralbank(bankId uint64, searchValue string) ([]common.TransactionModel, int) {
 	query := `SELECT CountryId FROM Bank
 			Where Id = @p1`
 
@@ -164,7 +164,7 @@ func (wrapper *DBWrapper) GetTransactionsForCentralbank(bankId uint64, searchVal
 	for rows.Next() {
 		if err = rows.Scan(&centralBankCountryId); err != nil {
 			log.Println("Error scanning row:", err)
-			return []TransactionModel{}, 0
+			return []common.TransactionModel{}, 0
 		}
 	}
 
@@ -197,14 +197,14 @@ func (wrapper *DBWrapper) GetTransactionsForCentralbank(bankId uint64, searchVal
 	}
 	defer rows.Close()
 
-	transactions := []TransactionModel{}
+	transactions := []common.TransactionModel{}
 	for rows.Next() {
-		var trnx TransactionModel
+		var trnx common.TransactionModel
 		if err = rows.Scan(&trnx.Id, &trnx.OriginatorBank, &trnx.OriginatorBankCountryId, &trnx.BeneficiaryBank,
 			&trnx.SenderGlobalIdentifier, &trnx.ReceiverGlobalIdentifier, &trnx.SenderName, &trnx.ReceiverName,
 			&trnx.Currency, &trnx.Amount, &trnx.Status); err != nil {
 			log.Println("Error scanning row:", err)
-			return []TransactionModel{}, 0
+			return []common.TransactionModel{}, 0
 		}
 
 		trnx = *convertTxStatusDBtoPR(&trnx)
@@ -213,7 +213,7 @@ func (wrapper *DBWrapper) GetTransactionsForCentralbank(bankId uint64, searchVal
 	return transactions, centralBankCountryId
 }
 
-func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) TransactionModel {
+func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) common.TransactionModel {
 	query := `SELECT t.Id
 					,ob.Name
 					,bb.Name
@@ -241,7 +241,7 @@ func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) Transactio
 		log.Fatal(err)
 	}
 
-	var trnx TransactionModel
+	var trnx common.TransactionModel
 	if rows.Next() {
 		if err := rows.Scan(&trnx.Id, &trnx.OriginatorBank, &trnx.BeneficiaryBank, &trnx.SenderGlobalIdentifier, &trnx.ReceiverGlobalIdentifier, &trnx.SenderName, &trnx.ReceiverName, &trnx.Currency, &trnx.Amount, &trnx.LoanId, &trnx.TypeCode, &trnx.Type, &trnx.TypeId); err != nil {
 			log.Fatal(err)
@@ -264,7 +264,7 @@ func (wrapper *DBWrapper) GetTransactionHistory(transactionId uint64) Transactio
 	defer rows.Close()
 
 	for rows.Next() {
-		var statusHistory StatusHistoryModel
+		var statusHistory common.StatusHistoryModel
 		if err := rows.Scan(&statusHistory.Name, &statusHistory.Date); err != nil {
 			log.Fatal(err)
 		}
