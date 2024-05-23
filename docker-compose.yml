@@ -19,11 +19,26 @@ services:
   app:
     build: .
     container_name: app
+    environment:
+      - DB_ADDRESS=sql-database
+      - DB_PORT=1433
+      - DB_NAME=BIS
+      - DB_PASSWORD=Ethernal123
+      - SERVER_PORT=4000
     ports:
       - "4000:4000"
     depends_on:
       sql-database:
         condition: service_started
+    networks:
+      - my-network
+
+  p2pmock:
+    build:
+      context: ./p2pmock
+    container_name: p2pmock
+    ports:
+      - "5000:5000"
     networks:
       - my-network
 

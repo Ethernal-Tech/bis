@@ -1,7 +1,9 @@
 package DB
 
 import (
+	"bisgo/config"
 	"database/sql"
+	"fmt"
 	"log"
 	"runtime"
 	"strconv"
@@ -22,19 +24,24 @@ func InitDb() *DBWrapper {
 	)
 
 	if runtime.GOOS == "linux" {
-		sqldb, err = sql.Open("sqlserver", "server=sql-database;user id=SA;password=Ethernal123;port=1433;database=BIS")
+		sqldb, err = sql.Open("sqlserver", fmt.Sprintf("server=%s;user id=SA;password=%s;port=%s;database=%s", config.ResolveDBAddress(), config.ResolveDBPassword(), config.ResolveDBPort(), config.ResolveDBName()))
 	} else {
 		// Windows authentication
-		sqldb, err = sql.Open("sqlserver", "sqlserver://@localhost:1434?database=BIS&trusted_connection=yes")
+		sqldb, err = sql.Open("sqlserver", fmt.Sprintf("sqlserver://@localhost:1434?database=%s&trusted_connection=yes", config.ResolveDBName()))
 	}
 
 	if err != nil {
 		log.Panic(err)
 	}
 
-	err = sqldb.Ping()
-	if err != nil {
-		log.Panic(err)
+	numOfRetries := 60
+	for i := 0; i < numOfRetries; i++ {
+		err = sqldb.Ping()
+		if err != nil {
+			log.Print(err)
+		}
+
+		time.Sleep(time.Second)
 	}
 
 	wrapper := &DBWrapper{}

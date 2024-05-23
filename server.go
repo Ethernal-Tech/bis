@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bisgo/config"
 	"fmt"
 	"log"
 	"net/http"
@@ -46,8 +47,7 @@ func main() {
 	app.dependencies()
 
 	server := &http.Server{
-		//Addr:    ":443",
-		Addr:    "0.0.0.0:4000",
+		Addr:    config.ResolveServerPort(),
 		Handler: app.routes(),
 	}
 

@@ -19,8 +19,9 @@ fetch-releases:
 	@echo "Give permissions to API exe"
 	chmod +x gpjc-api
 
-remove_image:
+remove_images:
 	@docker image inspect bis_app:latest &> /dev/null && docker image rm bis_app:latest || true
+	@docker image inspect bis_p2pmock:latest &> /dev/null && docker image rm bis_app:latest || true
 
-make run-docker: remove_image
+make run-docker: remove_images
 	docker-compose up --build -d
