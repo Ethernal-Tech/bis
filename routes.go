@@ -31,5 +31,7 @@ func (app *application) routes() http.Handler {
 
 	router.HandlerFunc(http.MethodPost, "/api/submitTransactionProof", app.submitTransactionProof)
 
+	router.HandlerFunc(http.MethodPost, "/api/createTx", app.createTx)
+
 	return DenyAccessToHTML(app.sessionManager.LoadAndSave(router))
 }

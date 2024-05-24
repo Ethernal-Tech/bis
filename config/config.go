@@ -2,7 +2,46 @@ package config
 
 import "os"
 
-type Config struct{}
+type Config struct {
+	GpjcApiAddress    string
+	GpjcClientUrl     string
+	P2PNodeAPIAddress string
+}
+
+func CreateConfgi() *Config {
+	return &Config{
+		GpjcApiAddress:    resolveGpjcApiAddress(),
+		GpjcClientUrl:     resolveGpjcClientUrl(),
+		P2PNodeAPIAddress: resolveP2PNodeAPIAddress(),
+	}
+}
+
+func resolveP2PNodeAPIAddress() string {
+	env_address := os.Getenv("P2P_NODE_ADDRESS")
+	if env_address == "" {
+		return "localhost:4321"
+	}
+
+	return env_address
+}
+
+func resolveGpjcApiAddress() string {
+	env_address := os.Getenv("GPJC_API")
+	if env_address == "" {
+		return "localhost"
+	}
+
+	return env_address
+}
+
+func resolveGpjcClientUrl() string {
+	env_url := os.Getenv("GPJC")
+	if env_url == "" {
+		return "0.0.0.0"
+	}
+
+	return env_url
+}
 
 func ResolveDBAddress() string {
 	env_address := os.Getenv("DB_ADDRESS")

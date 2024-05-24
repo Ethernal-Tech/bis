@@ -2,6 +2,7 @@ package main
 
 import (
 	"bisgo/DB"
+	"bisgo/config"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -204,6 +205,49 @@ func (app *application) addTransaction(w http.ResponseWriter, r *http.Request) {
 			Amount:          amount,
 			TypeId:          transactionType,
 			LoanId:          loanId,
+		}
+
+		// Call P2P createTx of beneficiary bank
+		transactionDto := config.TransactionDTO{
+			TransactionID:                   "0",
+			SenderLei:                       "",
+			SenderName:                      r.Form.Get("sender"),
+			ReceiverLei:                     "",
+			ReceiverName:                    r.Form.Get("receiver"),
+			OriginatorBankGlobalIdentifier:  app.db.GetBankGlobalIdentifier(int(originatorBank)),
+			BeneficiaryBankGlobalIdentifier: app.db.GetBankGlobalIdentifier(beneficiaryBank),
+			PaymentType:                     "",
+			TransactionType:                 fmt.Sprint(transactionType),
+			Amount:                          uint64(amount),
+			Currency:                        currency,
+			SwiftBICCode:                    "",
+			LoanID:                          uint64(loanId),
+		}
+
+		jsonObj, err := json.Marshal(transactionDto)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error parsing json object", 500)
+		}
+
+		beneficiaryBankURL := os.Getenv("BENEFICIARY_BANK_URL")
+		reqObj := config.PassThruRequest{
+			PeerID:  "",
+			URI:     strings.Join([]string{"http:/", beneficiaryBankURL, "api", "createTx"}, "/"),
+			Payload: string(jsonObj),
+		}
+
+		reqBytes, err := json.Marshal(reqObj)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error parsing req json object", 500)
+		}
+
+		p2pNodeURL := os.Getenv("P2P_NODE_URL")
+		err = config.SendPassthruMessage(p2pNodeURL, reqBytes)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error sending the tx to beneficiary", 500)
 		}
 
 		transactionID := app.db.InsertTransaction(transaction)
@@ -582,6 +626,45 @@ func (app *application) submitTransactionProof(w http.ResponseWriter, r *http.Re
 	} else {
 		app.db.UpdateTransactionState(uint64(transactionId), 8)
 	}
+
+	err = json.NewEncoder(w).Encode("Ok")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error 2", 500)
+		return
+	}
+}
+
+func (app *application) createTx(w http.ResponseWriter, r *http.Request) {
+	body, _ := io.ReadAll(r.Body)
+
+	var messageData config.TransactionDTO
+	if err := json.Unmarshal(body, &messageData); err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error 1", 500)
+		return
+	}
+
+	transactionType, err := strconv.Atoi(messageData.TransactionType)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error 1", 500)
+		return
+	}
+
+	transaction := DB.Transaction{
+		OriginatorBank:  app.db.GetBankIdByIdentifier(messageData.OriginatorBankGlobalIdentifier),
+		BeneficiaryBank: app.db.GetBankIdByIdentifier(messageData.BeneficiaryBankGlobalIdentifier),
+		Sender:          app.db.GetBankClientId(messageData.SenderName),
+		Receiver:        app.db.GetBankClientId(messageData.ReceiverName),
+		Currency:        messageData.Currency,
+		Amount:          int(messageData.Amount),
+		TypeId:          transactionType,
+		LoanId:          int(messageData.LoanID),
+	}
+
+	transactionID := app.db.InsertTransaction(transaction)
+	app.db.UpdateTransactionState(transactionID, 1)
 
 	err = json.NewEncoder(w).Encode("Ok")
 	if err != nil {

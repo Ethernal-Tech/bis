@@ -899,3 +899,47 @@ func (wrapper *DBWrapper) UpdatePolicyChecklist(policyId uint64, checklist strin
 		log.Fatal(err)
 	}
 }
+
+//------------------------------------------------------------------------------------------------------
+
+func (wrapper *DBWrapper) GetBankIdByIdentifier(identifier string) uint64 {
+	query := `SELECT Id FROM [Bank] WHERE GlobalIdentifier = @p1`
+
+	rows, err := wrapper.db.Query(query, sql.Named("p1", identifier))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer rows.Close()
+
+	var bankId uint64
+	for rows.Next() {
+		if err := rows.Scan(&bankId); err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	return bankId
+}
+
+func (wrapper *DBWrapper) GetBankGlobalIdentifier(id int) string {
+	query := `SELECT GlobalIdentifier FROM [Bank] WHERE Id = @p1`
+
+	rows, err := wrapper.db.Query(query, sql.Named("p1", id))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer rows.Close()
+
+	var bankGlobalIdentifier string
+	for rows.Next() {
+		if err := rows.Scan(&bankGlobalIdentifier); err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	return bankGlobalIdentifier
+}
