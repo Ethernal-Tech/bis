@@ -1,4 +1,4 @@
-package DB
+package models
 
 import "time"
 
@@ -12,23 +12,23 @@ type BankEmployeeModel struct {
 }
 
 type TransactionModel struct {
-	Id                        uint64
-	OriginatorBank            string
-	BeneficiaryBank           string
-	SenderGlobalIdentifier    string
-	ReceiverGlobalIdedntifier string
-	SenderName                string
-	ReceiverName              string
-	Currency                  string
-	Amount                    int
-	LoanId                    int
-	Type                      string
-	TypeCode                  string
-	TypeId                    int
-	Status                    string
-	StatusHistory             []StatusHistoryModel
-	Policies                  []string
-	OriginatorBankCountryId   int
+	Id                       uint64
+	OriginatorBank           string
+	BeneficiaryBank          string
+	SenderGlobalIdentifier   string
+	ReceiverGlobalIdentifier string
+	SenderName               string
+	ReceiverName             string
+	Currency                 string
+	Amount                   int
+	LoanId                   int
+	Type                     string
+	TypeCode                 string
+	TypeId                   int
+	Status                   string
+	StatusHistory            []StatusHistoryModel
+	Policies                 []string
+	OriginatorBankCountryId  int
 }
 
 type StatusHistoryModel struct {

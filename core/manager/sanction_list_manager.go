@@ -1,4 +1,4 @@
-package main
+package manager
 
 import (
 	"encoding/csv"
@@ -9,7 +9,42 @@ import (
 	"time"
 )
 
-func getNewestSanctionsList() (string, error) {
+// SanctionListManager offers functionalities for managing updates to local public sanction list from Open Sanctions.
+// Open Sanction: https://www.opensanctions.org/
+type SanctionListManager struct{}
+
+// CreateSanctionListManager function creates new SanctionListManager that can be used
+// for managing local public sanction list.
+func CreateSanctionListManager() *SanctionListManager {
+	var sanctionListManager = &SanctionListManager{}
+
+	// Initialize sanction list folder
+	if _, err := os.Stat("./sanction-lists"); err != nil {
+		if os.IsNotExist(err) {
+			err = os.Mkdir("sanction-lists", 0777)
+			if err != nil {
+				panic(fmt.Sprint("error while creating sanction-lists folder %w", err.Error()))
+			}
+		} else {
+			panic(fmt.Sprint("error while searching for sanction-lists folder %w", err.Error()))
+		}
+	}
+
+	// Initialize sanction list
+	if _, err := os.Stat("./sanction-lists/UN_List.csv"); err != nil {
+		if os.IsNotExist(err) {
+			if _, err := sanctionListManager.GetNewestSanctionsList(); err != nil {
+				panic(fmt.Sprint("error while downloading latest sanction list %w", err.Error()))
+			}
+		} else {
+			panic(fmt.Sprint("error while searching for sanction list %w", err.Error()))
+		}
+	}
+
+	return sanctionListManager
+}
+
+func (*SanctionListManager) GetNewestSanctionsList() (string, error) {
 	// Open sanctions url contains date
 	// Start from today's date
 	currentDate := time.Now()
