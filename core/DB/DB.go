@@ -2,6 +2,7 @@ package DB
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"runtime"
 
@@ -19,7 +20,7 @@ type DBHandler struct {
 //
 // 1) linux
 // 2) windows
-func CreateDBHandler() *DBHandler {
+func CreateDBHandler(server string, password string, port string, database string) *DBHandler {
 	var (
 		db  *sql.DB
 		err error
@@ -27,10 +28,10 @@ func CreateDBHandler() *DBHandler {
 
 	switch runtime.GOOS {
 	case "linux":
-		db, err = sql.Open("sqlserver", "server=localhost;user id=SA;password=Ethernal123;port=1433;database=BIS")
+		db, err = sql.Open("sqlserver", fmt.Sprintf("server=%s;user id=SA;password=%s;port=%s;database=%s", server, password, port, database))
 	case "windows":
 		// windows authentication
-		db, err = sql.Open("sqlserver", "sqlserver://@localhost:1434?database=BIS&trusted_connection=yes")
+		db, err = sql.Open("sqlserver", fmt.Sprintf("sqlserver://@localhost:1434?database=%s&trusted_connection=yes", database))
 	default:
 		log.Fatalf("\033[31m"+"DB handler is currently not supported for %s operating system."+"\033[31m", runtime.GOOS)
 	}

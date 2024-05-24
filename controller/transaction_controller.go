@@ -7,7 +7,6 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"text/template"
@@ -255,18 +254,18 @@ func (controller *TransactionController) ConfirmTransaction(w http.ResponseWrite
 		var jsonPayloadClient []byte
 
 		if country == "Malaysia" {
-			urlServer = "http://" + os.Getenv("API_MY") + ":9090/api/start-server"
+			urlServer = "http://" + controller.Config.GpjcApiAddress + ":9090/api/start-server"
 			jsonPayloadServer = []byte(fmt.Sprintf(`{"tx_id": "%d", "policy_id": "%d"}`, transactionId, SCLpolicyId))
 
-			urlClient = "http://" + os.Getenv("API_SG") + ":9090/api/start-client"
-			jsonPayloadClient = []byte(fmt.Sprintf(`{"tx_id": "%d", "receiver": "%s", "to": "%s:10501"}`, transactionId, transaction.ReceiverName, os.Getenv("GPJC_MY")))
+			urlClient = "http://" + controller.Config.GpjcApiAddress + ":9090/api/start-client"
+			jsonPayloadClient = []byte(fmt.Sprintf(`{"tx_id": "%d", "receiver": "%s", "to": "%s:10501"}`, transactionId, transaction.ReceiverName, controller.Config.GpjcClientUrl))
 
 		} else if country == "Singapore" {
-			urlServer = "http://" + os.Getenv("API_SG") + ":9090/api/start-server"
+			urlServer = "http://" + controller.Config.GpjcApiAddress + ":9090/api/start-server"
 			jsonPayloadServer = []byte(fmt.Sprintf(`{"tx_id": "%d", "policy_id": "%d"}`, transactionId, SCLpolicyId))
 
-			urlClient = "http://" + os.Getenv("API_MY") + ":9090/api/start-client"
-			jsonPayloadClient = []byte(fmt.Sprintf(`{"tx_id": "%d", "receiver": "%s", "to": "%s:10501"}`, transactionId, transaction.ReceiverName, os.Getenv("GPJC_SG")))
+			urlClient = "http://" + controller.Config.GpjcApiAddress + ":9090/api/start-client"
+			jsonPayloadClient = []byte(fmt.Sprintf(`{"tx_id": "%d", "receiver": "%s", "to": "%s:10501"}`, transactionId, transaction.ReceiverName, controller.Config.GpjcClientUrl))
 
 		} else {
 			log.Println("Error in SCL")

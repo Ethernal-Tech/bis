@@ -12,13 +12,15 @@ type Core struct {
 	DB                  *DB.DBHandler
 	SessionManager      *manager.SessionManager
 	SanctionListManager *manager.SanctionListManager
+	Config              *config.Config
 }
 
 // CreateCore function initializes and returns a new instance of the Core component.
 func CreateCore(config *config.Config) *Core {
 	return &Core{
-		DB:                  DB.CreateDBHandler(),
+		DB:                  DB.CreateDBHandler(config.ResolveDBAddress(), config.ResolveDBPassword(), config.ResolveDBPort(), config.ResolveDBName()),
 		SessionManager:      manager.CreateSessionManager(),
 		SanctionListManager: manager.CreateSanctionListManager(),
+		Config:              config,
 	}
 }
