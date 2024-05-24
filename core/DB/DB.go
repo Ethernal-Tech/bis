@@ -4,6 +4,8 @@ import (
 	"database/sql"
 	"log"
 	"runtime"
+
+	_ "github.com/denisenkom/go-mssqldb"
 )
 
 // DBHandler represents a wrapper around the standard library's sql.DB type.
