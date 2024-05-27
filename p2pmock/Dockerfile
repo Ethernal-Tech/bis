@@ -4,12 +4,6 @@ FROM golang:1.22.3-alpine AS builder
 # Set the working directory inside the container
 WORKDIR /app
 
-# # Copy the Go modules manifests
-# COPY go.mod go.sum ./
-
-# # Download the Go modules
-# RUN go mod download
-
 # Copy the source code
 COPY . .
 

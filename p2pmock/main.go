@@ -25,8 +25,24 @@ func main() {
 	r.GET("/v1/p2p/peers", func(c *gin.Context) {
 		peers := []Peer{
 			{
-				Name:   "some_name",
-				PeerID: "some_hash",
+				// JPM Chase
+				Name:   "984500653R409CC5AB28",
+				PeerID: "hash1",
+			},
+			{
+				// MAS
+				Name:   "54930035WQZLGC45RZ35",
+				PeerID: "hash2",
+			},
+			{
+				// HLB
+				Name:   "549300BUPYUQGB5BFX94",
+				PeerID: "hash3",
+			},
+			{
+				// BNM
+				Name:   "549300NROGNBV2T1GS07",
+				PeerID: "hash3",
 			},
 		}
 		c.JSON(http.StatusOK, peers)
