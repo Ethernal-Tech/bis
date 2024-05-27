@@ -1,6 +1,7 @@
 # Use the official Golang image as a base
 FROM golang:1.19
 
+COPY common /app/common
 COPY config /app/config
 COPY controller /app/controller
 COPY core /app/core
