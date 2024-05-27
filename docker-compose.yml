@@ -23,13 +23,15 @@ services:
         ]
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 5
       start_period: 30s
 
   app1:
     build:
       context: .
       dockerfile: image/Dockerfile
+      args:
+        - DNS_NAME=app1
     container_name: app1
     environment:
       - DB_ADDRESS=sql-database1
@@ -39,6 +41,7 @@ services:
       - SERVER_PORT=4000
       - BENEFICIARY_BANK_URL=app2:4000
       - P2P_NODE_URL=p2pmock:5000
+      - GPJC_API=app1
     ports:
       - "4001:4000"
     depends_on:
@@ -69,13 +72,15 @@ services:
         ]
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 5
       start_period: 30s
 
   app2:
     build:
       context: .
       dockerfile: image/Dockerfile
+      args:
+        - DNS_NAME=app2
     container_name: app2
     environment:
       - DB_ADDRESS=sql-database2
@@ -85,6 +90,7 @@ services:
       - SERVER_PORT=4000
       - BENEFICIARY_BANK_URL=app1:4000
       - P2P_NODE_URL=p2pmock:5000
+      - GPJC_API=app2
     ports:
       - "4002:4000"
     depends_on:
