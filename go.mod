@@ -5,7 +5,6 @@ go 1.19
 require (
 	github.com/alexedwards/scs/v2 v2.5.1
 	github.com/denisenkom/go-mssqldb v0.12.3
-	github.com/joho/godotenv v1.5.1
 	github.com/julienschmidt/httprouter v1.3.0
 )
 
