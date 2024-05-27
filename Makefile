@@ -18,3 +18,9 @@ fetch-releases:
 	curl -L $(GPJC_API_RELEASE_ULR) -o gpjc-api
 	@echo "Give permissions to API exe"
 	chmod +x gpjc-api
+
+run-docker:
+	docker-compose up --build -d
+
+stop-docker: 
+	docker-compose down --rmi local
