@@ -254,14 +254,14 @@ func (controller *TransactionController) ConfirmTransaction(w http.ResponseWrite
 		var jsonPayloadClient []byte
 
 		if country == "Malaysia" {
-			urlServer = "http://" + controller.Config.GpjcApiAddress + ":9090/api/start-server"
+			urlServer = "http://" + controller.Config.GpjcApiAddress[:len(controller.Config.GpjcApiAddress)-1] + "1" + ":9090/api/start-server"
 			jsonPayloadServer = []byte(fmt.Sprintf(`{"tx_id": "%d", "policy_id": "%d"}`, transactionId, SCLpolicyId))
 
 			urlClient = "http://" + controller.Config.GpjcApiAddress + ":9090/api/start-client"
 			jsonPayloadClient = []byte(fmt.Sprintf(`{"tx_id": "%d", "receiver": "%s", "to": "%s:10501"}`, transactionId, transaction.ReceiverName, controller.Config.GpjcClientUrl))
 
 		} else if country == "Singapore" {
-			urlServer = "http://" + controller.Config.GpjcApiAddress + ":9090/api/start-server"
+			urlServer = "http://" + controller.Config.GpjcApiAddress[:len(controller.Config.GpjcApiAddress)-1] + "2" + ":9090/api/start-server"
 			jsonPayloadServer = []byte(fmt.Sprintf(`{"tx_id": "%d", "policy_id": "%d"}`, transactionId, SCLpolicyId))
 
 			urlClient = "http://" + controller.Config.GpjcApiAddress + ":9090/api/start-client"

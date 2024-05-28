@@ -24,7 +24,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 10
-      start_period: 60s
+      start_period: 90s
 
   app1:
     build:
@@ -42,6 +42,7 @@ services:
       - BENEFICIARY_BANK_URL=app2:4000
       - P2P_NODE_URL=p2pmock:5000
       - GPJC_API=app1
+      - GPJC=app1
     ports:
       - "4001:4000"
     depends_on:
@@ -73,7 +74,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 10
-      start_period: 60s
+      start_period: 90s
 
   app2:
     build:
@@ -91,6 +92,7 @@ services:
       - BENEFICIARY_BANK_URL=app1:4000
       - P2P_NODE_URL=p2pmock:5000
       - GPJC_API=app2
+      - GPJC=app2
     ports:
       - "4002:4000"
     depends_on:

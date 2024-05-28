@@ -41,4 +41,4 @@ RUN /app/gpjc_scripts/certs_script.sh
 EXPOSE 4000
 
 # Run the application
-CMD /app/gpjc-api app1 Ethernal123 & go run .
+CMD /app/gpjc-api ${DNS_NAME} Ethernal123 & go run .

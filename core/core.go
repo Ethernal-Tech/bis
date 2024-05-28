@@ -4,6 +4,7 @@ import (
 	"bisgo/config"
 	"bisgo/core/DB"
 	"bisgo/core/manager"
+	"bisgo/core/messaging"
 )
 
 // Core is the central component of the system.
@@ -12,7 +13,7 @@ type Core struct {
 	DB                  *DB.DBHandler
 	SessionManager      *manager.SessionManager
 	SanctionListManager *manager.SanctionListManager
-	MessagingManager    *manager.MessagingManager
+	MessagingHandler    *messaging.MessagingHandler
 	Config              *config.Config
 }
 
@@ -22,7 +23,7 @@ func CreateCore(config *config.Config) *Core {
 		DB:                  DB.CreateDBHandler(config.ResolveDBAddress(), config.ResolveDBPassword(), config.ResolveDBPort(), config.ResolveDBName()),
 		SessionManager:      manager.CreateSessionManager(),
 		SanctionListManager: manager.CreateSanctionListManager(),
-		MessagingManager:    manager.CreateMessagingManager(config.P2PNodeAPIAddress),
+		MessagingHandler:    messaging.CreateMessagingHandler(config.P2PNodeAPIAddress),
 		Config:              config,
 	}
 }

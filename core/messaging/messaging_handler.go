@@ -1,4 +1,4 @@
-package manager
+package messaging
 
 import (
 	"bisgo/common"
@@ -10,22 +10,22 @@ import (
 	"strings"
 )
 
-// MessagingManager provides functionalities for communicating with Peer-to-Peer node.
-type MessagingManager struct {
+// MessagingHandler provides functionalities for communicating with Peer-to-Peer node.
+type MessagingHandler struct {
 	P2PNodeAddress string
 }
 
-// CreateMessagingManager initializes and returns a pointer to a new MessagingManager instance.
+// CreateMessagingHandler initializes and returns a pointer to a new MessagingHandler instance.
 // Parameters:
 //   - p2pNodeAddress: a string representing the address of the Peer-to-Peer node.
-func CreateMessagingManager(p2pNodeAddress string) *MessagingManager {
-	return &MessagingManager{
+func CreateMessagingHandler(p2pNodeAddress string) *MessagingHandler {
+	return &MessagingHandler{
 		P2PNodeAddress: p2pNodeAddress,
 	}
 }
 
 // GetAvailablePeers calls the Peer-to-Peer node to discover available peers in the system.
-func (m *MessagingManager) GetAvailablePeers() ([]common.Peer, error) {
+func (m *MessagingHandler) GetAvailablePeers() ([]common.Peer, error) {
 	client := &http.Client{}
 
 	req, err := http.NewRequest("GET", strings.Join([]string{m.P2PNodeAddress, "v1", "p2p", "peers"}, "/"), nil)
@@ -60,10 +60,10 @@ func (m *MessagingManager) GetAvailablePeers() ([]common.Peer, error) {
 //   - receiveingBankPeerId: a string representing the id of the targeted Peer-to-Peer node.
 //   - receiveingBankPeerId: a string representing the url of the targeted bank.
 //   - requestData: a byte array representing the data that is being sent.
-func (m *MessagingManager) SendPassthruMessage(receiveingBankPeerId string, receiveingBankURL string, requestData []byte) error {
+func (m *MessagingHandler) SendPassthruMessage(receiveingBankPeerId string, receiveingBankURL string, method string, requestData []byte) error {
 	reqObj := common.PassThruRequest{
 		PeerID:  receiveingBankPeerId,
-		URI:     strings.Join([]string{"http:/", receiveingBankURL, "api", "createTx"}, "/"),
+		URI:     strings.Join([]string{"http:/", receiveingBankURL, "api", method}, "/"),
 		Payload: string(requestData),
 	}
 
