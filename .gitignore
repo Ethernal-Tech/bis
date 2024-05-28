@@ -24,3 +24,5 @@ go.work
 gpjc-api
 /private-join-and-compute
 /p2pmock
+ca.crt
+ca.key

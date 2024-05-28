@@ -32,13 +32,20 @@ fetch-releases-multiple-machines:
 	tar -xzvf /tmp/release.tar.gz -C "$(GPJC_RELEASE_FOLDER)"
 	rm /tmp/release.tar.gz
 	@echo "Release $(GPJC_RELEASE_FOLDER) fetched successfully"
-	@echo "Fetch API"
-	curl -L $(GPJC_API_MULTIPLE_RELEASE_ULR) -o gpjc-api
-	@echo "Give permissions to API exe"
-	chmod +x gpjc-api
+	# @echo "Fetch API"
+	# curl -L $(GPJC_API_MULTIPLE_RELEASE_ULR) -o gpjc-api
+	# @echo "Give permissions to API exe"
+	# chmod +x gpjc-api
 
-run-docker:
+run-docker: create-certs
 	docker-compose up --build -d
 
 stop-docker: 
 	docker-compose down --rmi local
+
+build-gpjc:
+	$(MAKE) -C gpjc-api release-multiple-machines
+
+create-certs: 
+	chmod +x image/gpjc_scripts/ca_script.sh
+	./image/gpjc_scripts/ca_script.sh

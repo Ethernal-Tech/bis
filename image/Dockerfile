@@ -13,12 +13,16 @@ COPY go.sum /app
 COPY Makefile /app
 
 COPY image/gpjc_scripts /app/gpjc_scripts
+COPY ca.crt /app
+COPY ca.key /app
 
 # Set the working directory inside the container
 WORKDIR /app
 
 # Fetch the necessary releases using make
 RUN make fetch-releases-multiple-machines
+
+COPY gpjc-api/target/release/gpjc-api /app/
 
 # Install ODBC library for GPJC API
 RUN apt-get update && apt-get install -y unixodbc unixodbc-dev
@@ -30,12 +34,19 @@ ARG DNS_NAME
 ENV DNS_NAME=${DNS_NAME}
 
 # Make the scripts executable
-RUN chmod +x /app/gpjc_scripts/ca_script.sh
 RUN chmod +x /app/gpjc_scripts/certs_script.sh
 
 # Run the scripts
-RUN /app/gpjc_scripts/ca_script.sh
 RUN /app/gpjc_scripts/certs_script.sh
+
+RUN mv /app/ca.crt /app/private-join-and-compute && \
+    mv /app/ca.key /app/private-join-and-compute && \
+    mv /app/client.crt /app/private-join-and-compute && \
+    mv /app/client.csr /app/private-join-and-compute && \
+    mv /app/client.key /app/private-join-and-compute && \
+    mv /app/server.crt /app/private-join-and-compute && \
+    mv /app/server.csr /app/private-join-and-compute && \
+    mv /app/server.key /app/private-join-and-compute
 
 # Expose the port that the app listens on
 EXPOSE 4000

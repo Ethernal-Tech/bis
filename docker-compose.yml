@@ -14,7 +14,7 @@ services:
     volumes:
       - ./core/DB/scripts/:/docker-entrypoint-initdb/scripts/
     command: >
-      /bin/bash -c " /opt/mssql/bin/sqlservr & sleep 30 &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2023.10.10_CreateBISdb.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2023.10.10_InsertData.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.04.24_\(1\)_CreateBankTypeTable.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.04.24_\(2\)_AlterBankTable\(AddColumn\).sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.04.25_\(1\)_InsertIntoBankTable.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.04.25_\(2\)_InsertIntoBankEmployee.sql &&  wait "
+      /bin/bash -c " /opt/mssql/bin/sqlservr & sleep 120 &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2023.10.10_CreateBISdb.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2023.10.10_InsertData.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.04.24_\(1\)_CreateBankTypeTable.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.04.24_\(2\)_AlterBankTable\(AddColumn\).sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.04.25_\(1\)_InsertIntoBankTable.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.04.25_\(2\)_InsertIntoBankEmployee.sql &&  wait "
     healthcheck:
       test:
         [
@@ -24,7 +24,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 10
-      start_period: 90s
+      start_period: 2m
 
   app1:
     build:
@@ -42,7 +42,8 @@ services:
       - BENEFICIARY_BANK_URL=app2:4000
       - P2P_NODE_URL=p2pmock:5000
       - GPJC_API=app1
-      - GPJC=app1
+      - GPJC=app2
+      - INTERMEDIARY=0.0.0.0:4000
     ports:
       - "4001:4000"
     depends_on:
@@ -64,7 +65,7 @@ services:
     volumes:
       - ./core/DB/scripts/:/docker-entrypoint-initdb/scripts/
     command: >
-      /bin/bash -c " /opt/mssql/bin/sqlservr & sleep 30 &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2023.10.10_CreateBISdb.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2023.10.10_InsertData.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.04.24_\(1\)_CreateBankTypeTable.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.04.24_\(2\)_AlterBankTable\(AddColumn\).sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.04.25_\(1\)_InsertIntoBankTable.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.04.25_\(2\)_InsertIntoBankEmployee.sql &&  wait "
+      /bin/bash -c " /opt/mssql/bin/sqlservr & sleep 120 &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2023.10.10_CreateBISdb.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2023.10.10_InsertData.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.04.24_\(1\)_CreateBankTypeTable.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.04.24_\(2\)_AlterBankTable\(AddColumn\).sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.04.25_\(1\)_InsertIntoBankTable.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.04.25_\(2\)_InsertIntoBankEmployee.sql &&  wait "
     healthcheck:
       test:
         [
@@ -74,7 +75,7 @@ services:
       interval: 30s
       timeout: 10s
       retries: 10
-      start_period: 90s
+      start_period: 2m
 
   app2:
     build:
@@ -92,7 +93,8 @@ services:
       - BENEFICIARY_BANK_URL=app1:4000
       - P2P_NODE_URL=p2pmock:5000
       - GPJC_API=app2
-      - GPJC=app2
+      - GPJC=app1
+      - INTERMEDIARY=0.0.0.0:4000
     ports:
       - "4002:4000"
     depends_on:
