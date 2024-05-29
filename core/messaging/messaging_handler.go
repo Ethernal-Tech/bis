@@ -58,7 +58,8 @@ func (m *MessagingHandler) GetAvailablePeers() ([]common.Peer, error) {
 // SendPassthruMessage sends the message to the receiveing bank over Peer-to-Peer network.
 // Parameters:
 //   - receiveingBankPeerId: a string representing the id of the targeted Peer-to-Peer node.
-//   - receiveingBankPeerId: a string representing the url of the targeted bank.
+//   - receiveingBankURL: a string representing the url of the targeted bank.
+//   - method: a string representing the targeted method of the targeted bank.
 //   - requestData: a byte array representing the data that is being sent.
 func (m *MessagingHandler) SendPassthruMessage(receiveingBankPeerId string, receiveingBankURL string, method string, requestData []byte) error {
 	reqObj := common.PassThruRequest{

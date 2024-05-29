@@ -40,7 +40,7 @@ services:
       - DB_PASSWORD=Ethernal123
       - SERVER_PORT=4000
       - BENEFICIARY_BANK_URL=app2:4000
-      - P2P_NODE_URL=p2pmock:5000
+      - P2P_NODE_ADDRESS=p2pmock:5000
       - GPJC_API=app1
       - GPJC=app2
       - INTERMEDIARY=0.0.0.0:4000
@@ -91,7 +91,7 @@ services:
       - DB_PASSWORD=Ethernal123
       - SERVER_PORT=4000
       - BENEFICIARY_BANK_URL=app1:4000
-      - P2P_NODE_URL=p2pmock:5000
+      - P2P_NODE_ADDRESS=p2pmock:5000
       - GPJC_API=app2
       - GPJC=app1
       - INTERMEDIARY=0.0.0.0:4000

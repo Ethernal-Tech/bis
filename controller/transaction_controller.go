@@ -1,12 +1,15 @@
 package controller
 
 import (
+	"bisgo/common"
 	"bisgo/models"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"text/template"
@@ -111,6 +114,37 @@ func (controller *TransactionController) AddTransaction(w http.ResponseWriter, r
 			LoanId:          loanId,
 		}
 
+		// Call P2P create-transaction of beneficiary bank
+		transactionDto := common.TransactionDTO{
+			TransactionID:                   "0",
+			SenderLei:                       "",
+			SenderName:                      r.Form.Get("sender"),
+			ReceiverLei:                     "",
+			ReceiverName:                    r.Form.Get("receiver"),
+			OriginatorBankGlobalIdentifier:  controller.DB.GetBankGlobalIdentifier(int(originatorBank)),
+			BeneficiaryBankGlobalIdentifier: controller.DB.GetBankGlobalIdentifier(beneficiaryBank),
+			PaymentType:                     "",
+			TransactionType:                 fmt.Sprint(transactionType),
+			Amount:                          uint64(amount),
+			Currency:                        currency,
+			SwiftBICCode:                    "",
+			LoanID:                          uint64(loanId),
+		}
+
+		jsonObj, err := json.Marshal(transactionDto)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error parsing json object", 500)
+		}
+
+		// handle peer_id, benef_bank url from map
+		err = controller.MessagingHandler.SendPassthruMessage("peer_id", os.Getenv("BENEFICIARY_BANK_URL"), "create-transaction", jsonObj)
+
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error sending create tx", 500)
+		}
+
 		transactionID := controller.DB.InsertTransaction(transaction)
 		controller.DB.UpdateTransactionState(transactionID, 1)
 
@@ -196,11 +230,8 @@ func (controller *TransactionController) ConfirmTransaction(w http.ResponseWrite
 		CFMexists := false
 		SCLexists := false
 		var SCLpolicyId int
-		var country string
 
 		for _, policy := range policies {
-			country = policy.Country
-
 			if policy.Code == "CFM" {
 				CFMpolicy = policy
 				CFMexists = true
@@ -253,40 +284,19 @@ func (controller *TransactionController) ConfirmTransaction(w http.ResponseWrite
 		var urlClient string
 		var jsonPayloadClient []byte
 
-		if country == "Malaysia" {
-			server := ""
-			if controller.Config.GpjcApiAddress == "app1" {
-				server = "app2"
-			} else {
-				server = "app1"
-			}
-
-			urlServer = "http://" + server + ":9090/api/start-server"
-			jsonPayloadServer = []byte(fmt.Sprintf(`{"tx_id": "%d", "policy_id": "%d"}`, transactionId, SCLpolicyId))
-
-			urlClient = "http://" + controller.Config.GpjcApiAddress + ":9090/api/start-client"
-			jsonPayloadClient = []byte(fmt.Sprintf(`{"tx_id": "%d", "receiver": "%s", "to": "%s:10501"}`, transactionId, transaction.ReceiverName, controller.Config.GpjcClientUrl))
-
-		} else if country == "Singapore" {
-			server := ""
-			if controller.Config.GpjcApiAddress == "app1" {
-				server = "app2"
-			} else {
-				server = "app1"
-			}
-
-			urlServer = "http://" + server + ":9090/api/start-server"
-			jsonPayloadServer = []byte(fmt.Sprintf(`{"tx_id": "%d", "policy_id": "%d"}`, transactionId, SCLpolicyId))
-
-			urlClient = "http://" + controller.Config.GpjcApiAddress + ":9090/api/start-client"
-			jsonPayloadClient = []byte(fmt.Sprintf(`{"tx_id": "%d", "receiver": "%s", "to": "%s:10501"}`, transactionId, transaction.ReceiverName, controller.Config.GpjcClientUrl))
-
+		// TODO: This will be updated in upcoming messaging system changes
+		gpjc_client := ""
+		if controller.Config.GpjcApiAddress == "app1" {
+			gpjc_client = "app2"
 		} else {
-			log.Println("Error in SCL")
-			http.Error(w, "Internal Server Error", 500)
-
-			return
+			gpjc_client = "app1"
 		}
+
+		urlServer = "http://" + controller.Config.GpjcApiAddress + ":9090/api/start-server"
+		jsonPayloadServer = []byte(fmt.Sprintf(`{"tx_id": "%d", "policy_id": "%d"}`, transactionId, SCLpolicyId))
+
+		urlClient = "http://" + gpjc_client + ":9090/api/start-client"
+		jsonPayloadClient = []byte(fmt.Sprintf(`{"tx_id": "%d", "receiver": "%s", "to": "%s:10501"}`, transactionId, transaction.ReceiverName, controller.Config.GpjcApiAddress))
 
 		client := &http.Client{}
 
