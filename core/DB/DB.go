@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"runtime"
+	"time"
 
 	_ "github.com/denisenkom/go-mssqldb"
 )
@@ -38,6 +39,16 @@ func CreateDBHandler(server string, password string, port string, database strin
 
 	if err != nil {
 		log.Fatalf("\033[31m" + "Failed to connect to the database!" + "\033[31m")
+	}
+
+	numOfRetries := 60
+	for i := 0; i < numOfRetries; i++ {
+		err = db.Ping()
+		if err != nil {
+			log.Print(err)
+		}
+
+		time.Sleep(time.Second)
 	}
 
 	return &DBHandler{db: db}

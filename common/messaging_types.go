@@ -8,7 +8,7 @@ type Peer struct {
 type PassThruRequest struct {
 	PeerID  string `json:"peer_id"`
 	URI     string `json:"uri"`
-	Payload string `json:"payload"`
+	Payload []byte `json:"payload"`
 }
 
 type ErrorResponse struct {

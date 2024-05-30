@@ -65,7 +65,7 @@ func (m *MessagingHandler) SendPassthruMessage(receiveingBankPeerId string, rece
 	reqObj := common.PassThruRequest{
 		PeerID:  receiveingBankPeerId,
 		URI:     strings.Join([]string{"http:/", receiveingBankURL, "api", method}, "/"),
-		Payload: string(requestData),
+		Payload: requestData,
 	}
 
 	reqBytes, err := json.Marshal(reqObj)

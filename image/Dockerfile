@@ -5,6 +5,7 @@ COPY common /app/common
 COPY config /app/config
 COPY controller /app/controller
 COPY core /app/core
+COPY models /app/models
 COPY server /app/server
 COPY static /app/static
 COPY main.go /app
