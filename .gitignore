@@ -26,3 +26,4 @@ gpjc-api
 /p2pmock
 ca.crt
 ca.key
+/playwright-tests
