@@ -49,6 +49,3 @@ build-gpjc:
 create-certs: 
 	chmod +x image/gpjc_scripts/ca_script.sh
 	./image/gpjc_scripts/ca_script.sh
-
-test:
-	$(MAKE) -C playwright-tests test
