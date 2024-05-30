@@ -296,7 +296,7 @@ func (controller *TransactionController) ConfirmTransaction(w http.ResponseWrite
 		jsonPayloadServer = []byte(fmt.Sprintf(`{"tx_id": "%d", "policy_id": "%d"}`, transactionId, SCLpolicyId))
 
 		urlClient = "http://" + gpjc_client + ":9090/api/start-client"
-		jsonPayloadClient = []byte(fmt.Sprintf(`{"tx_id": "%d", "receiver": "%s", "to": "%s:10501"}`, transactionId, transaction.ReceiverName, controller.Config.GpjcApiAddress))
+		jsonPayloadClient = []byte(fmt.Sprintf(`{"tx_id": "%d", "policy_id": "%d", "receiver": "%s", "to": "%s:10501"}`, transactionId, SCLpolicyId, transaction.ReceiverName, controller.Config.GpjcApiAddress))
 
 		client := &http.Client{}
 

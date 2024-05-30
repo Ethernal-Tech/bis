@@ -23,8 +23,6 @@ WORKDIR /app
 # Fetch the necessary releases using make
 RUN make fetch-releases-multiple-machines
 
-COPY gpjc-api/target/release/gpjc-api /app/
-
 # Install ODBC library for GPJC API
 RUN apt-get update && apt-get install -y unixodbc unixodbc-dev
 

@@ -3,7 +3,7 @@ GPJC_MULTIPLE_RELEASE_URL := https://github.com/Ethernal-Tech/private-join-and-c
 GPJC_RELEASE_FOLDER := private-join-and-compute
 
 GPJC_API_RELEASE_ULR := https://github.com/Ethernal-Tech/gpjc-api/releases/download/v0.1.1/gpjc-api
-GPJC_API_MULTIPLE_RELEASE_ULR := https://github.com/Ethernal-Tech/gpjc-api/releases/download/v0.1.1/gpjc-api-multiple
+GPJC_API_MULTIPLE_RELEASE_ULR := https://github.com/Ethernal-Tech/gpjc-api/releases/download/v0.1.2/gpjc-api-multiple
 
 fetch-releases:
 	@echo "Checking if $(GPJC_RELEASE_FOLDER) exists..."
@@ -32,10 +32,14 @@ fetch-releases-multiple-machines:
 	tar -xzvf /tmp/release.tar.gz -C "$(GPJC_RELEASE_FOLDER)"
 	rm /tmp/release.tar.gz
 	@echo "Release $(GPJC_RELEASE_FOLDER) fetched successfully"
-	# @echo "Fetch API"
-	# curl -L $(GPJC_API_MULTIPLE_RELEASE_ULR) -o gpjc-api
-	# @echo "Give permissions to API exe"
-	# chmod +x gpjc-api
+	@echo "Fetch API"
+	curl -L $(GPJC_API_MULTIPLE_RELEASE_ULR) -o gpjc-api
+	@echo "Give permissions to API exe"
+	chmod +x gpjc-api
+
+create-certs: 
+	chmod +x image/gpjc_scripts/ca_script.sh
+	./image/gpjc_scripts/ca_script.sh
 
 run-docker: create-certs
 	docker-compose up --build -d
@@ -43,9 +47,6 @@ run-docker: create-certs
 stop-docker: 
 	docker-compose down --rmi local
 
-build-gpjc:
-	$(MAKE) -C gpjc-api release-multiple-machines
-
-create-certs: 
-	chmod +x image/gpjc_scripts/ca_script.sh
-	./image/gpjc_scripts/ca_script.sh
+test: run-docker
+	sleep 90
+	$(MAKE) -C playwright-tests test
