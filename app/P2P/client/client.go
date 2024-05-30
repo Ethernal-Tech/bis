@@ -25,7 +25,7 @@ func GetP2PClient() *P2PClient {
 	return &client
 }
 
-func (m *P2PClient) Send(receivingBankID string, method string, data any) (<-chan any, error) {
+func (c *P2PClient) Send(receivingBankID string, method string, data any) (<-chan any, error) {
 	receivingBankPeerID, err := manager.GetBankPeerID(receivingBankID)
 
 	if err != nil {
@@ -54,7 +54,7 @@ func (m *P2PClient) Send(receivingBankID string, method string, data any) (<-cha
 
 	client := &http.Client{}
 
-	request, err := http.NewRequest("POST", strings.Join([]string{"http:/", m.p2pNodeAddress, "v1", "p2p", "passthru"}, "/"), bytes.NewBuffer(messageJSON))
+	request, err := http.NewRequest("POST", strings.Join([]string{"http:/", c.p2pNodeAddress, "v1", "p2p", "passthru"}, "/"), bytes.NewBuffer(messageJSON))
 
 	if err != nil {
 		return nil, err
