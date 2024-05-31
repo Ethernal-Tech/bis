@@ -19,7 +19,7 @@ func CreateP2PHandler(core *core.Core) *P2PHandler {
 }
 
 func (h *P2PHandler) CreateTransaction(messageID int, payload []byte) {
-	channel, err := messages.LoadChannel(messageID)
+	_, err := messages.LoadChannel(messageID)
 
 	if err != nil {
 		// handle error
@@ -29,7 +29,7 @@ func (h *P2PHandler) CreateTransaction(messageID int, payload []byte) {
 
 	// handler logic
 
-	channel <- nil // send data to the listener
+	// channel <- nil // send data to the listener
 
 	var messageData common.TransactionDTO
 	if err := json.Unmarshal(payload, &messageData); err != nil {
