@@ -6,7 +6,7 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func (server *Server) routes() http.Handler {
+func (server *WebServer) Routes() http.Handler {
 	router := httprouter.New()
 
 	fileServer := http.FileServer(http.Dir("./static"))

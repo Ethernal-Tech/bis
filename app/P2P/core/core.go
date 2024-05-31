@@ -13,7 +13,7 @@ type Core struct {
 // CreateCore function initializes and returns a new instance of the Core component.
 func CreateCore() *Core {
 	return &Core{
-		DB:     DB.CreateDBHandler(),
+		DB:     DB.GetDBHandler(),
 		Client: client.GetP2PClient(),
 	}
 }

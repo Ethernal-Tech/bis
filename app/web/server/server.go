@@ -3,14 +3,12 @@ package server
 import (
 	"bisgo/app/web/controller"
 	"bisgo/app/web/core"
-	"fmt"
-	"log"
 	"net/http"
 )
 
-// Server represents a wrapper around the standard library's http.Server type.
+// WebServer represents a wrapper around the standard library's http.Server type.
 // It integrates custom handlers grouped into controllers and embeds a wide range of additional core functionalities.
-type Server struct {
+type WebServer struct {
 	*controller.HomeController
 	*controller.TransactionController
 	*controller.PolicyController
@@ -20,11 +18,12 @@ type Server struct {
 	*http.Server
 }
 
-func Run() {
-	var core *core.Core = core.CreateCore()
-	defer core.DB.Close()
+var server WebServer
 
-	server := Server{
+func init() {
+	var core *core.Core = core.CreateCore()
+
+	server = WebServer{
 		HomeController:        controller.CreateHomeController(core),
 		TransactionController: controller.CreateTransactionController(core),
 		PolicyController:      controller.CreatePolicyController(core),
@@ -32,16 +31,8 @@ func Run() {
 		APIController:         controller.CreateAPIController(core),
 		Core:                  core,
 	}
+}
 
-	server.Server = &http.Server{
-		Addr:    ":4000",
-		Handler: server.routes(),
-	}
-
-	fmt.Println("The server starts at", server.Addr)
-	err := server.ListenAndServe()
-
-	if err != nil {
-		log.Fatalf("\033[31m" + "Failed to start the server!" + "\033[31m")
-	}
+func GetWebServer() *WebServer {
+	return &server
 }

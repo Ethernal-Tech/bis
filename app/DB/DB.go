@@ -44,6 +44,8 @@ func init() {
 		err = db.Ping()
 		if err != nil {
 			log.Print(err)
+		} else {
+			break
 		}
 
 		time.Sleep(time.Second)
@@ -61,6 +63,6 @@ func GetDBHandler() *DBHandler {
 	return &handler
 }
 
-func (handler *DBHandler) Close() {
+func Close() {
 	handler.db.Close()
 }

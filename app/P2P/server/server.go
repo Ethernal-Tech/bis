@@ -1,4 +1,4 @@
-package client
+package server
 
 import (
 	"bisgo/app/P2P/core"
