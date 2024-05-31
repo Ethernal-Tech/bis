@@ -27,3 +27,4 @@ gpjc-api
 ca.crt
 ca.key
 /playwright-tests
+*.sh
