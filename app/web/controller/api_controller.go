@@ -1,8 +1,8 @@
 package controller
 
 import (
+	"bisgo/app/models"
 	"bisgo/common"
-	"bisgo/models"
 	"encoding/json"
 	"io"
 	"log"

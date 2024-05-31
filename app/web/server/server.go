@@ -1,9 +1,8 @@
 package server
 
 import (
-	"bisgo/config"
-	"bisgo/controller"
-	"bisgo/core"
+	"bisgo/app/web/controller"
+	"bisgo/app/web/core"
 	"fmt"
 	"log"
 	"net/http"
@@ -23,9 +22,9 @@ type Server struct {
 
 func Run() {
 	// configuration settings
-	var config = config.CreateConfig()
+	//var config = config.CreateConfig()
 
-	var core *core.Core = core.CreateCore(config)
+	var core *core.Core = core.CreateCore(nil)
 	defer core.DB.Close()
 
 	server := Server{
@@ -38,7 +37,7 @@ func Run() {
 	}
 
 	server.Server = &http.Server{
-		Addr:    config.ResolveServerPort(),
+		Addr:    ":4000",
 		Handler: server.routes(),
 	}
 

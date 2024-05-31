@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"bisgo/models"
+	"bisgo/app/models"
 	"log"
 	"net/http"
 	"text/template"

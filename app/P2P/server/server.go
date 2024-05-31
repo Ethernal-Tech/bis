@@ -53,6 +53,6 @@ func (s *P2PServer) Mux() http.Handler {
 			return
 		}
 
-		w.WriteHeader(http.StatusNoContent)
+		w.WriteHeader(http.StatusOK)
 	})
 }

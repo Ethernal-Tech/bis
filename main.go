@@ -1,6 +1,6 @@
 package main
 
-import "bisgo/server"
+import "bisgo/app/web/server"
 
 func main() {
 	server.Run()

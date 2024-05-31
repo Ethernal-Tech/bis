@@ -1,15 +1,14 @@
 package controller
 
 import (
+	"bisgo/app/models"
 	"bisgo/common"
-	"bisgo/models"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
-	"os"
 	"strconv"
 	"strings"
 	"text/template"
@@ -138,7 +137,9 @@ func (controller *TransactionController) AddTransaction(w http.ResponseWriter, r
 		}
 
 		// handle peer_id, benef_bank url from map
-		err = controller.MessagingHandler.SendPassthruMessage("peer_id", os.Getenv("BENEFICIARY_BANK_URL"), "create-transaction", jsonObj)
+		ch, err := controller.P2PClient.Send("peer_id", "create-transaction", any(jsonObj))
+
+		_ = ch
 
 		if err != nil {
 			log.Println(err.Error())
