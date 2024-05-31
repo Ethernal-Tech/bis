@@ -3,6 +3,7 @@ package client
 import (
 	"bisgo/app/P2P/messages"
 	manager "bisgo/app/P2P/peers_manager"
+	"bisgo/config"
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -18,7 +19,7 @@ type P2PClient struct {
 var client P2PClient
 
 func init() {
-	// configuration settings (e.g. for p2pNodeAddress)
+	client = P2PClient{config.ResolveP2PNodeAPIAddress()}
 }
 
 func GetP2PClient() *P2PClient {

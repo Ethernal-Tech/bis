@@ -1,6 +1,7 @@
 package DB
 
 import (
+	"bisgo/config"
 	"database/sql"
 	"fmt"
 	"log"
@@ -16,12 +17,9 @@ type DBHandler struct {
 	db *sql.DB
 }
 
-// CreateDBHandler function creates new DBHandler that can be considered as a database connection pool.
-// Currently supported operating systems:
-//
-// 1) linux
-// 2) windows
-func CreateDBHandler() *DBHandler {
+var handler DBHandler
+
+func init() {
 	var (
 		db  *sql.DB
 		err error
@@ -29,10 +27,10 @@ func CreateDBHandler() *DBHandler {
 
 	switch runtime.GOOS {
 	case "linux":
-		db, err = sql.Open("sqlserver", fmt.Sprintf("server=%s;user id=SA;password=%s;port=%s;database=%s", "server", "password", "port", "database"))
+		db, err = sql.Open("sqlserver", fmt.Sprintf("server=%s;user id=SA;password=%s;port=%s;database=%s", config.ResolveDBAddress(), config.ResolveDBPassword(), config.ResolveDBPort(), config.ResolveDBName()))
 	case "windows":
 		// windows authentication
-		db, err = sql.Open("sqlserver", fmt.Sprintf("sqlserver://@localhost:1434?database=%s&trusted_connection=yes", "database"))
+		db, err = sql.Open("sqlserver", fmt.Sprintf("sqlserver://@localhost:1434?database=%s&trusted_connection=yes", config.ResolveDBName()))
 	default:
 		log.Fatalf("\033[31m"+"DB handler is currently not supported for %s operating system."+"\033[31m", runtime.GOOS)
 	}
@@ -51,7 +49,16 @@ func CreateDBHandler() *DBHandler {
 		time.Sleep(time.Second)
 	}
 
-	return &DBHandler{db: db}
+	handler = DBHandler{db}
+}
+
+// GetDBHandler function return DBHandler that can be considered as a database connection pool.
+// Currently supported operating systems:
+//
+// 1) linux
+// 2) windows
+func GetDBHandler() *DBHandler {
+	return &handler
 }
 
 func (handler *DBHandler) Close() {

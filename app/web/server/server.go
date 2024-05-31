@@ -21,10 +21,7 @@ type Server struct {
 }
 
 func Run() {
-	// configuration settings
-	//var config = config.CreateConfig()
-
-	var core *core.Core = core.CreateCore(nil)
+	var core *core.Core = core.CreateCore()
 	defer core.DB.Close()
 
 	server := Server{
