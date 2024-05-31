@@ -3,10 +3,12 @@ package client
 import (
 	"bisgo/app/P2P/messages"
 	manager "bisgo/app/P2P/peers_manager"
+	"bisgo/common"
 	"bisgo/config"
 	"bytes"
 	"encoding/json"
-	"errors"
+	"fmt"
+	"io"
 	"math/rand"
 	"net/http"
 )
@@ -66,8 +68,13 @@ func (c *P2PClient) Send(receivingBankID string, method string, data any) (<-cha
 		return nil, err
 	}
 
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		return nil, err
+	}
+
 	if response.StatusCode != 200 {
-		return nil, errors.New("error: unsuccessful request to the peer")
+		return nil, handleError(body)
 	}
 
 	channel := make(chan any, 1)
@@ -75,4 +82,12 @@ func (c *P2PClient) Send(receivingBankID string, method string, data any) (<-cha
 	messages.StoreChannel(messageID, channel)
 
 	return channel, nil
+}
+
+func handleError(responseBody []byte) error {
+	var resp common.ErrorResponse
+	if err := json.Unmarshal(responseBody, &resp); err != nil {
+		return err
+	}
+	return fmt.Errorf("call to p2p failed with error: " + resp.Message)
 }

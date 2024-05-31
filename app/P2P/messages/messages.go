@@ -4,13 +4,13 @@ package messages
 type P2PClientMessage struct {
 	PeerID    string `json:"peer_id"`
 	MessageID int    `json:"message_id"`
-	Method    string `json:"uri"`
+	Method    string `json:"method"`
 	Payload   []byte `json:"payload"`
 }
 
 // server message
 type P2PServerMessasge struct {
 	MessageID int    `json:"message_id"`
-	Method    string `json:"name"`
+	Method    string `json:"method"`
 	Payload   []byte `json:"payload"`
 }
