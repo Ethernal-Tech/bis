@@ -9,7 +9,6 @@ import (
 	"errors"
 	"math/rand"
 	"net/http"
-	"strings"
 )
 
 type P2PClient struct {
@@ -35,19 +34,20 @@ func (c *P2PClient) Send(receivingBankID string, method string, data any) (<-cha
 
 	messageID := rand.Int()
 
-	messagePayload, err := messages.CreateMessagePayload(messageID, method, data)
+	messagePayload, err := json.Marshal(data)
 
 	if err != nil {
 		return nil, err
 	}
 
-	message := struct {
-		PeerID  string
-		method  string
-		Payload []byte
-	}{receivingBankPeerID, method, messagePayload}
+	messageData := messages.P2PClientMessage{
+		PeerID:    receivingBankPeerID,
+		MessageID: messageID,
+		Method:    method,
+		Payload:   messagePayload,
+	}
 
-	messageJSON, err := json.Marshal(message)
+	message, err := json.Marshal(messageData)
 
 	if err != nil {
 		return nil, err
@@ -55,7 +55,7 @@ func (c *P2PClient) Send(receivingBankID string, method string, data any) (<-cha
 
 	client := &http.Client{}
 
-	request, err := http.NewRequest("POST", strings.Join([]string{"http:/", c.p2pNodeAddress, "v1", "p2p", "passthru"}, "/"), bytes.NewBuffer(messageJSON))
+	request, err := http.NewRequest("POST", c.p2pNodeAddress, bytes.NewBuffer(message))
 
 	if err != nil {
 		return nil, err

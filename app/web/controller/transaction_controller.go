@@ -4,7 +4,6 @@ import (
 	"bisgo/app/models"
 	"bisgo/common"
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"log"
 	"math/rand"
@@ -130,14 +129,8 @@ func (controller *TransactionController) AddTransaction(w http.ResponseWriter, r
 			LoanID:                          uint64(loanId),
 		}
 
-		jsonObj, err := json.Marshal(transactionDto)
-		if err != nil {
-			log.Println(err.Error())
-			http.Error(w, "Internal Server Error parsing json object", 500)
-		}
-
 		// handle peer_id, benef_bank url from map
-		ch, err := controller.P2PClient.Send("peer_id", "create-transaction", any(jsonObj))
+		ch, err := controller.P2PClient.Send(transactionDto.BeneficiaryBankGlobalIdentifier, "create-transaction", transactionDto)
 
 		_ = ch
 
