@@ -1,7 +1,8 @@
 package controller
 
 import (
-	"bisgo/core/DB/models"
+	"bisgo/app/models"
+	"bisgo/common"
 	"bytes"
 	"fmt"
 	"log"
@@ -111,6 +112,33 @@ func (controller *TransactionController) AddTransaction(w http.ResponseWriter, r
 			LoanId:          loanId,
 		}
 
+		// Call P2P create-transaction of beneficiary bank
+		transactionDto := common.TransactionDTO{
+			TransactionID:                   "0",
+			SenderLei:                       "",
+			SenderName:                      r.Form.Get("sender"),
+			ReceiverLei:                     "",
+			ReceiverName:                    r.Form.Get("receiver"),
+			OriginatorBankGlobalIdentifier:  controller.DB.GetBankGlobalIdentifier(int(originatorBank)),
+			BeneficiaryBankGlobalIdentifier: controller.DB.GetBankGlobalIdentifier(beneficiaryBank),
+			PaymentType:                     "",
+			TransactionType:                 fmt.Sprint(transactionType),
+			Amount:                          uint64(amount),
+			Currency:                        currency,
+			SwiftBICCode:                    "",
+			LoanID:                          uint64(loanId),
+		}
+
+		// handle peer_id, benef_bank url from map
+		ch, err := controller.P2PClient.Send(transactionDto.BeneficiaryBankGlobalIdentifier, "create-transaction", transactionDto)
+
+		_ = ch
+
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error sending create tx", 500)
+		}
+
 		transactionID := controller.DB.InsertTransaction(transaction)
 		controller.DB.UpdateTransactionState(transactionID, 1)
 
@@ -196,11 +224,8 @@ func (controller *TransactionController) ConfirmTransaction(w http.ResponseWrite
 		CFMexists := false
 		SCLexists := false
 		var SCLpolicyId int
-		var country string
 
 		for _, policy := range policies {
-			country = policy.Country
-
 			if policy.Code == "CFM" {
 				CFMpolicy = policy
 				CFMexists = true
@@ -253,26 +278,13 @@ func (controller *TransactionController) ConfirmTransaction(w http.ResponseWrite
 		var urlClient string
 		var jsonPayloadClient []byte
 
-		if country == "Malaysia" {
-			urlServer = "http://" + controller.Config.GpjcApiAddress + ":9090/api/start-server"
-			jsonPayloadServer = []byte(fmt.Sprintf(`{"tx_id": "%d", "policy_id": "%d"}`, transactionId, SCLpolicyId))
+		// TODO: This will be updated in upcoming messaging system changes
 
-			urlClient = "http://" + controller.Config.GpjcApiAddress + ":9090/api/start-client"
-			jsonPayloadClient = []byte(fmt.Sprintf(`{"tx_id": "%d", "receiver": "%s", "to": "%s:10501"}`, transactionId, transaction.ReceiverName, controller.Config.GpjcClientUrl))
+		urlServer = "http://" + "controller.Config.GpjcApiAddress" + ":9090/api/start-server"
+		jsonPayloadServer = []byte(fmt.Sprintf(`{"tx_id": "%d", "policy_id": "%d"}`, transactionId, SCLpolicyId))
 
-		} else if country == "Singapore" {
-			urlServer = "http://" + controller.Config.GpjcApiAddress + ":9090/api/start-server"
-			jsonPayloadServer = []byte(fmt.Sprintf(`{"tx_id": "%d", "policy_id": "%d"}`, transactionId, SCLpolicyId))
-
-			urlClient = "http://" + controller.Config.GpjcApiAddress + ":9090/api/start-client"
-			jsonPayloadClient = []byte(fmt.Sprintf(`{"tx_id": "%d", "receiver": "%s", "to": "%s:10501"}`, transactionId, transaction.ReceiverName, controller.Config.GpjcClientUrl))
-
-		} else {
-			log.Println("Error in SCL")
-			http.Error(w, "Internal Server Error", 500)
-
-			return
-		}
+		urlClient = "http://" + "gpjc_client" + ":9090/api/start-client"
+		jsonPayloadClient = []byte(fmt.Sprintf(`{"tx_id": "%d", "policy_id": "%d", "receiver": "%s", "to": "%s:10501"}`, transactionId, SCLpolicyId, transaction.ReceiverName, "controller.Config.GpjcApiAddress"))
 
 		client := &http.Client{}
 

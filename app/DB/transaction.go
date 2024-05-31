@@ -1,7 +1,7 @@
 package DB
 
 import (
-	"bisgo/core/DB/models"
+	"bisgo/app/models"
 	"database/sql"
 	"log"
 	"time"

@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"bisgo/core"
+	"bisgo/app/web/core"
 )
 
 type HomeController struct {

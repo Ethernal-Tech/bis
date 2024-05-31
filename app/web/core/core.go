@@ -1,9 +1,9 @@
 package core
 
 import (
-	"bisgo/config"
-	"bisgo/core/DB"
-	"bisgo/core/manager"
+	"bisgo/app/DB"
+	"bisgo/app/P2P/client"
+	"bisgo/app/web/manager"
 )
 
 // Core is the central component of the system.
@@ -12,15 +12,15 @@ type Core struct {
 	DB                  *DB.DBHandler
 	SessionManager      *manager.SessionManager
 	SanctionListManager *manager.SanctionListManager
-	Config              *config.Config
+	P2PClient           *client.P2PClient
 }
 
 // CreateCore function initializes and returns a new instance of the Core component.
-func CreateCore(config *config.Config) *Core {
+func CreateCore() *Core {
 	return &Core{
-		DB:                  DB.CreateDBHandler(config.ResolveDBAddress(), config.ResolveDBPassword(), config.ResolveDBPort(), config.ResolveDBName()),
+		DB:                  DB.GetDBHandler(),
 		SessionManager:      manager.CreateSessionManager(),
 		SanctionListManager: manager.CreateSanctionListManager(),
-		Config:              config,
+		P2PClient:           client.GetP2PClient(),
 	}
 }

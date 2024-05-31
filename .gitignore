@@ -23,3 +23,8 @@ go.work
 /sanction-lists
 gpjc-api
 /private-join-and-compute
+/p2pmock
+ca.crt
+ca.key
+/playwright-tests
+*.sh

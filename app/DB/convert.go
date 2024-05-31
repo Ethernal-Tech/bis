@@ -1,6 +1,6 @@
 package DB
 
-import "bisgo/core/DB/models"
+import "bisgo/app/models"
 
 func convertTxStatusDBtoPR(transaction *models.TransactionModel) *models.TransactionModel {
 	switch transaction.Status {

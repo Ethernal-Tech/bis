@@ -1,7 +1,7 @@
 package DB
 
 import (
-	"bisgo/core/DB/models"
+	"bisgo/app/models"
 	"database/sql"
 	"log"
 )
@@ -166,4 +166,47 @@ func (wrapper *DBHandler) GetCountry(countryId uint) models.Country {
 	}
 
 	return country
+}
+
+// ------------------------------------------------------------------------------------------------
+func (wrapper *DBHandler) GetBankIdByIdentifier(identifier string) uint64 {
+	query := `SELECT Id FROM [Bank] WHERE GlobalIdentifier = @p1`
+
+	rows, err := wrapper.db.Query(query, sql.Named("p1", identifier))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer rows.Close()
+
+	var bankId uint64
+	for rows.Next() {
+		if err := rows.Scan(&bankId); err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	return bankId
+}
+
+func (wrapper *DBHandler) GetBankGlobalIdentifier(id int) string {
+	query := `SELECT GlobalIdentifier FROM [Bank] WHERE Id = @p1`
+
+	rows, err := wrapper.db.Query(query, sql.Named("p1", id))
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer rows.Close()
+
+	var bankGlobalIdentifier string
+	for rows.Next() {
+		if err := rows.Scan(&bankGlobalIdentifier); err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	return bankGlobalIdentifier
 }

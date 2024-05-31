@@ -1,7 +1,8 @@
 package controller
 
 import (
-	"bisgo/core/DB/models"
+	"bisgo/app/models"
+	"bisgo/common"
 	"encoding/json"
 	"io"
 	"log"
@@ -142,5 +143,45 @@ func (controller *APIController) GetPolicy(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error", 500)
+	}
+}
+
+// ------------------------------------------------------------------------------------------
+func (controller *APIController) CreateTx(w http.ResponseWriter, r *http.Request) {
+	body, _ := io.ReadAll(r.Body)
+
+	var messageData common.TransactionDTO
+	if err := json.Unmarshal(body, &messageData); err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error 1", 500)
+		return
+	}
+
+	transactionType, err := strconv.Atoi(messageData.TransactionType)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error 1", 500)
+		return
+	}
+
+	transaction := models.Transaction{
+		OriginatorBank:  controller.DB.GetBankIdByIdentifier(messageData.OriginatorBankGlobalIdentifier),
+		BeneficiaryBank: controller.DB.GetBankIdByIdentifier(messageData.BeneficiaryBankGlobalIdentifier),
+		Sender:          controller.DB.GetBankClientId(messageData.SenderName),
+		Receiver:        controller.DB.GetBankClientId(messageData.ReceiverName),
+		Currency:        messageData.Currency,
+		Amount:          int(messageData.Amount),
+		TypeId:          transactionType,
+		LoanId:          int(messageData.LoanID),
+	}
+
+	transactionID := controller.DB.InsertTransaction(transaction)
+	controller.DB.UpdateTransactionState(transactionID, 1)
+
+	err = json.NewEncoder(w).Encode("Ok")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error 2", 500)
+		return
 	}
 }

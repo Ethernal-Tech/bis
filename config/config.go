@@ -2,21 +2,7 @@ package config
 
 import "os"
 
-type Config struct {
-	GpjcApiAddress    string
-	GpjcClientUrl     string
-	P2PNodeAPIAddress string
-}
-
-func CreateConfig() *Config {
-	return &Config{
-		GpjcApiAddress:    resolveGpjcApiAddress(),
-		GpjcClientUrl:     resolveGpjcClientUrl(),
-		P2PNodeAPIAddress: resolveP2PNodeAPIAddress(),
-	}
-}
-
-func resolveP2PNodeAPIAddress() string {
+func ResolveP2PNodeAPIAddress() string {
 	env_address := os.Getenv("P2P_NODE_ADDRESS")
 	if env_address == "" {
 		return "localhost:5000"
@@ -25,7 +11,7 @@ func resolveP2PNodeAPIAddress() string {
 	return env_address
 }
 
-func resolveGpjcApiAddress() string {
+func ResolveGpjcApiAddress() string {
 	env_address := os.Getenv("GPJC_API")
 	if env_address == "" {
 		return "localhost"
@@ -34,7 +20,7 @@ func resolveGpjcApiAddress() string {
 	return env_address
 }
 
-func resolveGpjcClientUrl() string {
+func ResolveGpjcClientUrl() string {
 	env_url := os.Getenv("GPJC")
 	if env_url == "" {
 		return "0.0.0.0"
@@ -43,7 +29,7 @@ func resolveGpjcClientUrl() string {
 	return env_url
 }
 
-func (*Config) ResolveDBAddress() string {
+func ResolveDBAddress() string {
 	env_address := os.Getenv("DB_ADDRESS")
 	if env_address == "" {
 		return "localhost"
@@ -52,7 +38,7 @@ func (*Config) ResolveDBAddress() string {
 	return env_address
 }
 
-func (*Config) ResolveDBPort() string {
+func ResolveDBPort() string {
 	env_port := os.Getenv("DB_PORT")
 	if env_port == "" {
 		return "1433"
@@ -61,7 +47,7 @@ func (*Config) ResolveDBPort() string {
 	return env_port
 }
 
-func (*Config) ResolveDBName() string {
+func ResolveDBName() string {
 	env_name := os.Getenv("DB_NAME")
 	if env_name == "" {
 		return "BIS"
@@ -70,7 +56,7 @@ func (*Config) ResolveDBName() string {
 	return env_name
 }
 
-func (*Config) ResolveDBPassword() string {
+func ResolveDBPassword() string {
 	env_password := os.Getenv("DB_PASSWORD")
 	if env_password == "" {
 		return "Ethernal123"
@@ -79,7 +65,7 @@ func (*Config) ResolveDBPassword() string {
 	return env_password
 }
 
-func (*Config) ResolveServerPort() string {
+func ResolveServerPort() string {
 	env_port := os.Getenv("SERVER_PORT")
 	if env_port == "" {
 		return ":4000"

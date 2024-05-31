@@ -58,8 +58,14 @@ func (controller *CBController) ShowAnalytics(w http.ResponseWriter, r *http.Req
 	viewData["received"] = receivedAmount
 	viewData["successful"] = successfulTxs
 	viewData["initialized"] = len(transactions)
-	percentage := float64(successfulTxs) / float64(len(transactions)) * 100
-	viewData["percentage"] = math.Floor(percentage*100) / 100
+
+	if successfulTxs == 0 {
+		viewData["percentage"] = 0
+	} else {
+		percentage := float64(successfulTxs) / float64(len(transactions)) * 100
+		viewData["percentage"] = math.Floor(percentage*100) / 100
+	}
+
 	viewData["sclFails"] = failedBecauseOfSanctionsCheck
 	viewData["cfmFails"] = failedBecauseOfCFMCheck
 
