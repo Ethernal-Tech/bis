@@ -3,6 +3,7 @@ package app
 import (
 	"bisgo/app/DB"
 	p2pserver "bisgo/app/P2P/server"
+	provingserver "bisgo/app/proving/server"
 	webserver "bisgo/app/web/server"
 	"bisgo/config"
 	"fmt"
@@ -12,15 +13,17 @@ import (
 )
 
 type app struct {
-	p2pServer *p2pserver.P2PServer
-	webServer *webserver.WebServer
+	p2pServer     *p2pserver.P2PServer
+	webServer     *webserver.WebServer
+	provingServer *provingserver.ProvingServer
 	*http.Server
 }
 
 func Run() {
 	app := app{
-		p2pServer: p2pserver.GetP2PServer(),
-		webServer: webserver.GetWebServer(),
+		p2pServer:     p2pserver.GetP2PServer(),
+		webServer:     webserver.GetWebServer(),
+		provingServer: provingserver.GetProvingServer(),
 	}
 
 	app.Server = &http.Server{
@@ -44,7 +47,7 @@ func (a *app) Mux() http.Handler {
 		case strings.Contains(r.URL.Path, "/p2p"):
 			a.p2pServer.Mux().ServeHTTP(w, r)
 		case strings.Contains(r.URL.Path, "/proof"):
-			// proof service
+			a.provingServer.Mux().ServeHTTP(w, r)
 		default:
 			a.webServer.Routes().ServeHTTP(w, r)
 		}
