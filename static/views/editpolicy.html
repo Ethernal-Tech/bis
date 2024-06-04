@@ -32,7 +32,7 @@
                 <input class="input-sender" type="text" placeholder="Policy Name" name="policyName" id="policyName"
                     value="{{.policy.Name}}" readonly>
                 {{if eq .policy.Code "CFM"}}
-                <input class="input-amount" type="text" id="amount" name="amount" value="{{.policy.Amount}}">
+                <input class="input-amount" type="text" id="amount" name="amount" value="{{.policy.Parameter}}">
                 {{else}}
                 <input class="input-sender" type="text" placeholder="SCL" name="sclName" id="sclName"
                     value="{{.policy.Parameter}}" readonly>

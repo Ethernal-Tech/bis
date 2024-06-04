@@ -121,7 +121,7 @@ func (controller *APIController) GetPolicy(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	policies := controller.DB.GetPolicy(data.BankCountry, uint64(policyId))
+	policies := controller.DB.GetPolicy(uint64(policyId))
 
 	jsonData, err := json.Marshal(policies)
 

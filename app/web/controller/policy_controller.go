@@ -22,7 +22,7 @@ func (controller *PolicyController) ShowPolicies(w http.ResponseWriter, r *http.
 	viewData["country"] = controller.SessionManager.GetString(r.Context(), "country")
 	viewData["centralBankEmployee"] = controller.SessionManager.GetBool(r.Context(), "centralBankEmployee")
 
-	policies := controller.DB.PoliciesFromCountry(controller.SessionManager.Get(r.Context(), "bankId").(uint64))
+	policies := controller.DB.PoliciesFromCountry(controller.SessionManager.GetString(r.Context(), "bankId"))
 
 	viewData["policies"] = policies
 
@@ -55,15 +55,16 @@ func (controller *PolicyController) EditPolicy(w http.ResponseWriter, r *http.Re
 			return
 		}
 
-		policyId, _ := strconv.Atoi(r.Form.Get("policyId"))
+		policyId, _ := strconv.ParseUint(r.FormValue("policyId"), 10, 64)
 
 		viewData := map[string]any{}
 
 		viewData["username"] = controller.SessionManager.GetString(r.Context(), "username")
 		viewData["bankName"] = controller.SessionManager.GetString(r.Context(), "bankName")
 		viewData["country"] = controller.SessionManager.GetString(r.Context(), "country")
-		viewData["policy"] = controller.DB.GetPolicy(viewData["country"].(string), uint64(policyId))
 		viewData["centralBankEmployee"] = controller.SessionManager.GetBool(r.Context(), "centralBankEmployee")
+
+		viewData["policy"] = controller.DB.GetPolicy(uint64(policyId))
 
 		ts, err := template.ParseFiles("./static/views/editpolicy.html")
 		if err != nil {
@@ -85,8 +86,9 @@ func (controller *PolicyController) EditPolicy(w http.ResponseWriter, r *http.Re
 			return
 		}
 
-		policyId, _ := strconv.Atoi(r.FormValue("policyId"))
-		originalPolicy := controller.DB.GetPolicy(controller.SessionManager.GetString(r.Context(), "country"), uint64(policyId))
+		policyId, _ := strconv.ParseUint(r.FormValue("policyId"), 10, 64)
+
+		originalPolicy := controller.DB.GetPolicy(uint64(policyId))
 
 		if originalPolicy.Code == "CFM" {
 			amount, err := strconv.Atoi(strings.Replace(r.Form.Get("amount"), ",", "", -1))
@@ -96,7 +98,7 @@ func (controller *PolicyController) EditPolicy(w http.ResponseWriter, r *http.Re
 				return
 			}
 
-			controller.DB.UpdatePolicyAmount(uint64(policyId), uint64(amount))
+			controller.DB.UpdatePolicyAmount(uint64(amount), uint64(policyId))
 		} else {
 			fileName, err := controller.SanctionListManager.GetNewestSanctionsList()
 			if err != nil {
@@ -105,7 +107,7 @@ func (controller *PolicyController) EditPolicy(w http.ResponseWriter, r *http.Re
 				return
 			}
 
-			controller.DB.UpdatePolicyChecklist(uint64(policyId), fileName)
+			controller.DB.UpdatePolicyChecklist(fileName, uint64(policyId))
 		}
 
 		http.Redirect(w, r, "/policies", http.StatusSeeOther)

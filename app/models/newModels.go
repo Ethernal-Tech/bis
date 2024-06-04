@@ -32,12 +32,6 @@ type NewBankType struct {
 	Name string
 }
 
-type NewPolicyType struct {
-	Id   int
-	Code string
-	Name string
-}
-
 type NewCountry struct {
 	Id          int
 	Name        string
@@ -67,11 +61,18 @@ type NewStatus struct {
 	Name string
 }
 
-type NewTransactionStatusHistory struct {
+type NewTransactionHistory struct {
 	TransactionId string
 	StatusId      int
 	Date          time.Time
 }
+
+type NewPolicyType struct {
+	Id   int
+	Code string
+	Name string
+}
+
 type NewPolicy struct {
 	Id                       int64
 	PolicyTypeId             int

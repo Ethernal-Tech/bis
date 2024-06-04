@@ -84,13 +84,11 @@ func (wrapper *DBHandler) GetPolices(bankId string, transactionTypeId int) []mod
 	return policies
 }
 
-func (wrapper *DBHandler) PoliciesFromCountry(bankId uint64) []models.PolicyModel {
-	query := `SELECT p.Id, c.Name, p.Code, p.Name, ttp.Amount, ttp.Checklist, tt.Name
-				FROM TransactionTypePolicy ttp
-				JOIN Policy as p ON ttp.PolicyId = p.Id
-				Join Country as c ON ttp.CountryId = c.Id
-				Join TransactionType as tt ON tt.Id = ttp.TransactionTypeId
-				Where ttp.CountryId = (SELECT CountryId FROM [Bank] Where Id = @p1)`
+func (wrapper *DBHandler) PoliciesFromCountry(bankId string) []models.PolicyModel {
+	query := `SELECT p.Id, pt.Code, pt.Name, tt.Name, p.Parameters FROM Policy as p
+					LEFT JOIN PolicyType as pt on p.PolicyTypeId = pt.Id
+					LEFT JOIN TransactionType as tt on p.TransactionTypeId = tt.Id
+					Where p.PolicyEnforcingCountryId = (SELECT CountryId FROM [Bank] Where GlobalIdentifier = @p1)`
 
 	rows, err := wrapper.db.Query(query,
 		sql.Named("p1", bankId))
@@ -103,32 +101,21 @@ func (wrapper *DBHandler) PoliciesFromCountry(bankId uint64) []models.PolicyMode
 	policies := []models.PolicyModel{}
 	for rows.Next() {
 		var policy models.PolicyModel
-		if err := rows.Scan(&policy.Id, &policy.Country, &policy.Code, &policy.Name, &policy.Amount, &policy.Checklist, &policy.TransactionType); err != nil {
+		if err := rows.Scan(&policy.Id, &policy.Code, &policy.Name, &policy.TransactionType, &policy.Parameter); err != nil {
 			log.Fatal(err)
 		}
-
-		if len(policy.Checklist) > 0 {
-			policy.Parameter = policy.Checklist
-		} else {
-			policy.Parameter = strconv.FormatUint(policy.Amount, 10)
-		}
-
 		policies = append(policies, policy)
 	}
 	return policies
 }
 
-func (wrapper *DBHandler) GetPolicy(bankCountry string, policyId uint64) models.PolicyModel {
-	query := `SELECT p.Id, c.Name, p.CountryId, p.Code, p.Name, ttp.Amount, ttp.Checklist
-					FROM TransactionTypePolicy ttp
-					JOIN Policy as p ON ttp.PolicyId = p.Id
-					Join Country as c ON ttp.CountryId = c.Id
-					Where ttp.PolicyId = @p2
-						and ttp.CountryId = (SELECT Id FROM [Country] Where Name = @p1)`
+func (wrapper *DBHandler) GetPolicy(policyId uint64) models.PolicyModel {
+	query := `SELECT p.Id, pt.Code, pt.Name, p.Parameters FROM Policy as p
+					LEFT JOIN PolicyType as pt on p.PolicyTypeId = pt.Id
+					Where p.Id = @p1`
 
 	rows, err := wrapper.db.Query(query,
-		sql.Named("p1", bankCountry),
-		sql.Named("p2", policyId))
+		sql.Named("p1", policyId))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -137,37 +124,30 @@ func (wrapper *DBHandler) GetPolicy(bankCountry string, policyId uint64) models.
 
 	var policy models.PolicyModel
 	for rows.Next() {
-		if err := rows.Scan(&policy.Id, &policy.Country, &policy.CountryId, &policy.Code, &policy.Name, &policy.Amount, &policy.Checklist); err != nil {
+		if err := rows.Scan(&policy.Id, &policy.Code, &policy.Name, &policy.Parameter); err != nil {
 			log.Fatal(err)
 		}
-
-		if len(policy.Checklist) > 0 {
-			policy.Parameter = policy.Checklist
-		} else {
-			policy.Parameter = strconv.FormatUint(policy.Amount, 10)
-		}
 	}
-
 	return policy
 }
 
-func (wrapper *DBHandler) UpdatePolicyAmount(policyId uint64, amount uint64) {
-	query := `UPDATE [TransactionTypePolicy] Set Amount = @p2 Where PolicyId = @p1`
+func (wrapper *DBHandler) UpdatePolicyAmount(amount uint64, policyId uint64) {
+	query := `UPDATE [Policy] Set Parameters = @p1 Where Id = @p2`
 
 	_, err := wrapper.db.Exec(query,
-		sql.Named("p1", policyId),
-		sql.Named("p2", amount))
+		sql.Named("p1", amount),
+		sql.Named("p2", policyId))
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func (wrapper *DBHandler) UpdatePolicyChecklist(policyId uint64, checklist string) {
-	query := `UPDATE [TransactionTypePolicy] Set Checklist = @p2 Where PolicyId = @p1`
+func (wrapper *DBHandler) UpdatePolicyChecklist(checklist string, policyId uint64) {
+	query := `UPDATE [Policy] Set Parameters = @p1 Where Id = @p2`
 
 	_, err := wrapper.db.Exec(query,
-		sql.Named("p1", policyId),
-		sql.Named("p2", checklist))
+		sql.Named("p1", checklist),
+		sql.Named("p2", policyId))
 	if err != nil {
 		log.Fatal(err)
 	}
