@@ -7,7 +7,7 @@ type BankEmployeeModel struct {
 	Name     string
 	Username string
 	Password string
-	BankId   uint64
+	BankId   string
 	BankName string
 }
 
@@ -56,7 +56,7 @@ type TransactionProofRequest struct {
 }
 
 type BankModel struct {
-	Id      uint64
+	Id      string
 	Name    string
 	Country string
 }
