@@ -143,8 +143,7 @@ func (controller *TransactionController) AddTransaction(w http.ResponseWriter, r
 			LoanID:                          uint64(loanId),
 		}
 
-		// handle peer_id, benef_bank url from map
-		ch, err := controller.P2PClient.Send(transactionDto.BeneficiaryBankGlobalIdentifier, "create-transaction", transactionDto)
+		ch, err := controller.P2PClient.Send(transactionDto.BeneficiaryBankGlobalIdentifier, "create-transaction", transactionDto, 0)
 
 		_ = ch
 
@@ -229,7 +228,7 @@ func (controller *TransactionController) ConfirmTransaction(w http.ResponseWrite
 
 		bank := controller.DB.GetBank(controller.DB.GetBankId(transaction.BeneficiaryBank))
 
-		amount := controller.DB.CheckCFM(controller.DB.GetBankClientId(transaction.ReceiverName), bank.CountryId)
+		amount := controller.DB.CheckCFM(controller.DB.GetBankClientId(transaction.ReceiverName), int(bank.CountryId))
 
 		policies := controller.DB.GetPolices(controller.DB.GetBankId(transaction.BeneficiaryBank), transaction.TypeId)
 

@@ -148,7 +148,7 @@ func (wrapper *DBHandler) GetBanks() []models.BankModel {
 }
 
 func (wrapper *DBHandler) GetCountry(countryId uint) models.NewCountry {
-	query := `SELECT c.Id, c.Name, c.CountryCode
+	query := `SELECT c.Id, c.Name, c.Code
 					From Country c
 					WHERE c.Id = @p1`
 
@@ -162,7 +162,7 @@ func (wrapper *DBHandler) GetCountry(countryId uint) models.NewCountry {
 	var country models.NewCountry
 
 	for rows.Next() {
-		if err := rows.Scan(&country.Id, &country.Name, &country.CountryCode); err != nil {
+		if err := rows.Scan(&country.Id, &country.Name, &country.Code); err != nil {
 			log.Fatal(err)
 		}
 	}

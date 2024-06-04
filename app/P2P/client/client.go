@@ -27,15 +27,17 @@ func GetP2PClient() *P2PClient {
 	return &client
 }
 
-func (c *P2PClient) Send(receivingBankID string, method string, data any) (<-chan any, error) {
+func (c *P2PClient) Send(receivingBankID string, method string, data any, messageID int) (<-chan any, error) {
 	receivingBankPeerID, err := manager.GetBankPeerID(receivingBankID)
 
 	if err != nil {
 		return nil, err
 	}
 
-	messageID := rand.Int()
-
+	if messageID == 0 {
+		messageID = rand.Int()
+	}
+	fmt.Println(messageID)
 	messagePayload, err := json.Marshal(data)
 
 	if err != nil {

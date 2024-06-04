@@ -4,6 +4,7 @@ import (
 	"bisgo/app/models"
 	"bisgo/common"
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"net/http"
@@ -29,11 +30,27 @@ func (controller *APIController) GetPolicies(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	transactionTypeId, _ := strconv.Atoi(data.TransactionTypeId)
+	countryCode := controller.DB.GetCountry(controller.DB.GetBank(data.BankId).CountryId).Code
 
-	policies := controller.DB.GetPolices(data.BankId, transactionTypeId)
+	// TODO: Handle RequesterGlobalIdentifier
+	policyRequestDto := common.PolicyRequestDTO{
+		Country:                   countryCode,
+		TransactionType:           data.TransactionTypeId,
+		RequesterGlobalIdentifier: "984500653R409CC5AB28",
+	}
 
-	jsonData, err := json.Marshal(policies)
+	ch, err := controller.P2PClient.Send(data.BankId, "get-policies", policyRequestDto, 0)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error", 500)
+	}
+
+	responseData := (<-ch).(common.PolicyResponseDTO)
+
+	fmt.Println("Received from request")
+	fmt.Println(responseData)
+
+	jsonData, err := json.Marshal("")
 
 	if err != nil {
 		http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)

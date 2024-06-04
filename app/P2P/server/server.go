@@ -47,7 +47,10 @@ func (s *P2PServer) Mux() http.Handler {
 		switch message.Method {
 		case "create-transaction":
 			s.CreateTransaction(message.MessageID, message.Payload)
-		case "method2":
+		case "get-policies":
+			s.GetPolicies(message.MessageID, message.Payload)
+		case "send-policies":
+			s.SendPolicies(message.MessageID, message.Payload)
 		default:
 			http.Error(w, "Invalid method", http.StatusBadRequest)
 			return

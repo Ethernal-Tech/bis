@@ -32,16 +32,19 @@ type TransactionDTO struct {
 }
 
 type PolicyRequestDTO struct {
-	RequestID            string `json:"req_id"`
-	BankGlobalIdentifier string `json:"bank_id"`
-	TransactionType      string `json:"tx_type"`
+	Country                   string `json:"country"`
+	TransactionType           string `json:"tx_type"`
+	RequesterGlobalIdentifier string `json:"requester"`
+}
+
+type PolicyResponseDTO struct {
+	Policies []PolicyDTO `json:"policies"`
 }
 
 type PolicyDTO struct {
-	RequestID string `json:"req_id"`
-	Code      string `json:"code"`
-	Name      string `json:"name"`
-	Params    string `json:"params"`
+	Code   string `json:"code"`
+	Name   string `json:"name"`
+	Params string `json:"params"`
 }
 
 type SCLInitiationDTO struct {

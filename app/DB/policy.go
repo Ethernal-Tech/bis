@@ -84,6 +84,34 @@ func (wrapper *DBHandler) GetPolices(bankId string, transactionTypeId int) []mod
 	return policies
 }
 
+func (wrapper *DBHandler) GetPolicesByCountryCode(originatingCountryCode string, transactionTypeId int) []models.NewPolicyModel {
+	query := `SELECT p.Id, p.PolicyTypeId, pt.Code, pt.Name, p.TransactionTypeId, p.PolicyEnforcingCountryId, p.OriginatingCountryId, p.Parameters
+              FROM Policy p
+              JOIN PolicyType pt ON p.PolicyTypeId = pt.Id
+              JOIN Country c ON p.OriginatingCountryId = c.Id
+              WHERE c.Code = @p1 AND p.TransactionTypeId = @p2`
+
+	rows, err := wrapper.db.Query(query,
+		sql.Named("p1", originatingCountryCode),
+		sql.Named("p2", transactionTypeId))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer rows.Close()
+
+	policies := []models.NewPolicyModel{}
+	for rows.Next() {
+		var policy models.NewPolicyModel
+		if err := rows.Scan(&policy.Policy.Id, &policy.Policy.PolicyTypeId, &policy.PolicyType.Code, &policy.PolicyType.Name, &policy.Policy.TransactionTypeId, &policy.Policy.PolicyEnforcingCountryId, &policy.Policy.OriginatingCountryId, &policy.Policy.Parameters); err != nil {
+			log.Fatal(err)
+		}
+
+		policies = append(policies, policy)
+	}
+	return policies
+}
+
 func (wrapper *DBHandler) PoliciesFromCountry(bankId string) []models.PolicyModel {
 	query := `SELECT p.Id, pt.Code, pt.Name, tt.Name, p.Parameters FROM Policy as p
 					LEFT JOIN PolicyType as pt on p.PolicyTypeId = pt.Id
