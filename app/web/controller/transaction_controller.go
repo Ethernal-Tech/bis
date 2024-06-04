@@ -71,7 +71,7 @@ func (controller *TransactionController) AddTransaction(w http.ResponseWriter, r
 		viewData["banks"] = controller.DB.GetBanks()
 		viewData["transactionTypes"] = controller.DB.GetTransactionTypes()
 
-		ts, err := template.ParseFiles("./static/views/addtransaction.html")
+		ts, err := template.ParseFiles("./app/web/static/views/addcompliance.html")
 		if err != nil {
 			log.Println(err.Error())
 			http.Error(w, "Internal Server Error 1", 500)

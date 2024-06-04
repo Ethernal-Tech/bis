@@ -9,8 +9,11 @@ import (
 func (server *WebServer) Routes() http.Handler {
 	router := httprouter.New()
 
-	fileServer := http.FileServer(http.Dir("./static"))
-	router.Handler(http.MethodGet, "/static/*filepath", http.StripPrefix("/static", fileServer))
+	fileServerLegacy := http.FileServer(http.Dir("./static"))
+	router.Handler(http.MethodGet, "/static/*filepath", http.StripPrefix("/static", fileServerLegacy))
+
+	fileServer := http.FileServer(http.Dir("./app/web/static"))
+	router.Handler(http.MethodGet, "/app/web/static/*filepath", http.StripPrefix("/app/web/static", fileServer))
 
 	// Home controller
 	{

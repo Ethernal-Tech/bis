@@ -1,0 +1,229 @@
+* {
+    margin: 0px;
+    padding: 0px;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    height: 100vh;
+    width: 100vw;
+    background-color: #3A6BAC;
+    background-image: url(/static/images/waves.svg);
+}
+
+header {
+    background-color: #FFFFFF;
+    border-bottom: 4px solid #AA322F;
+}
+
+header > div {
+    width: 80%;
+    margin: 0px auto;
+    padding: 10px;
+    display: flex;
+    justify-content: space-between;
+    color: #AA322F;
+}
+
+
+img {
+    display: block;
+}
+
+input:focus {
+    outline: none;
+}
+
+.user{
+    width: 260px;
+    font-size: 18px;
+    justify-content: space-between;
+    display: flex;
+    align-items: center;
+}
+
+.logout {
+    display: flex;
+    align-items: center;
+}
+
+.add-compliance {
+    background-color: #FFFFFF;
+    width: 940px;
+    height: 610px;
+    margin: 100px auto;
+    border: 1px solid #706F6F;
+    border-radius: 8px;
+    box-shadow: 0px 0px 4px #000000;
+}
+
+.add-compliance > fieldset {
+    margin: 20px auto;
+    margin-bottom: 30px;
+    border: 1px solid rgb(183, 183, 183);
+    width: 880px;
+    height: 200px;
+    display: flex;
+}
+
+.add-compliance > fieldset > legend {
+    margin: 10px;
+    padding-left: 4px;
+    padding-right: 10px;
+    font-size: 18px;
+}
+
+.sender-beneficiary-details, .transaction-details {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.title {
+    margin: 20px auto;
+    margin-bottom: 34px;
+    width: 880px;
+}
+
+.title > span {
+    font-weight: 600;
+    font-size: 28px;
+    color: #AA322F;
+}
+
+.sender, .beneficiary {
+    width: 47%;
+    font-size: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 74%;
+}
+
+.input {
+    border-radius: 4px;
+    border: 1px solid rgb(183, 183, 183);
+    height: 28px;
+    width: 300px;
+    padding-left: 10px;
+    padding-right: 10px;
+    box-sizing: border-box;
+}
+
+.input-select {
+    width: 380px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.sender input, .beneficiary input {
+    width: 380px;
+}
+
+.input-container {
+    width: 380px;
+    display: flex;
+}
+
+.input-container > input {
+    flex: 8;
+    border-radius: 0px;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+} 
+
+.transaction-details .input-container > input {
+    border-radius: 0px;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+}
+
+.input-container > a {
+   color: #FFFFFF;
+   background-color: #AA322F;
+   display: flex;
+   justify-content: center;
+   align-items: center;
+   flex: 2;
+   border-top-right-radius: 4px;
+   border-bottom-right-radius: 4px;
+   cursor: pointer;
+}
+
+.input-container > select {
+    border: 0px;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    background-color: #AA322F;
+    color: #FFFFFF;
+    flex: 2;
+    text-align: center;
+}
+
+.beneficiary {
+    align-items: end;
+}
+
+.transaction-details > div {
+    width: 47%;
+    font-size: 15px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 74%;
+}
+
+.transaction-details > div:nth-of-type(2) {
+    align-items: end;
+}
+
+.transaction-details input {
+    width: 380px;
+}
+
+
+.field-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.input-descriptor {
+    margin-bottom: 6px;
+}
+
+.input-descriptor > span {
+    color: #AA322F;
+    margin-left: 4px;
+}
+
+.buttons {
+    width: 880px;
+    margin: 0px auto;
+    height: 36px;
+    display: flex;
+    justify-content: end;
+}
+
+.buttons > div {
+    display: flex;
+    width: 300px;
+    justify-content: space-between;
+}
+
+.control-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 130px;
+    border-radius: 8px;
+    color: #FFFFFF;
+    cursor: pointer;
+}
+
+.cancel1 {
+    background-color: #706F6F;
+}
+
+.next1 {
+    background-color: #AA322F;
+}
