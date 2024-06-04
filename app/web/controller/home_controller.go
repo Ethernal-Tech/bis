@@ -49,7 +49,7 @@ func (controller *HomeController) Login(w http.ResponseWriter, r *http.Request) 
 	controller.SessionManager.Put(r.Context(), "username", user.Name)
 	controller.SessionManager.Put(r.Context(), "bankId", user.BankId)
 	controller.SessionManager.Put(r.Context(), "bankName", user.BankName)
-	controller.SessionManager.Put(r.Context(), "country", controller.DB.GetCountry(uint(controller.DB.GetBank(user.BankId).CountryId)).Name)
+	controller.SessionManager.Put(r.Context(), "country", user.Country)
 	controller.SessionManager.Put(r.Context(), "centralBankEmployee", centralBankEmploye)
 
 	http.Redirect(w, r, "/home", http.StatusSeeOther)
@@ -72,10 +72,10 @@ func (controller *HomeController) Home(w http.ResponseWriter, r *http.Request) {
 	var transactions []models.TransactionModel
 	if controller.SessionManager.GetBool(r.Context(), "centralBankEmployee") {
 		var countryId int
-		transactions, countryId = controller.DB.GetTransactionsForCentralbank(controller.SessionManager.Get(r.Context(), "bankId").(uint64), "")
+		transactions, countryId = controller.DB.GetTransactionsForCentralbank(controller.SessionManager.Get(r.Context(), "bankId").(string), "")
 		viewData["countryId"] = countryId
 	} else {
-		transactions = controller.DB.GetTransactionsForAddress(controller.SessionManager.Get(r.Context(), "bankId").(uint64), "")
+		transactions = controller.DB.GetTransactionsForAddress(controller.SessionManager.Get(r.Context(), "bankId").(string), "")
 	}
 
 	viewData["username"] = controller.SessionManager.GetString(r.Context(), "username")

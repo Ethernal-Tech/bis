@@ -7,28 +7,13 @@ import (
 	"strings"
 )
 
-func (wrapper *DBHandler) CheckCFM(receiverId uint64, countryId int) int64 {
-	query := `SELECT GlobalIdentifier FROM BankClient Where Id = @p1`
+func (wrapper *DBHandler) CheckCFM(receiverId string, countryId int) int64 {
+	query := `SELECT b.GlobalIdentifier FROM BankClient as bc 
+				JOIN (SELECT * FROM Bank Where CountryId = @p2) as b ON b.GlobalIdentifier = bc.BankId
+				Where bc.GlobalIdentifier = @p1`
 
 	rows, err := wrapper.db.Query(query,
-		sql.Named("p1", receiverId))
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	var globalIdentifier string
-	for rows.Next() {
-		if err := rows.Scan(&globalIdentifier); err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	rows.Close()
-	query = `SELECT b.Id FROM BankClient as bc Join (SELECT * FROM Bank Where CountryId = @p2) as b ON b.Id = bc.BankId	Where bc.GlobalIdentifier = @p1`
-
-	rows, err = wrapper.db.Query(query,
-		sql.Named("p1", globalIdentifier),
+		sql.Named("p1", receiverId),
 		sql.Named("p2", countryId))
 
 	if err != nil {

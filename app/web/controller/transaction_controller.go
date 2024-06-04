@@ -27,10 +27,10 @@ func (controller *TransactionController) SearchTransaction(w http.ResponseWriter
 	var transactions []models.TransactionModel
 	if controller.SessionManager.GetBool(r.Context(), "centralBankEmployee") {
 		var countryId int
-		transactions, countryId = controller.DB.GetTransactionsForCentralbank(controller.SessionManager.Get(r.Context(), "bankId").(uint64), searchValue)
+		transactions, countryId = controller.DB.GetTransactionsForCentralbank(controller.SessionManager.Get(r.Context(), "bankId").(string), searchValue)
 		viewData["countryId"] = countryId
 	} else {
-		transactions = controller.DB.GetTransactionsForAddress(controller.SessionManager.Get(r.Context(), "bankId").(uint64), searchValue)
+		transactions = controller.DB.GetTransactionsForAddress(controller.SessionManager.Get(r.Context(), "bankId").(string), searchValue)
 	}
 
 	viewData["transactions"] = transactions
@@ -93,7 +93,7 @@ func (controller *TransactionController) AddTransaction(w http.ResponseWriter, r
 		}
 
 		originatorBank := controller.DB.GetBankId(controller.SessionManager.GetString(r.Context(), "bankName"))
-		beneficiaryBank, _ := strconv.Atoi(r.Form.Get("bank"))
+		//beneficiaryBank, _ := strconv.Atoi(r.Form.Get("bank"))
 		sender := controller.DB.GetBankClientId(r.Form.Get("sender"))
 		receiver := controller.DB.GetBankClientId(r.Form.Get("receiver"))
 		currency := r.Form.Get("currency")
@@ -101,26 +101,40 @@ func (controller *TransactionController) AddTransaction(w http.ResponseWriter, r
 		transactionType, _ := strconv.Atoi(r.Form.Get("type"))
 		loanId, _ := strconv.Atoi(strings.Replace(r.Form.Get("loanId"), ",", "", -1))
 
-		transaction := models.Transaction{
+		/*
 			OriginatorBank:  uint64(originatorBank),
-			BeneficiaryBank: uint64(beneficiaryBank),
-			Sender:          sender,
-			Receiver:        receiver,
-			Currency:        currency,
-			Amount:          amount,
-			TypeId:          transactionType,
-			LoanId:          loanId,
+				BeneficiaryBank: uint64(beneficiaryBank),
+				Sender:          sender,
+				Receiver:        receiver,
+				Currency:        currency,
+				Amount:          amount,
+				TypeId:          transactionType,
+				LoanId:          loanId, */
+
+		// TODO: Generate tx id
+		// TODO: Get beneficiary lei
+		transaction := models.NewTransaction{
+			Id:                "",
+			OriginatorBankId:  originatorBank,
+			BeneficiaryBankId: "",
+			SenderId:          sender,
+			ReceiverId:        receiver,
+			Currency:          currency,
+			Amount:            amount,
+			TransactionTypeId: transactionType,
+			LoanId:            loanId,
 		}
 
 		// Call P2P create-transaction of beneficiary bank
+		// TODO: Get beneficiary lei
 		transactionDto := common.TransactionDTO{
 			TransactionID:                   "0",
 			SenderLei:                       "",
 			SenderName:                      r.Form.Get("sender"),
 			ReceiverLei:                     "",
 			ReceiverName:                    r.Form.Get("receiver"),
-			OriginatorBankGlobalIdentifier:  controller.DB.GetBankGlobalIdentifier(int(originatorBank)),
-			BeneficiaryBankGlobalIdentifier: controller.DB.GetBankGlobalIdentifier(beneficiaryBank),
+			OriginatorBankGlobalIdentifier:  originatorBank,
+			BeneficiaryBankGlobalIdentifier: "",
 			PaymentType:                     "",
 			TransactionType:                 fmt.Sprint(transactionType),
 			Amount:                          uint64(amount),

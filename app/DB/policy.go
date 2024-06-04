@@ -49,7 +49,7 @@ func (wrapper *DBHandler) GetPolicyById(policyID int) models.Policy {
 	return policy
 }
 
-func (wrapper *DBHandler) GetPolices(bankId uint64, transactionTypeId int) []models.PolicyModel {
+func (wrapper *DBHandler) GetPolices(bankId string, transactionTypeId int) []models.PolicyModel {
 	query := `SELECT p.Id, c.Name, p.CountryId, p.Code, p.Name, ttp.Amount, ttp.Checklist
 					FROM TransactionTypePolicy ttp
 					JOIN Policy as p ON ttp.PolicyId = p.Id

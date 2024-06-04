@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-func (wrapper *DBHandler) GetTransactionPolicyStatuses(transactionId uint64) []models.TransactionPolicyStatus {
+func (wrapper *DBHandler) GetTransactionPolicyStatuses(transactionId string) []models.TransactionPolicyStatus {
 	query := `SELECT TransactionId, PolicyId, Status FROM [TransactionPolicyStatus] WHERE TransactionId = @p1`
 
 	rows, err := wrapper.db.Query(query, sql.Named("p1", transactionId))
@@ -50,7 +50,7 @@ func (wrapper *DBHandler) GetTransactionPolicyStatus(transactionId uint64, polic
 	return status
 }
 
-func (wrapper *DBHandler) UpdateTransactionPolicyStatus(transactionId uint64, policyId int, status int) {
+func (wrapper *DBHandler) UpdateTransactionPolicyStatus(transactionId string, policyId int, status int) {
 	query := `UPDATE [TransactionPolicyStatus] Set Status = @p3 Where TransactionId = @p1 and PolicyId = @p2`
 
 	_, err := wrapper.db.Exec(query,

@@ -3,16 +3,16 @@ package models
 import "time"
 
 type BankEmployeeModel struct {
-	Id       uint64
 	Name     string
 	Username string
 	Password string
 	BankId   string
 	BankName string
+	Country  string
 }
 
 type TransactionModel struct {
-	Id                       uint64
+	Id                       string
 	OriginatorBank           string
 	BeneficiaryBank          string
 	SenderGlobalIdentifier   string
@@ -56,7 +56,7 @@ type TransactionProofRequest struct {
 }
 
 type BankModel struct {
-	Id      string
+	Id      uint64
 	Name    string
 	Country string
 }

@@ -43,15 +43,16 @@ func (h *P2PHandler) CreateTransaction(messageID int, payload []byte) {
 		return
 	}
 
-	transaction := models.Transaction{
-		OriginatorBank:  h.DB.GetBankIdByIdentifier(messageData.OriginatorBankGlobalIdentifier),
-		BeneficiaryBank: h.DB.GetBankIdByIdentifier(messageData.BeneficiaryBankGlobalIdentifier),
-		Sender:          h.DB.GetBankClientId(messageData.SenderName),
-		Receiver:        h.DB.GetBankClientId(messageData.ReceiverName),
-		Currency:        messageData.Currency,
-		Amount:          int(messageData.Amount),
-		TypeId:          transactionType,
-		LoanId:          int(messageData.LoanID),
+	transaction := models.NewTransaction{
+		Id:                "",
+		OriginatorBankId:  messageData.OriginatorBankGlobalIdentifier,
+		BeneficiaryBankId: messageData.BeneficiaryBankGlobalIdentifier,
+		SenderId:          messageData.SenderName,
+		ReceiverId:        messageData.ReceiverName,
+		Currency:          messageData.Currency,
+		Amount:            int(messageData.Amount),
+		TransactionTypeId: transactionType,
+		LoanId:            int(messageData.LoanID),
 	}
 
 	transactionID := h.DB.InsertTransaction(transaction)

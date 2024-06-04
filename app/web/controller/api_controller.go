@@ -29,10 +29,9 @@ func (controller *APIController) GetPolicies(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	bankId, _ := strconv.Atoi(data.BankId)
 	transactionTypeId, _ := strconv.Atoi(data.TransactionTypeId)
 
-	policies := controller.DB.GetPolices(uint64(bankId), transactionTypeId)
+	policies := controller.DB.GetPolices(data.BankId, transactionTypeId)
 
 	jsonData, err := json.Marshal(policies)
 
@@ -60,25 +59,19 @@ func (controller *APIController) SubmitTransactionProof(w http.ResponseWriter, r
 		return
 	}
 
-	transactionId, err := strconv.Atoi(messageData.TransactionId)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error 1", 500)
-		return
-	}
-	controller.DB.InsertTransactionProof(uint64(transactionId), messageData.Value)
+	controller.DB.InsertTransactionProof(messageData.TransactionId, messageData.Value)
 
 	if messageData.Value == "0" {
 		policyId, _ := strconv.Atoi(messageData.PolicyId)
-		controller.DB.UpdateTransactionPolicyStatus(uint64(transactionId), policyId, 1)
-		controller.DB.UpdateTransactionState(uint64(transactionId), 4)
+		controller.DB.UpdateTransactionPolicyStatus(messageData.TransactionId, policyId, 1)
+		controller.DB.UpdateTransactionState(messageData.TransactionId, 4)
 	} else {
 		policyId, _ := strconv.Atoi(messageData.PolicyId)
-		controller.DB.UpdateTransactionPolicyStatus(uint64(transactionId), policyId, 2)
-		controller.DB.UpdateTransactionState(uint64(transactionId), 5)
+		controller.DB.UpdateTransactionPolicyStatus(messageData.TransactionId, policyId, 2)
+		controller.DB.UpdateTransactionState(messageData.TransactionId, 5)
 	}
 
-	policyStatuses := controller.DB.GetTransactionPolicyStatuses(uint64(transactionId))
+	policyStatuses := controller.DB.GetTransactionPolicyStatuses(messageData.TransactionId)
 
 	check := true
 
@@ -89,13 +82,13 @@ func (controller *APIController) SubmitTransactionProof(w http.ResponseWriter, r
 	}
 
 	if check {
-		controller.DB.UpdateTransactionState(uint64(transactionId), 6)
-		controller.DB.UpdateTransactionState(uint64(transactionId), 7)
+		controller.DB.UpdateTransactionState(messageData.TransactionId, 6)
+		controller.DB.UpdateTransactionState(messageData.TransactionId, 7)
 	} else {
-		controller.DB.UpdateTransactionState(uint64(transactionId), 8)
+		controller.DB.UpdateTransactionState(messageData.TransactionId, 8)
 	}
 
-	err = json.NewEncoder(w).Encode("Ok")
+	err := json.NewEncoder(w).Encode("Ok")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error 2", 500)
@@ -164,15 +157,18 @@ func (controller *APIController) CreateTx(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	transaction := models.Transaction{
-		OriginatorBank:  controller.DB.GetBankIdByIdentifier(messageData.OriginatorBankGlobalIdentifier),
-		BeneficiaryBank: controller.DB.GetBankIdByIdentifier(messageData.BeneficiaryBankGlobalIdentifier),
-		Sender:          controller.DB.GetBankClientId(messageData.SenderName),
-		Receiver:        controller.DB.GetBankClientId(messageData.ReceiverName),
-		Currency:        messageData.Currency,
-		Amount:          int(messageData.Amount),
-		TypeId:          transactionType,
-		LoanId:          int(messageData.LoanID),
+	// TODO: Add new client if not exists
+
+	transaction := models.NewTransaction{
+		Id:                messageData.TransactionID,
+		OriginatorBankId:  messageData.OriginatorBankGlobalIdentifier,
+		BeneficiaryBankId: messageData.BeneficiaryBankGlobalIdentifier,
+		SenderId:          messageData.SenderLei,
+		ReceiverId:        messageData.ReceiverLei,
+		Currency:          messageData.Currency,
+		Amount:            int(messageData.Amount),
+		TransactionTypeId: transactionType,
+		LoanId:            int(messageData.LoanID),
 	}
 
 	transactionID := controller.DB.InsertTransaction(transaction)
