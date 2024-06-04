@@ -32,98 +32,109 @@
         <div class="title">
             <span>New Compliance Check</span>
         </div>
-        <fieldset class="sender-beneficiary-details">
-            <legend>1. Please fill in the sender and beneficiary's personal details:</legend>
-            <div class="sender">
-                <div class="field-container">
-                    <span class="input-descriptor">Sender's Legal Entity Identifier (LEI)</span>
-                    <div class="input-container"><input class="input" type="text" placeholder="e.g. 123456X89Y123Z5A7890"><a>Populate</a></div>
-                </div>
-                <div class="field-container">
-                    <span class="input-descriptor">Sender's Company Name<span>*</span></span>
-                    <input class="input" type="text" placeholder="e.g. Sender company Limited">                    
-                </div>
-            </div>
-            <div class="beneficiary">
-                <div class="field-container">
-                    <span class="input-descriptor">Beneficiary's Legal Entity Identifier (LEI)</span>
-                    <div class="input-container"><input class="input" type="text" placeholder="e.g. 123456X89Y123Z5A7890"><a>Populate</a></div>
-                </div>
-                <div class="field-container">
-                    <span class="input-descriptor">Beneficiary's Company Name<span>*</span></span>
-                    <input class="input" type="text" placeholder="e.g. Beneficiary Company Limited">                    
-                </div>
-            </div>
-          </fieldset>
-        <fieldset class="transaction-details">
-            <legend>2. Please fill in the transaction details:</legend>
-            <div>
-                <div class="field-container">
-                    <span class="input-descriptor">Payment Type<span>*</span></span>
-                    <select class="input input-select">
-                        <option>
-                            Option 1
-                        </option>
-                        <option>
-                            Option 2
-                        </option>
-                        <option>
-                            Option 3
-                        </option>
-                    </select>
-                </div>
-                <div class="field-container">
-                    <span class="input-descriptor">Transaction Amount<span>*</span></span>
-                    <div class="input-container">
-                        <select>
-                            <option>
-                                AUD
-                            </option>
-                            <option>
-                                KRW
-                            </option>
-                            <option>
-                                MYR
-                            </option>
-                            <option>
-                                SGD
-                            </option>
-                        </select>
-                        <input class="input" type="text" placeholder="e.g. 200,000,000">                    
+        <div class="view">
+            <div class="display view-1" id="view-1">
+                <fieldset class="sender-beneficiary-details">
+                    <legend>1. Please fill in the sender and beneficiary's personal details:</legend>
+                    <div class="sender">
+                        <div class="field-container">
+                            <span class="input-descriptor">Sender's Legal Entity Identifier (LEI)</span>
+                            <div class="input-container"><input class="input" type="text" placeholder="e.g. 123456X89Y123Z5A7890"><a>Populate</a></div>
+                        </div>
+                        <div class="field-container">
+                            <span class="input-descriptor">Sender's Company Name<span>*</span></span>
+                            <input class="input" type="text" placeholder="e.g. Sender company Limited">                    
+                        </div>
                     </div>
-                </div>
+                    <div class="beneficiary">
+                        <div class="field-container">
+                            <span class="input-descriptor">Beneficiary's Legal Entity Identifier (LEI)</span>
+                            <div class="input-container"><input class="input" type="text" placeholder="e.g. 123456X89Y123Z5A7890"><a>Populate</a></div>
+                        </div>
+                        <div class="field-container">
+                            <span class="input-descriptor">Beneficiary's Company Name<span>*</span></span>
+                            <input class="input" type="text" placeholder="e.g. Beneficiary Company Limited">                    
+                        </div>
+                    </div>
+                </fieldset>
+                <fieldset class="transaction-details">
+                    <legend>2. Please fill in the transaction details:</legend>
+                    <div>
+                        <div class="field-container">
+                            <span class="input-descriptor">Payment Type<span>*</span></span>
+                            <select class="input input-select">
+                                <option>
+                                    Option 1
+                                </option>
+                                <option>
+                                    Option 2
+                                </option>
+                                <option>
+                                    Option 3
+                                </option>
+                            </select>
+                        </div>
+                        <div class="field-container">
+                            <span class="input-descriptor">Transaction Amount<span>*</span></span>
+                            <div class="input-container">
+                                <select>
+                                    <option>
+                                        AUD
+                                    </option>
+                                    <option>
+                                        KRW
+                                    </option>
+                                    <option>
+                                        MYR
+                                    </option>
+                                    <option>
+                                        SGD
+                                    </option>
+                                </select>
+                                <input class="input" type="text" placeholder="e.g. 200,000,000">                    
+                            </div>
+                        </div>
+                    </div>
+                    <div> 
+                        <div class="field-container">
+                            <span class="input-descriptor">Transaction Type<span>*</span></span>
+                            <select class="input input-select">
+                                <option>
+                                    Option 1
+                                </option>
+                                <option>
+                                    Option 2
+                                </option>
+                                <option>
+                                    Option 3
+                                </option>
+                            </select>
+                        </div>
+                        <div class="field-container">
+                            <span class="input-descriptor">Beneficiary Bank<span>*</span></span>
+                            <input class="input" type="text" placeholder="e.g. ANZ">                    
+                        </div>
+                    </div>
+                </fieldset>
             </div>
-            <div> 
-                <div class="field-container">
-                    <span class="input-descriptor">Transaction Type<span>*</span></span>
-                    <select class="input input-select">
-                        <option>
-                            Option 1
-                        </option>
-                        <option>
-                            Option 2
-                        </option>
-                        <option>
-                            Option 3
-                        </option>
-                    </select>
-                </div>
-                <div class="field-container">
-                    <span class="input-descriptor">Beneficiary Bank<span>*</span></span>
-                    <input class="input" type="text" placeholder="e.g. ANZ">                    
-                </div>
+            <div class="not-display view-2" id="view-2">
+                View 2
             </div>
-        </fieldset>
+            <div class="not-display view-3" id="view-3">
+                View 3
+            </div>
+        </div>
         <div class="buttons">
             <div>
-                <div class="control-button cancel1">
+                <div id="cancel-button" class="control-button cancel1">
                     Cancel
                 </div>
-                <div class="control-button next1">
+                <div id="next-button" class="control-button next1">
                     Next
                 </div>
             </div>
         </div>
     </div>
+    <script src="/app/web/static/javascripts/addcompliance-js.js"></script>
 </body>
 </html>
