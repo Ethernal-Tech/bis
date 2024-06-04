@@ -1,6 +1,9 @@
 window.onload = function () {
     document.getElementById("cancel-button").addEventListener("click", downgradeView)
     document.getElementById("next-button").addEventListener("click", upgradeView)
+    document.getElementById('amount-input').addEventListener("input", addSeparators)
+
+    addSeparators()
 }
 
 let currentView = 1
@@ -61,3 +64,12 @@ function upgradeView() {
     }
 }
 
+function addSeparators(event) {
+    let inputValue = parseFloat(event.target.value.replace(/,/g, ''));
+
+    if (!isNaN(inputValue)) {
+        event.target.value = inputValue.toLocaleString();
+    } else {
+        event.target.value = '';
+    }
+}

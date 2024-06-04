@@ -259,6 +259,10 @@ input:focus {
     border-radius: 8px;
     color: #FFFFFF;
     cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;    
+    -ms-user-select: none;     
+    user-select: none;        
 }
 
 .cancel1 {
