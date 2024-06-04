@@ -214,13 +214,41 @@ input:focus {
     margin: 0px auto;
     height: 36px;
     display: flex;
-    justify-content: end;
+    justify-content: space-between;
 }
+
 
 .buttons > div {
     display: flex;
     width: 300px;
     justify-content: space-between;
+}
+
+#view-indicator {
+    margin-left: 10px;
+    width: 70px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.view-indicator > div {
+    border: 1px solid #AA322F;
+    border-radius: 50%;
+    width: 8px;
+    height: 8px;
+}
+
+.view-indicator > div:nth-child(1) {
+    background-color: #AA322F;
+}
+
+.add-color {
+    background-color: #AA322F;
+}
+
+.remove-color {
+    background-color: #FFFFFF; 
 }
 
 .control-button {
