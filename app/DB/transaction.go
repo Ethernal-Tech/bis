@@ -92,7 +92,7 @@ func (wrapper *DBHandler) GetTransactionTypeId(transactionType string) int {
 	return transactionTypeId
 }
 
-func (wrapper *DBHandler) GetTransactionTypes() []models.TransactionType {
+func (wrapper *DBHandler) GetTransactionTypes() []models.NewTransactionType {
 	query := `SELECT Id, Code, Name From TransactionType`
 
 	rows, err := wrapper.db.Query(query)
@@ -102,9 +102,9 @@ func (wrapper *DBHandler) GetTransactionTypes() []models.TransactionType {
 
 	defer rows.Close()
 
-	types := []models.TransactionType{}
+	types := []models.NewTransactionType{}
 	for rows.Next() {
-		var tType models.TransactionType
+		var tType models.NewTransactionType
 		if err := rows.Scan(&tType.Id, &tType.Code, &tType.Name); err != nil {
 			log.Fatal(err)
 		}
