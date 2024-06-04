@@ -258,11 +258,14 @@ input:focus {
     width: 130px;
     border-radius: 8px;
     color: #FFFFFF;
-    cursor: pointer;
+    cursor: pointer;   
+}
+
+.non-selectable {
     -webkit-user-select: none;
     -moz-user-select: none;    
     -ms-user-select: none;     
-    user-select: none;        
+    user-select: none;     
 }
 
 .cancel1 {
