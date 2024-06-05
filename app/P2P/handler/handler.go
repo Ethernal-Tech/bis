@@ -102,7 +102,7 @@ func (h *P2PHandler) GetPolicies(messageID int, payload []byte) {
 		})
 	}
 
-	_, err = h.Client.Send(messageData.RequesterGlobalIdentifier, "send-policies", response, messageID)
+	_, err = h.P2PClient.Send(messageData.RequesterGlobalIdentifier, "send-policies", response, messageID)
 	if err != nil {
 		log.Println(err.Error())
 		return
