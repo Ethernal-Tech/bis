@@ -31,6 +31,7 @@ func (wrapper *DBHandler) InsertTransaction(t models.NewTransaction) string {
 		log.Fatal(err)
 	}
 
+	// TODO: Move the logic to the new func
 	polices := wrapper.GetPolices(t.BeneficiaryBankId, t.TransactionTypeId)
 
 	for _, policy := range polices {

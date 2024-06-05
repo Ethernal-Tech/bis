@@ -50,7 +50,7 @@ func (controller *APIController) GetPolicies(w http.ResponseWriter, r *http.Requ
 	fmt.Println("Received from request")
 	fmt.Println(responseData)
 
-	jsonData, err := json.Marshal("")
+	jsonData, err := json.Marshal(responseData)
 
 	if err != nil {
 		http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)

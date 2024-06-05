@@ -14,7 +14,7 @@ function downgradeView() {
     let view2indCL = document.querySelector(".view-indicator > div:nth-child(2)").classList
     let view3CL = document.getElementById("view-3").classList
     let view3indCL = document.querySelector(".view-indicator > div:nth-child(3)").classList
-    
+
     if (currentView == 1) {
         window.location.href = "/home"
     } else if (currentView == 2) {
@@ -59,8 +59,30 @@ function upgradeView() {
         view3indCL.add("add-color")
         view3CL.remove("not-display")
         view3CL.add("display")
+
+        getPolicies()
     } else if (currentView == 3) {
         // submit compliance check
+        var insertedData = {
+            "senderLei": document.getElementById("sender-lei").value,
+            "senderName": document.getElementById("sender-name").value,
+            "beneficiaryLei": document.getElementById("beneficiary-lei").value,
+            "beneficiaryName": document.getElementById("beneficiary-name").value,
+        };
+
+        fetch("/addtransaction", {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(insertedData)
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                window.location.replace("/home");
+            })
     }
 }
 
@@ -72,4 +94,39 @@ function addSeparators(event) {
     } else {
         event.target.value = '';
     }
+}
+
+function getPolicies() {
+    //bankId = document.getElementById("select-bank").value
+    //transactionTypeid = document.getElementById("select-type").value
+
+    data = {
+        BankId: "549300BUPYUQGB5BFX94",
+        TransactionTypeId: 1
+    }
+
+    fetch("/api/getpolicies", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.length == 0) {
+                console.log('no policies to be applied')
+            }
+            else {
+                console.log(data)
+            }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+        });
 }
