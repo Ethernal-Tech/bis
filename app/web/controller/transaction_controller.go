@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"net/http"
 	"strconv"
+	"strings"
 	"text/template"
 )
 
@@ -85,10 +86,15 @@ func (controller *TransactionController) AddTransaction(w http.ResponseWriter, r
 	} else if r.Method == http.MethodPost {
 
 		data := struct {
-			SenderLei       string `json:"senderLei"`
-			SenderName      string `json:"senderName"`
-			BeneficiaryLei  string `json:"beneficiaryLei"`
-			BeneficiaryName string `json:"beneficiaryName"`
+			SenderLei         string `json:"senderLei"`
+			SenderName        string `json:"senderName"`
+			BeneficiaryLei    string `json:"beneficiaryLei"`
+			BeneficiaryName   string `json:"beneficiaryName"`
+			PaymentTypeID     string `json:"paymentType"`
+			TransactionTypeID string `json:"transactionType"`
+			Currency          string `json:"currency"`
+			Amount            string `json:"amount"`
+			BeneficiaryBank   string `json:"beneficiaryBank"`
 		}{}
 
 		decoder := json.NewDecoder(r.Body)
@@ -99,74 +105,55 @@ func (controller *TransactionController) AddTransaction(w http.ResponseWriter, r
 		}
 
 		fmt.Println(data)
-		// err := r.ParseForm()
-		// if err != nil {
-		// 	log.Println(err.Error())
-		// 	http.Error(w, "Internal Server Error parsing form", 500)
-		// }
 
-		// originatorBank := controller.DB.GetBankId(controller.SessionManager.GetString(r.Context(), "bankName"))
-		// //beneficiaryBank, _ := strconv.Atoi(r.Form.Get("bank"))
-		// sender := controller.DB.GetBankClientId(r.Form.Get("sender"))
-		// receiver := controller.DB.GetBankClientId(r.Form.Get("receiver"))
-		// currency := r.Form.Get("currency")
-		// amount, _ := strconv.Atoi(strings.Replace(r.Form.Get("amount"), ",", "", -1))
-		// transactionType, _ := strconv.Atoi(r.Form.Get("type"))
-		// loanId, _ := strconv.Atoi(strings.Replace(r.Form.Get("loanId"), ",", "", -1))
+		originatorBankId := controller.DB.GetBankId(controller.SessionManager.GetString(r.Context(), "bankName"))
 
-		// /*
-		// 	OriginatorBank:  uint64(originatorBank),
-		// 		BeneficiaryBank: uint64(beneficiaryBank),
-		// 		Sender:          sender,
-		// 		Receiver:        receiver,
-		// 		Currency:        currency,
-		// 		Amount:          amount,
-		// 		TypeId:          transactionType,
-		// 		LoanId:          loanId, */
+		amount, _ := strconv.Atoi(strings.Replace(data.Amount, ",", "", -1))
+		transactionType, _ := strconv.Atoi(data.TransactionTypeID)
+		//loanId, _ := strconv.Atoi(data.PaymentTypeID)
 
-		// // TODO: Generate tx id
-		// // TODO: Get beneficiary lei
-		// transaction := models.NewTransaction{
-		// 	Id:                "",
-		// 	OriginatorBankId:  originatorBank,
-		// 	BeneficiaryBankId: "",
-		// 	SenderId:          sender,
-		// 	ReceiverId:        receiver,
-		// 	Currency:          currency,
-		// 	Amount:            amount,
-		// 	TransactionTypeId: transactionType,
-		// 	LoanId:            loanId,
-		// }
+		// TODO: If client is not in the DB add it
 
-		// // Call P2P create-transaction of beneficiary bank
-		// // TODO: Get beneficiary lei
-		// transactionDto := common.TransactionDTO{
-		// 	TransactionID:                   "0",
-		// 	SenderLei:                       "",
-		// 	SenderName:                      r.Form.Get("sender"),
-		// 	ReceiverLei:                     "",
-		// 	ReceiverName:                    r.Form.Get("receiver"),
-		// 	OriginatorBankGlobalIdentifier:  originatorBank,
-		// 	BeneficiaryBankGlobalIdentifier: "",
-		// 	PaymentType:                     "",
-		// 	TransactionType:                 fmt.Sprint(transactionType),
-		// 	Amount:                          uint64(amount),
-		// 	Currency:                        currency,
-		// 	SwiftBICCode:                    "",
-		// 	LoanID:                          uint64(loanId),
-		// }
+		transaction := models.NewTransaction{
+			OriginatorBankId:  originatorBankId,
+			BeneficiaryBankId: data.BeneficiaryBank,
+			SenderId:          data.SenderLei,
+			ReceiverId:        data.BeneficiaryLei,
+			Currency:          data.Currency,
+			Amount:            amount,
+			TransactionTypeId: transactionType,
+			LoanId:            0,
+		}
 
-		// ch, err := controller.P2PClient.Send(transactionDto.BeneficiaryBankGlobalIdentifier, "create-transaction", transactionDto, 0)
+		transactionID := controller.DB.InsertTransaction(transaction)
+		controller.DB.UpdateTransactionState(transactionID, 1)
+		fmt.Println(transactionID)
 
-		// _ = ch
+		// Call P2P create-transaction of beneficiary bank
+		transactionDto := common.TransactionDTO{
+			TransactionID:                   transactionID,
+			SenderLei:                       data.SenderLei,
+			SenderName:                      data.SenderName,
+			ReceiverLei:                     data.BeneficiaryLei,
+			ReceiverName:                    data.BeneficiaryName,
+			OriginatorBankGlobalIdentifier:  transaction.OriginatorBankId,
+			BeneficiaryBankGlobalIdentifier: transaction.BeneficiaryBankId,
+			PaymentType:                     "",
+			TransactionType:                 fmt.Sprint(transactionType),
+			Amount:                          uint64(amount),
+			Currency:                        data.Currency,
+			SwiftBICCode:                    "",
+			LoanID:                          uint64(0),
+		}
 
-		// if err != nil {
-		// 	log.Println(err.Error())
-		// 	http.Error(w, "Internal Server Error sending create tx", 500)
-		// }
+		ch, err := controller.P2PClient.Send(transactionDto.BeneficiaryBankGlobalIdentifier, "create-transaction", transactionDto, 0)
 
-		// transactionID := controller.DB.InsertTransaction(transaction)
-		// controller.DB.UpdateTransactionState(transactionID, 1)
+		_ = ch
+
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, fmt.Sprint("Internal Server Error sending create tx %w", err), 500)
+		}
 
 		http.Redirect(w, r, "/home", http.StatusSeeOther)
 	}

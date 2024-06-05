@@ -2,6 +2,7 @@ package DB
 
 import (
 	"bisgo/app/models"
+	"bisgo/common"
 	"database/sql"
 	"log"
 	"time"
@@ -13,8 +14,10 @@ func (wrapper *DBHandler) InsertTransaction(t models.NewTransaction) string {
 
 	var insertedID string
 
-	// TODO: Generate Tx hash here...
-	// if (t.Id == "")
+	insertedID, err1 := common.GenerateHash(t)
+	if err1 != nil {
+		log.Fatal(err1)
+	}
 
 	err := wrapper.db.QueryRow(query,
 		sql.Named("p1", insertedID),
@@ -31,7 +34,8 @@ func (wrapper *DBHandler) InsertTransaction(t models.NewTransaction) string {
 		log.Fatal(err)
 	}
 
-	// TODO: Move the logic to the new func
+	// TODO2: Add correct policies/ maybe more than 1 fits criteria
+	// 		  add latest ones
 	polices := wrapper.GetPolices(t.BeneficiaryBankId, t.TransactionTypeId)
 
 	for _, policy := range polices {

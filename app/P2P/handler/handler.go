@@ -43,7 +43,7 @@ func (h *P2PHandler) CreateTransaction(messageID int, payload []byte) {
 	}
 
 	transaction := models.NewTransaction{
-		Id:                "",
+		Id:                messageData.TransactionID,
 		OriginatorBankId:  messageData.OriginatorBankGlobalIdentifier,
 		BeneficiaryBankId: messageData.BeneficiaryBankGlobalIdentifier,
 		SenderId:          messageData.SenderName,
@@ -54,10 +54,10 @@ func (h *P2PHandler) CreateTransaction(messageID int, payload []byte) {
 		LoanId:            int(messageData.LoanID),
 	}
 
+	// TODO: Insert client in DB if it not exists
+
 	transactionID := h.DB.InsertTransaction(transaction)
 	h.DB.UpdateTransactionState(transactionID, 1)
-
-	// TODO: Add policies that are applicable to the created tx
 }
 
 func (h *P2PHandler) GetPolicies(messageID int, payload []byte) {
@@ -143,6 +143,8 @@ func (h *P2PHandler) SendPolicies(messageID int, payload []byte) {
 		log.Println(err.Error())
 		return
 	}
+
+	// TODO1: Add policies to the DB if not exist
 
 	channel <- messageData // send data to the listener
 }

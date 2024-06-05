@@ -43,7 +43,7 @@ function setElements() {
     amount = document.getElementById("amount")
     transactionType = document.getElementById("transaction-type")
     beneficiaryBank = document.getElementById("beneficiary-bank")
-    
+
     senderLeiTI = document.getElementById("ti-sender-lei")
     senderNameTI = document.getElementById("ti-sender-name")
     beneficiaryLeiTI = document.getElementById("ti-beneficiary-lei")
@@ -116,7 +116,7 @@ function upgradeView() {
         }
         beneficiaryNameTI.innerText = beneficiaryName.value
         paymentTypeTI.innerText = paymentType.value
-        amountTI.innerText= amount.value + " " + currency.value
+        amountTI.innerText = amount.value + " " + currency.value
         transactionTypeTI.innerText = transactionType.options[transactionType.selectedIndex].text
         beneficiaryBankTI.innerText = beneficiaryBank.value
 
@@ -139,10 +139,16 @@ function upgradeView() {
     } else if (currentView == 3) {
         // submit compliance check
         var insertedData = {
-            "senderLei": document.getElementById("sender-lei").value,
-            "senderName": document.getElementById("sender-name").value,
-            "beneficiaryLei": document.getElementById("beneficiary-lei").value,
-            "beneficiaryName": document.getElementById("beneficiary-name").value,
+            "senderLei": senderLei.value,
+            "senderName": senderName.value,
+            "beneficiaryLei": beneficiaryLei.value,
+            "beneficiaryName": beneficiaryName.value,
+            "paymentType": paymentType.value,
+            "transactionType": transactionType.value,
+            "currency": currency.options[currency.selectedIndex].text,
+            "amount": amount.value,
+            // TODO: Change to dropdown select
+            "beneficiaryBank": beneficiaryBank.value
         };
 
         fetch("/addtransaction", {
@@ -185,24 +191,24 @@ function getPolicies() {
         },
         body: JSON.stringify(data)
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.length == 0) {
-            console.log('no policies to be applied')
-        }
-        else {
-            hideLoader()
-            console.log(data)
-        }
-    })
-    .catch(error => {
-        console.error('Fetch error:', error);
-    });
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.length == 0) {
+                console.log('no policies to be applied')
+            }
+            else {
+                hideLoader()
+                console.log(data)
+            }
+        })
+        .catch(error => {
+            console.error('Fetch error:', error);
+        });
 }
 
 function showLoader() {
