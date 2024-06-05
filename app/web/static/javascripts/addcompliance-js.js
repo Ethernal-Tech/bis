@@ -1,12 +1,56 @@
 window.onload = function () {
     document.getElementById("cancel-button").addEventListener("click", downgradeView)
     document.getElementById("next-button").addEventListener("click", upgradeView)
-    document.getElementById('amount-input').addEventListener("input", addSeparators)
+    document.getElementById("amount").addEventListener("input", addSeparators)
+
+    setElements()
 
     addSeparators()
 }
 
 let currentView = 1
+
+let senderLei
+let senderName
+let beneficiaryLei
+let beneficiaryName
+let paymentType
+let currency
+let amount
+let transactionType
+let beneficiaryBank
+
+let senderLeiTI
+let senderNameTI
+let beneficiaryLeiTI
+let beneficiaryNameTI
+let paymentTypeTI
+let currencyTI
+let amountTI
+let transactionTypeTI
+let beneficiaryBankTI
+
+function setElements() {
+    senderLei = document.getElementById("sender-lei")
+    senderName = document.getElementById("sender-name")
+    beneficiaryLei = document.getElementById("beneficiary-lei")
+    beneficiaryName = document.getElementById("beneficiary-name")
+    paymentType = document.getElementById("payment-type")
+    currency = document.getElementById("currency")
+    amount = document.getElementById("amount")
+    transactionType = document.getElementById("transaction-type")
+    beneficiaryBank = document.getElementById("beneficiary-bank")
+    
+    senderLeiTI = document.getElementById("ti-sender-lei")
+    senderNameTI = document.getElementById("ti-sender-name")
+    beneficiaryLeiTI = document.getElementById("ti-beneficiary-lei")
+    beneficiaryNameTI = document.getElementById("ti-beneficiary-name")
+    paymentTypeTI = document.getElementById("ti-payment-type")
+    currencyTI = document.getElementById("ti-currency")
+    amountTI = document.getElementById("ti-amount")
+    transactionTypeTI = document.getElementById("ti-transaction-type")
+    beneficiaryBankTI = document.getElementById("ti-beneficiary-bank")
+}
 
 function downgradeView() {
     let view1CL = document.getElementById("view-1").classList
@@ -45,6 +89,24 @@ function upgradeView() {
 
     if (currentView == 1) {
         currentView++
+
+        if (senderLei.value == "") {
+            senderLeiTI.innerText = "-"
+        } else {
+            senderLeiTI.innerText = senderLei.value
+        }
+        senderNameTI.innerText = senderName.value
+        if (beneficiaryLei.value == "") {
+            beneficiaryLeiTI.innerText = "-"
+        } else {
+            beneficiaryLeiTI.innerText = beneficiaryLei.value
+        }
+        beneficiaryNameTI.innerText = beneficiaryName.value
+        paymentTypeTI.innerText = paymentType.value
+        amountTI.innerText= amount.value + " " + currency.value
+        transactionTypeTI.innerText = transactionType.value
+        beneficiaryBankTI.innerText = beneficiaryBank.value
+
         view1CL.remove("display")
         view1CL.add("not-display")
         view2indCL.remove("remove-color")
