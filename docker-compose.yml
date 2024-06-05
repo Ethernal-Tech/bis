@@ -8,7 +8,7 @@ services:
       ACCEPT_EULA: Y
       SA_PASSWORD: Ethernal123
     ports:
-      - "1433:1433"
+      - "1434:1433"
     networks:
       - my-network
     volumes:
@@ -59,7 +59,7 @@ services:
       ACCEPT_EULA: Y
       SA_PASSWORD: Ethernal123
     ports:
-      - "1434:1433"
+      - "1435:1433"
     networks:
       - my-network
     volumes:
@@ -96,7 +96,7 @@ services:
       - GPJC_PORT=10501
       - BACKEND_API_ADDRESS=0.0.0.0:4000
     ports:
-      - "4002:4000"
+      - "4003:4000"
     depends_on:
       sql-database2:
         condition: service_healthy
