@@ -159,6 +159,32 @@ func (wrapper *DBHandler) GetPolicy(policyId uint64) models.PolicyModel {
 	return policy
 }
 
+func (wrapper *DBHandler) GetPoliciesForTransaction(transactionID string) []models.NewPolicyModel {
+	query := `SELECT p.Id, p.PolicyTypeId, pt.Code, pt.Name, p.TransactionTypeId, p.PolicyEnforcingCountryId, p.OriginatingCountryId, p.Parameters
+              FROM Policy p
+              JOIN PolicyType pt ON p.PolicyTypeId = pt.Id
+              JOIN TransactionPolicy tp ON p.Id = tp.PolicyId
+              WHERE tp.TransactionId = @p1`
+
+	rows, err := wrapper.db.Query(query, sql.Named("p1", transactionID))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer rows.Close()
+
+	policies := []models.NewPolicyModel{}
+	for rows.Next() {
+		var policy models.NewPolicyModel
+		if err := rows.Scan(&policy.Policy.Id, &policy.Policy.PolicyTypeId, &policy.PolicyType.Code, &policy.PolicyType.Name, &policy.Policy.TransactionTypeId, &policy.Policy.PolicyEnforcingCountryId, &policy.Policy.OriginatingCountryId, &policy.Policy.Parameters); err != nil {
+			log.Fatal(err)
+		}
+
+		policies = append(policies, policy)
+	}
+	return policies
+}
+
 func (wrapper *DBHandler) UpdatePolicyAmount(amount uint64, policyId uint64) {
 	query := `UPDATE [Policy] Set Parameters = @p1 Where Id = @p2`
 

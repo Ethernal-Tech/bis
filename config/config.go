@@ -12,9 +12,27 @@ func ResolveP2PNodeAPIAddress() string {
 }
 
 func ResolveGpjcApiAddress() string {
-	env_address := os.Getenv("GPJC_API")
+	env_address := os.Getenv("GPJC_API_ADDRESS")
 	if env_address == "" {
 		return "localhost"
+	}
+
+	return env_address
+}
+
+func ResolveGpjcApiPort() string {
+	env_address := os.Getenv("GPJC_API_PORT")
+	if env_address == "" {
+		return "9090"
+	}
+
+	return env_address
+}
+
+func ResolveGpjcPort() string {
+	env_address := os.Getenv("GPJC_PORT")
+	if env_address == "" {
+		return "10501"
 	}
 
 	return env_address

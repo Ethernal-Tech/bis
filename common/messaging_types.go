@@ -47,8 +47,7 @@ type PolicyDTO struct {
 	Params string `json:"params"`
 }
 
-type SCLInitiationDTO struct {
-	TransactionID string `json:"tx_id"`
-	VMAddress     string `json:"vm_address"`
-	PolicyID      uint   `json:"policy_id"`
+type CheckConfirmedDTO struct {
+	CheckID   string `json:"tx_id"`
+	VMAddress string `json:"vm_address"`
 }

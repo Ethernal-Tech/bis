@@ -191,3 +191,18 @@ func (wrapper *DBHandler) GetCountryOfBank(bankId string) models.NewCountry {
 	}
 	return country
 }
+
+func (wrapper *DBHandler) GetClientNameByID(clientID string) string {
+	query := `SELECT Name FROM BankClient WHERE GlobalIdentifier = @p1`
+
+	var clientName string
+	err := wrapper.db.QueryRow(query, sql.Named("p1", clientID)).Scan(&clientName)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return ""
+		}
+		log.Fatal(err)
+	}
+
+	return clientName
+}

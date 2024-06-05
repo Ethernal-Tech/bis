@@ -2,7 +2,7 @@ package controller
 
 import (
 	"bisgo/app/models"
-	"bytes"
+	"bisgo/common"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"strconv"
 	"text/template"
-	"time"
 )
 
 func (controller *TransactionController) SearchTransaction(w http.ResponseWriter, r *http.Request) {
@@ -232,115 +231,36 @@ func (controller *TransactionController) ConfirmTransaction(w http.ResponseWrite
 			http.Error(w, "Internal Server Error parsing form", 500)
 		}
 
-		transactionId, _ := strconv.Atoi(r.Form.Get("transactionid"))
+		complianceCheckId := r.Form.Get("transactionid")
+		applicablePolicies := controller.DB.GetPoliciesForTransaction(complianceCheckId)
+		check := controller.DB.GetComplianceCheckByID(complianceCheckId)
 
-		transaction := controller.DB.GetTransactionHistory(uint64(transactionId))
+		controller.DB.UpdateTransactionState(check.Id, 2)
 
-		controller.DB.UpdateTransactionState(transaction.Id, 2)
-
-		// CFM check //
-
-		bank := controller.DB.GetBank(controller.DB.GetBankId(transaction.BeneficiaryBank))
-
-		amount := controller.DB.CheckCFM(controller.DB.GetBankClientId(transaction.ReceiverName), int(bank.CountryId))
-
-		policies := controller.DB.GetPolices(controller.DB.GetBankId(transaction.BeneficiaryBank), transaction.TypeId)
-
-		var CFMpolicy models.PolicyModel
-		CFMpolicy.Id = 0
-		CFMexists := false
-		SCLexists := false
-		var SCLpolicyId int
-
-		for _, policy := range policies {
-			if policy.Code == "CFM" {
-				CFMpolicy = policy
-				CFMexists = true
-			} else if policy.Code == "SCL" {
-				SCLpolicyId = controller.DB.GetPolicyId(policy.Code, policy.CountryId)
-				SCLexists = true
+		for _, policy := range applicablePolicies {
+			if policy.PolicyType.Code == "CFM" {
+				// CFM check //
+				// TODO: Notify central bank about the CFM check if it exists
+			} else if policy.PolicyType.Code == "SCL" {
+				// SCL //
+				// TODO: Start gpjc proving server
+				err = controller.ProvingClient.SendProofRequest("interactive", complianceCheckId, policy.Policy.Id, "", "")
+				if err != nil {
+					http.Error(w, fmt.Sprint("Internal Server Error %w", err), 500)
+				}
 			}
 		}
 
-		policyValid := false
+		controller.DB.UpdateTransactionState(check.Id, 3)
 
-		if CFMpolicy.Id != 0 {
-			var ratio = 3.4
-			var newAmount = float64(amount+int64(transaction.Amount)) * ratio
-			if newAmount >= float64(CFMpolicy.Amount) {
-				controller.DB.UpdateTransactionPolicyStatus(transaction.Id, int(CFMpolicy.Id), 2)
-			} else {
-				controller.DB.UpdateTransactionPolicyStatus(transaction.Id, int(CFMpolicy.Id), 1)
-
-				policyValid = true
-			}
+		checkConfirmedData := common.CheckConfirmedDTO{
+			CheckID:   complianceCheckId,
+			VMAddress: controller.ProvingClient.GetVMAddress(),
 		}
 
-		if !CFMexists && !SCLexists {
-			controller.DB.UpdateTransactionState(transaction.Id, 6)
-			controller.DB.UpdateTransactionState(transaction.Id, 7)
-
-			http.Redirect(w, r, "/home", http.StatusSeeOther)
-			return
-		}
-
-		if !SCLexists {
-			if policyValid {
-				controller.DB.UpdateTransactionState(transaction.Id, 6)
-				controller.DB.UpdateTransactionState(transaction.Id, 7)
-			} else {
-				controller.DB.UpdateTransactionState(transaction.Id, 8)
-			}
-
-			http.Redirect(w, r, "/home", http.StatusSeeOther)
-			return
-		}
-
-		// SCL //
-
-		controller.DB.UpdateTransactionState(transaction.Id, 3)
-
-		var urlServer string
-		var jsonPayloadServer []byte
-		var urlClient string
-		var jsonPayloadClient []byte
-
-		// TODO: This will be updated in upcoming messaging system changes
-
-		urlServer = "http://" + "controller.Config.GpjcApiAddress" + ":9090/api/start-server"
-		jsonPayloadServer = []byte(fmt.Sprintf(`{"tx_id": "%d", "policy_id": "%d"}`, transactionId, SCLpolicyId))
-
-		urlClient = "http://" + "gpjc_client" + ":9090/api/start-client"
-		jsonPayloadClient = []byte(fmt.Sprintf(`{"tx_id": "%d", "policy_id": "%d", "receiver": "%s", "to": "%s:10501"}`, transactionId, SCLpolicyId, transaction.ReceiverName, "controller.Config.GpjcApiAddress"))
-
-		client := &http.Client{}
-
-		req, err := http.NewRequest("POST", urlServer, bytes.NewBuffer(jsonPayloadServer))
+		_, err = controller.P2PClient.Send(check.OriginatorBankId, "check-confirmed", checkConfirmedData, 0)
 		if err != nil {
-			panic(err)
-		}
-
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Connection", "close")
-
-		_, err = client.Do(req)
-		if err != nil {
-			panic(err)
-		}
-
-		time.Sleep(100 * time.Millisecond)
-
-		req, err = http.NewRequest("POST", urlClient, bytes.NewBuffer(jsonPayloadClient))
-		if err != nil {
-			panic(err)
-		}
-
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Connection", "close")
-
-		_, err = client.Do(req)
-		if err != nil {
-			panic(err)
+			http.Error(w, fmt.Sprint("Internal Server Error %w", err), 500)
 		}
 
 		http.Redirect(w, r, "/home", http.StatusSeeOther)

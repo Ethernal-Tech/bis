@@ -30,7 +30,8 @@ func (controller *APIController) GetPolicies(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	countryCode := controller.DB.GetCountryOfBank(data.BankId).Code
+	// TODO: Get loged in users bank id
+	countryCode := controller.DB.GetCountryOfBank("984500653R409CC5AB28").Code
 
 	// TODO: Handle RequesterGlobalIdentifier
 	policyRequestDto := common.PolicyRequestDTO{

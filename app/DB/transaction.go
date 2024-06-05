@@ -305,3 +305,21 @@ func (wrapper *DBHandler) GetTransactionHistory(transactionId uint64) models.Tra
 
 	return trnx
 }
+
+func (wrapper *DBHandler) GetComplianceCheckByID(checkID string) models.NewTransaction {
+	query := `SELECT t.Id, t.OriginatorBankId, t.BeneficiaryBankId, t.SenderId, t.ReceiverId, t.Currency, t.Amount, t.TransactionTypeId, t.LoanId
+              FROM Transaction t
+              WHERE t.Id = @p1`
+
+	row := wrapper.db.QueryRow(query, sql.Named("p1", checkID))
+
+	var transaction models.NewTransaction
+	if err := row.Scan(&transaction.Id, &transaction.OriginatorBankId, &transaction.BeneficiaryBankId, &transaction.SenderId, &transaction.ReceiverId, &transaction.Currency, &transaction.Amount, &transaction.TransactionTypeId, &transaction.LoanId); err != nil {
+		if err == sql.ErrNoRows {
+			return models.NewTransaction{}
+		}
+		log.Fatal(err)
+	}
+
+	return transaction
+}
