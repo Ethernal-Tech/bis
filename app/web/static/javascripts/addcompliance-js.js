@@ -102,7 +102,7 @@ function getPolicies() {
 
     data = {
         BankId: "549300BUPYUQGB5BFX94",
-        TransactionTypeId: 1
+        TransactionTypeId: "1"
     }
 
     fetch("/api/getpolicies", {

@@ -169,3 +169,25 @@ func (wrapper *DBHandler) GetCountry(countryId uint) models.NewCountry {
 
 	return country
 }
+
+func (wrapper *DBHandler) GetCountryOfBank(bankId string) models.NewCountry {
+	query := `SELECT c.Id, c.Name, c.Code FROM Bank as b
+					LEFT JOIN Country as c on b.CountryId = c.Id
+					Where GlobalIdentifier = @p1`
+
+	rows, err := wrapper.db.Query(query, sql.Named("p1", bankId))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer rows.Close()
+
+	var country models.NewCountry
+
+	for rows.Next() {
+		if err := rows.Scan(&country.Id, &country.Name, &country.Code); err != nil {
+			log.Fatal(err)
+		}
+	}
+	return country
+}

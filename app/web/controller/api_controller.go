@@ -30,7 +30,7 @@ func (controller *APIController) GetPolicies(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	countryCode := controller.DB.GetCountry(controller.DB.GetBank(data.BankId).CountryId).Code
+	countryCode := controller.DB.GetCountryOfBank(data.BankId).Code
 
 	// TODO: Handle RequesterGlobalIdentifier
 	policyRequestDto := common.PolicyRequestDTO{
