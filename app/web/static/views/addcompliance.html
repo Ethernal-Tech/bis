@@ -109,20 +109,18 @@
                         <div class="field-container">
                             <span class="input-descriptor">Transaction Type<span>*</span></span>
                             <select id="transaction-type" class="input input-select">
-                                <option name="Option 1">
-                                    Option 1
-                                </option>
-                                <option name="Option 2">
-                                    Option 2
-                                </option>
-                                <option name="Option 3">
-                                    Option 3
-                                </option>
+                                {{range .transactionTypes}}
+                                <option value="{{.Id}}">{{.Code}} - {{.Name}}</option>
+                                {{end}}
                             </select>
                         </div>
                         <div class="field-container">
                             <span class="input-descriptor">Beneficiary Bank<span>*</span></span>
-                            <input id="beneficiary-bank" class="input" type="text" placeholder="e.g. ANZ">
+                            <select id="beneficiary-bank" class="input input-select">
+                                {{range .banks}}
+                                <option value="{{.Id}}">{{.Name}} ({{.Country}})</option>
+                                {{end}}
+                            </select>
                         </div>
                     </div>
                 </fieldset>
@@ -171,7 +169,7 @@
                 </div>
             </div>
             <div class="not-display view-3" id="view-3">
-                View 3
+                <div id="loader" style="display: none;"></div>
             </div>
         </div>
         <div class="buttons">

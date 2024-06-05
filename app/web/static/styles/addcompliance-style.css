@@ -323,3 +323,26 @@ input:focus {
 .next {
     background-color: #AA322F;
 }
+
+#loader {
+    position: absolute;
+    top: calc(46% - 20px);
+    left: calc(50% - 20px);
+    border: 4px solid #f3f3f3;
+    box-sizing: border-box;
+    border-radius: 50%;
+    border-top: 4px solid #AA322F;
+    width: 36px;
+    height: 36px;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}

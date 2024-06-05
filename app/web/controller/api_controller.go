@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 func (controller *APIController) GetPolicies(w http.ResponseWriter, r *http.Request) {
@@ -17,6 +18,8 @@ func (controller *APIController) GetPolicies(w http.ResponseWriter, r *http.Requ
 
 		return
 	}
+
+	time.Sleep(4 * time.Second)
 
 	data := struct {
 		BankId            string

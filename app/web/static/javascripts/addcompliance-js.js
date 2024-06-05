@@ -9,6 +9,7 @@ window.onload = function () {
 }
 
 let currentView = 1
+let buttonSelectable = true
 
 let senderLei
 let senderName
@@ -30,6 +31,8 @@ let amountTI
 let transactionTypeTI
 let beneficiaryBankTI
 
+let loader
+
 function setElements() {
     senderLei = document.getElementById("sender-lei")
     senderName = document.getElementById("sender-name")
@@ -50,9 +53,15 @@ function setElements() {
     amountTI = document.getElementById("ti-amount")
     transactionTypeTI = document.getElementById("ti-transaction-type")
     beneficiaryBankTI = document.getElementById("ti-beneficiary-bank")
+
+    loader = document.getElementById("loader")
 }
 
 function downgradeView() {
+    if (!buttonSelectable) {
+        return
+    }
+
     let view1CL = document.getElementById("view-1").classList
     let view2CL = document.getElementById("view-2").classList
     let view2indCL = document.querySelector(".view-indicator > div:nth-child(2)").classList
@@ -81,6 +90,10 @@ function downgradeView() {
 }
 
 function upgradeView() {
+    if (!buttonSelectable) {
+        return
+    }
+
     let view1CL = document.getElementById("view-1").classList
     let view2CL = document.getElementById("view-2").classList
     let view2indCL = document.querySelector(".view-indicator > div:nth-child(2)").classList
@@ -104,7 +117,7 @@ function upgradeView() {
         beneficiaryNameTI.innerText = beneficiaryName.value
         paymentTypeTI.innerText = paymentType.value
         amountTI.innerText= amount.value + " " + currency.value
-        transactionTypeTI.innerText = transactionType.value
+        transactionTypeTI.innerText = transactionType.options[transactionType.selectedIndex].text
         beneficiaryBankTI.innerText = beneficiaryBank.value
 
         view1CL.remove("display")
@@ -159,14 +172,12 @@ function addSeparators(event) {
 }
 
 function getPolicies() {
-    //bankId = document.getElementById("select-bank").value
-    //transactionTypeid = document.getElementById("select-type").value
-
     data = {
-        BankId: "549300BUPYUQGB5BFX94",
-        TransactionTypeId: "1"
+        BankId: beneficiaryBank.value,
+        TransactionTypeId: transactionType.value
     }
 
+    showLoader()
     fetch("/api/getpolicies", {
         method: 'POST',
         headers: {
@@ -174,21 +185,32 @@ function getPolicies() {
         },
         body: JSON.stringify(data)
     })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok');
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.length == 0) {
-                console.log('no policies to be applied')
-            }
-            else {
-                console.log(data)
-            }
-        })
-        .catch(error => {
-            console.error('Fetch error:', error);
-        });
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.length == 0) {
+            console.log('no policies to be applied')
+        }
+        else {
+            hideLoader()
+            console.log(data)
+        }
+    })
+    .catch(error => {
+        console.error('Fetch error:', error);
+    });
+}
+
+function showLoader() {
+    buttonSelectable = false
+    loader.style.display = 'block';
+}
+
+function hideLoader() {
+    buttonSelectable = true
+    loader.style.display = 'none';
 }
