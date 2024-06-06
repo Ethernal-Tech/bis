@@ -2,6 +2,7 @@ package DB
 
 import (
 	"bisgo/app/models"
+	"bisgo/common"
 	"database/sql"
 	"log"
 	"time"
@@ -13,8 +14,10 @@ func (wrapper *DBHandler) InsertTransaction(t models.NewTransaction) string {
 
 	var insertedID string
 
-	// TODO: Generate Tx hash here...
-	// if (t.Id == "")
+	insertedID, err1 := common.GenerateHash(t)
+	if err1 != nil {
+		log.Fatal(err1)
+	}
 
 	err := wrapper.db.QueryRow(query,
 		sql.Named("p1", insertedID),
@@ -31,7 +34,8 @@ func (wrapper *DBHandler) InsertTransaction(t models.NewTransaction) string {
 		log.Fatal(err)
 	}
 
-	// TODO: Move the logic to the new func
+	// TODO2: Add correct policies/ maybe more than 1 fits criteria
+	// 		  add latest ones
 	polices := wrapper.GetPolices(t.BeneficiaryBankId, t.TransactionTypeId)
 
 	for _, policy := range polices {
@@ -304,4 +308,22 @@ func (wrapper *DBHandler) GetTransactionHistory(transactionId uint64) models.Tra
 	}
 
 	return trnx
+}
+
+func (wrapper *DBHandler) GetComplianceCheckByID(checkID string) models.NewTransaction {
+	query := `SELECT t.Id, t.OriginatorBankId, t.BeneficiaryBankId, t.SenderId, t.ReceiverId, t.Currency, t.Amount, t.TransactionTypeId, t.LoanId
+              FROM Transaction t
+              WHERE t.Id = @p1`
+
+	row := wrapper.db.QueryRow(query, sql.Named("p1", checkID))
+
+	var transaction models.NewTransaction
+	if err := row.Scan(&transaction.Id, &transaction.OriginatorBankId, &transaction.BeneficiaryBankId, &transaction.SenderId, &transaction.ReceiverId, &transaction.Currency, &transaction.Amount, &transaction.TransactionTypeId, &transaction.LoanId); err != nil {
+		if err == sql.ErrNoRows {
+			return models.NewTransaction{}
+		}
+		log.Fatal(err)
+	}
+
+	return transaction
 }

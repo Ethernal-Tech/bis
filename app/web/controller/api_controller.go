@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 func (controller *APIController) GetPolicies(w http.ResponseWriter, r *http.Request) {
@@ -17,6 +18,8 @@ func (controller *APIController) GetPolicies(w http.ResponseWriter, r *http.Requ
 
 		return
 	}
+
+	time.Sleep(4 * time.Second)
 
 	data := struct {
 		BankId            string
@@ -30,7 +33,8 @@ func (controller *APIController) GetPolicies(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	countryCode := controller.DB.GetCountryOfBank(data.BankId).Code
+	// TODO: Get loged in users bank id
+	countryCode := controller.DB.GetCountryOfBank("984500653R409CC5AB28").Code
 
 	// TODO: Handle RequesterGlobalIdentifier
 	policyRequestDto := common.PolicyRequestDTO{

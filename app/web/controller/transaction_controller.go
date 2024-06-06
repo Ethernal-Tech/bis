@@ -2,15 +2,15 @@ package controller
 
 import (
 	"bisgo/app/models"
-	"bytes"
+	"bisgo/common"
 	"encoding/json"
 	"fmt"
 	"log"
 	"math/rand"
 	"net/http"
 	"strconv"
+	"strings"
 	"text/template"
-	"time"
 )
 
 func (controller *TransactionController) SearchTransaction(w http.ResponseWriter, r *http.Request) {
@@ -86,10 +86,15 @@ func (controller *TransactionController) AddTransaction(w http.ResponseWriter, r
 	} else if r.Method == http.MethodPost {
 
 		data := struct {
-			SenderLei       string `json:"senderLei"`
-			SenderName      string `json:"senderName"`
-			BeneficiaryLei  string `json:"beneficiaryLei"`
-			BeneficiaryName string `json:"beneficiaryName"`
+			SenderLei         string `json:"senderLei"`
+			SenderName        string `json:"senderName"`
+			BeneficiaryLei    string `json:"beneficiaryLei"`
+			BeneficiaryName   string `json:"beneficiaryName"`
+			PaymentTypeID     string `json:"paymentType"`
+			TransactionTypeID string `json:"transactionType"`
+			Currency          string `json:"currency"`
+			Amount            string `json:"amount"`
+			BeneficiaryBank   string `json:"beneficiaryBank"`
 		}{}
 
 		decoder := json.NewDecoder(r.Body)
@@ -100,74 +105,55 @@ func (controller *TransactionController) AddTransaction(w http.ResponseWriter, r
 		}
 
 		fmt.Println(data)
-		// err := r.ParseForm()
-		// if err != nil {
-		// 	log.Println(err.Error())
-		// 	http.Error(w, "Internal Server Error parsing form", 500)
-		// }
 
-		// originatorBank := controller.DB.GetBankId(controller.SessionManager.GetString(r.Context(), "bankName"))
-		// //beneficiaryBank, _ := strconv.Atoi(r.Form.Get("bank"))
-		// sender := controller.DB.GetBankClientId(r.Form.Get("sender"))
-		// receiver := controller.DB.GetBankClientId(r.Form.Get("receiver"))
-		// currency := r.Form.Get("currency")
-		// amount, _ := strconv.Atoi(strings.Replace(r.Form.Get("amount"), ",", "", -1))
-		// transactionType, _ := strconv.Atoi(r.Form.Get("type"))
-		// loanId, _ := strconv.Atoi(strings.Replace(r.Form.Get("loanId"), ",", "", -1))
+		originatorBankId := controller.DB.GetBankId(controller.SessionManager.GetString(r.Context(), "bankName"))
 
-		// /*
-		// 	OriginatorBank:  uint64(originatorBank),
-		// 		BeneficiaryBank: uint64(beneficiaryBank),
-		// 		Sender:          sender,
-		// 		Receiver:        receiver,
-		// 		Currency:        currency,
-		// 		Amount:          amount,
-		// 		TypeId:          transactionType,
-		// 		LoanId:          loanId, */
+		amount, _ := strconv.Atoi(strings.Replace(data.Amount, ",", "", -1))
+		transactionType, _ := strconv.Atoi(data.TransactionTypeID)
+		//loanId, _ := strconv.Atoi(data.PaymentTypeID)
 
-		// // TODO: Generate tx id
-		// // TODO: Get beneficiary lei
-		// transaction := models.NewTransaction{
-		// 	Id:                "",
-		// 	OriginatorBankId:  originatorBank,
-		// 	BeneficiaryBankId: "",
-		// 	SenderId:          sender,
-		// 	ReceiverId:        receiver,
-		// 	Currency:          currency,
-		// 	Amount:            amount,
-		// 	TransactionTypeId: transactionType,
-		// 	LoanId:            loanId,
-		// }
+		// TODO: If client is not in the DB add it
 
-		// // Call P2P create-transaction of beneficiary bank
-		// // TODO: Get beneficiary lei
-		// transactionDto := common.TransactionDTO{
-		// 	TransactionID:                   "0",
-		// 	SenderLei:                       "",
-		// 	SenderName:                      r.Form.Get("sender"),
-		// 	ReceiverLei:                     "",
-		// 	ReceiverName:                    r.Form.Get("receiver"),
-		// 	OriginatorBankGlobalIdentifier:  originatorBank,
-		// 	BeneficiaryBankGlobalIdentifier: "",
-		// 	PaymentType:                     "",
-		// 	TransactionType:                 fmt.Sprint(transactionType),
-		// 	Amount:                          uint64(amount),
-		// 	Currency:                        currency,
-		// 	SwiftBICCode:                    "",
-		// 	LoanID:                          uint64(loanId),
-		// }
+		transaction := models.NewTransaction{
+			OriginatorBankId:  originatorBankId,
+			BeneficiaryBankId: data.BeneficiaryBank,
+			SenderId:          data.SenderLei,
+			ReceiverId:        data.BeneficiaryLei,
+			Currency:          data.Currency,
+			Amount:            amount,
+			TransactionTypeId: transactionType,
+			LoanId:            0,
+		}
 
-		// ch, err := controller.P2PClient.Send(transactionDto.BeneficiaryBankGlobalIdentifier, "create-transaction", transactionDto, 0)
+		transactionID := controller.DB.InsertTransaction(transaction)
+		controller.DB.UpdateTransactionState(transactionID, 1)
+		fmt.Println(transactionID)
 
-		// _ = ch
+		// Call P2P create-transaction of beneficiary bank
+		transactionDto := common.TransactionDTO{
+			TransactionID:                   transactionID,
+			SenderLei:                       data.SenderLei,
+			SenderName:                      data.SenderName,
+			ReceiverLei:                     data.BeneficiaryLei,
+			ReceiverName:                    data.BeneficiaryName,
+			OriginatorBankGlobalIdentifier:  transaction.OriginatorBankId,
+			BeneficiaryBankGlobalIdentifier: transaction.BeneficiaryBankId,
+			PaymentType:                     "",
+			TransactionType:                 fmt.Sprint(transactionType),
+			Amount:                          uint64(amount),
+			Currency:                        data.Currency,
+			SwiftBICCode:                    "",
+			LoanID:                          uint64(0),
+		}
 
-		// if err != nil {
-		// 	log.Println(err.Error())
-		// 	http.Error(w, "Internal Server Error sending create tx", 500)
-		// }
+		ch, err := controller.P2PClient.Send(transactionDto.BeneficiaryBankGlobalIdentifier, "create-transaction", transactionDto, 0)
 
-		// transactionID := controller.DB.InsertTransaction(transaction)
-		// controller.DB.UpdateTransactionState(transactionID, 1)
+		_ = ch
+
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, fmt.Sprint("Internal Server Error sending create tx %w", err), 500)
+		}
 
 		http.Redirect(w, r, "/home", http.StatusSeeOther)
 	}
@@ -232,115 +218,36 @@ func (controller *TransactionController) ConfirmTransaction(w http.ResponseWrite
 			http.Error(w, "Internal Server Error parsing form", 500)
 		}
 
-		transactionId, _ := strconv.Atoi(r.Form.Get("transactionid"))
+		complianceCheckId := r.Form.Get("transactionid")
+		applicablePolicies := controller.DB.GetPoliciesForTransaction(complianceCheckId)
+		check := controller.DB.GetComplianceCheckByID(complianceCheckId)
 
-		transaction := controller.DB.GetTransactionHistory(uint64(transactionId))
+		controller.DB.UpdateTransactionState(check.Id, 2)
 
-		controller.DB.UpdateTransactionState(transaction.Id, 2)
-
-		// CFM check //
-
-		bank := controller.DB.GetBank(controller.DB.GetBankId(transaction.BeneficiaryBank))
-
-		amount := controller.DB.CheckCFM(controller.DB.GetBankClientId(transaction.ReceiverName), int(bank.CountryId))
-
-		policies := controller.DB.GetPolices(controller.DB.GetBankId(transaction.BeneficiaryBank), transaction.TypeId)
-
-		var CFMpolicy models.PolicyModel
-		CFMpolicy.Id = 0
-		CFMexists := false
-		SCLexists := false
-		var SCLpolicyId int
-
-		for _, policy := range policies {
-			if policy.Code == "CFM" {
-				CFMpolicy = policy
-				CFMexists = true
-			} else if policy.Code == "SCL" {
-				SCLpolicyId = controller.DB.GetPolicyId(policy.Code, policy.CountryId)
-				SCLexists = true
+		for _, policy := range applicablePolicies {
+			if policy.PolicyType.Code == "CFM" {
+				// CFM check //
+				// TODO: Notify central bank about the CFM check if it exists
+			} else if policy.PolicyType.Code == "SCL" {
+				// SCL //
+				// TODO: Start gpjc proving server
+				err = controller.ProvingClient.SendProofRequest("interactive", complianceCheckId, policy.Policy.Id, "", "")
+				if err != nil {
+					http.Error(w, fmt.Sprint("Internal Server Error %w", err), 500)
+				}
 			}
 		}
 
-		policyValid := false
+		controller.DB.UpdateTransactionState(check.Id, 3)
 
-		if CFMpolicy.Id != 0 {
-			var ratio = 3.4
-			var newAmount = float64(amount+int64(transaction.Amount)) * ratio
-			if newAmount >= float64(CFMpolicy.Amount) {
-				controller.DB.UpdateTransactionPolicyStatus(transaction.Id, int(CFMpolicy.Id), 2)
-			} else {
-				controller.DB.UpdateTransactionPolicyStatus(transaction.Id, int(CFMpolicy.Id), 1)
-
-				policyValid = true
-			}
+		checkConfirmedData := common.CheckConfirmedDTO{
+			CheckID:   complianceCheckId,
+			VMAddress: controller.ProvingClient.GetVMAddress(),
 		}
 
-		if !CFMexists && !SCLexists {
-			controller.DB.UpdateTransactionState(transaction.Id, 6)
-			controller.DB.UpdateTransactionState(transaction.Id, 7)
-
-			http.Redirect(w, r, "/home", http.StatusSeeOther)
-			return
-		}
-
-		if !SCLexists {
-			if policyValid {
-				controller.DB.UpdateTransactionState(transaction.Id, 6)
-				controller.DB.UpdateTransactionState(transaction.Id, 7)
-			} else {
-				controller.DB.UpdateTransactionState(transaction.Id, 8)
-			}
-
-			http.Redirect(w, r, "/home", http.StatusSeeOther)
-			return
-		}
-
-		// SCL //
-
-		controller.DB.UpdateTransactionState(transaction.Id, 3)
-
-		var urlServer string
-		var jsonPayloadServer []byte
-		var urlClient string
-		var jsonPayloadClient []byte
-
-		// TODO: This will be updated in upcoming messaging system changes
-
-		urlServer = "http://" + "controller.Config.GpjcApiAddress" + ":9090/api/start-server"
-		jsonPayloadServer = []byte(fmt.Sprintf(`{"tx_id": "%d", "policy_id": "%d"}`, transactionId, SCLpolicyId))
-
-		urlClient = "http://" + "gpjc_client" + ":9090/api/start-client"
-		jsonPayloadClient = []byte(fmt.Sprintf(`{"tx_id": "%d", "policy_id": "%d", "receiver": "%s", "to": "%s:10501"}`, transactionId, SCLpolicyId, transaction.ReceiverName, "controller.Config.GpjcApiAddress"))
-
-		client := &http.Client{}
-
-		req, err := http.NewRequest("POST", urlServer, bytes.NewBuffer(jsonPayloadServer))
+		_, err = controller.P2PClient.Send(check.OriginatorBankId, "check-confirmed", checkConfirmedData, 0)
 		if err != nil {
-			panic(err)
-		}
-
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Connection", "close")
-
-		_, err = client.Do(req)
-		if err != nil {
-			panic(err)
-		}
-
-		time.Sleep(100 * time.Millisecond)
-
-		req, err = http.NewRequest("POST", urlClient, bytes.NewBuffer(jsonPayloadClient))
-		if err != nil {
-			panic(err)
-		}
-
-		req.Header.Set("Content-Type", "application/json")
-		req.Header.Set("Connection", "close")
-
-		_, err = client.Do(req)
-		if err != nil {
-			panic(err)
+			http.Error(w, fmt.Sprint("Internal Server Error %w", err), 500)
 		}
 
 		http.Redirect(w, r, "/home", http.StatusSeeOther)

@@ -43,7 +43,7 @@ func (h *P2PHandler) CreateTransaction(messageID int, payload []byte) {
 	}
 
 	transaction := models.NewTransaction{
-		Id:                "",
+		Id:                messageData.TransactionID,
 		OriginatorBankId:  messageData.OriginatorBankGlobalIdentifier,
 		BeneficiaryBankId: messageData.BeneficiaryBankGlobalIdentifier,
 		SenderId:          messageData.SenderName,
@@ -53,6 +53,8 @@ func (h *P2PHandler) CreateTransaction(messageID int, payload []byte) {
 		TransactionTypeId: transactionType,
 		LoanId:            int(messageData.LoanID),
 	}
+
+	// TODO: Insert client in DB if it not exists
 
 	transactionID := h.DB.InsertTransaction(transaction)
 	h.DB.UpdateTransactionState(transactionID, 1)
@@ -67,14 +69,6 @@ func (h *P2PHandler) GetPolicies(messageID int, payload []byte) {
 
 	defer messages.RemoveChannel(messageID)
 
-	// handler logic
-	// Ako sam ja komercijalna banka
-	// 1. Pitam centralnu za polise
-	// 2. Vratim polise
-
-	// Ako sam ja centranla banka
-	// 1. Vratim polise
-
 	var messageData common.PolicyRequestDTO
 	if err := json.Unmarshal(payload, &messageData); err != nil {
 		log.Println(err.Error())
@@ -86,6 +80,32 @@ func (h *P2PHandler) GetPolicies(messageID int, payload []byte) {
 		log.Println(err.Error())
 		return
 	}
+
+	// Comercial bank has to update polices from the central bank first
+	// TODO: Add reference to this
+	/*
+		isCentralBank := true
+		fmt.Println("central bank")
+		if !isCentralBank {
+			centralBankRequest := common.PolicyRequestDTO{
+				Country:                   messageData.Country,
+				TransactionType:           messageData.TransactionType,
+				RequesterGlobalIdentifier: "myGlobalIdentifier", // TODO: Add reference to this
+			}
+
+			// TODO: Add reference to this
+			channel, err := h.P2PClient.Send("myCentralBankIdentifier", "get-policies", centralBankRequest, 0)
+			if err != nil {
+				log.Println(err.Error())
+				return
+			}
+
+			responseData := (<-channel).(common.PolicyResponseDTO)
+			fmt.Println(responseData)
+
+			// TODO: Update in DB if needed
+		}
+	*/
 
 	policies := h.DB.GetPolicesByCountryCode(messageData.Country, transactionType)
 	fmt.Println(policies)
@@ -124,5 +144,36 @@ func (h *P2PHandler) SendPolicies(messageID int, payload []byte) {
 		return
 	}
 
+	// TODO1: Add policies to the DB if not exist
+
 	channel <- messageData // send data to the listener
+}
+
+func (h *P2PHandler) CheckConfirmed(messageID int, payload []byte) {
+	_, err := messages.LoadChannel(messageID)
+
+	if err != nil {
+		// handle error
+	}
+
+	defer messages.RemoveChannel(messageID)
+
+	var messageData common.CheckConfirmedDTO
+	if err := json.Unmarshal(payload, &messageData); err != nil {
+		log.Println(err.Error())
+		return
+	}
+
+	applicablePolicies := h.DB.GetPoliciesForTransaction(messageData.CheckID)
+	check := h.DB.GetComplianceCheckByID(messageData.CheckID)
+	sender := h.DB.GetClientNameByID(check.SenderId)
+	for _, policy := range applicablePolicies {
+		if policy.PolicyType.Code == "SCL" {
+			err = h.ProvingClient.SendProofRequest("interactive", messageData.CheckID, policy.Policy.Id, sender, messageData.VMAddress)
+			if err != nil {
+				log.Println(err.Error())
+				return
+			}
+		}
+	}
 }

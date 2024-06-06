@@ -209,6 +209,54 @@ input:focus {
     margin-left: 4px;
 }
 
+.note {
+    color: #AA322F;
+    margin: 0px auto;
+    margin-top: 34px;
+    width: 880px;
+}
+
+.transaction-informations {
+    border: 1px solid rgb(183, 183, 183);
+    box-sizing: border-box;
+    padding: 10px;
+    margin: 0px auto;
+    margin-top: 40px;
+    width: 880px;
+    height: 376px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.transaction-informations > div {
+    width: 44%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    margin-top: 16px;
+}
+
+.transaction-information {
+    font-size: 15px;
+    height: 60px;
+    width: 100%;
+}
+
+.transaction-information-name {
+    font-weight: 600;
+}
+
+.transaction-information-value {
+    margin-top: 8px;
+    margin-left: 4px;
+    color: #706F6F;
+}
+
+.transaction-information-name > span {
+    color: #AA322F;
+    margin-left: 4px;
+}
+
 .buttons {
     width: 880px;
     margin: 0px auto;
@@ -268,18 +316,33 @@ input:focus {
     user-select: none;     
 }
 
-.cancel1 {
+.cancel {
     background-color: #706F6F;
 }
 
-.next1 {
+.next {
     background-color: #AA322F;
 }
 
-.view-2 {
-    text-align: center;
+#loader {
+    position: absolute;
+    top: calc(46% - 20px);
+    left: calc(50% - 20px);
+    border: 4px solid #f3f3f3;
+    box-sizing: border-box;
+    border-radius: 50%;
+    border-top: 4px solid #AA322F;
+    width: 36px;
+    height: 36px;
+    animation: spin 2s linear infinite;
 }
 
-.view-3 {
-    text-align: center;
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }

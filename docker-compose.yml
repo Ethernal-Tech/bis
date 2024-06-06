@@ -8,18 +8,18 @@ services:
       ACCEPT_EULA: Y
       SA_PASSWORD: Ethernal123
     ports:
-      - "1433:1433"
+      - "1434:1433"
     networks:
       - my-network
     volumes:
-      - ./core/DB/scripts/:/docker-entrypoint-initdb/scripts/
+      - ./app/DB/scripts/:/docker-entrypoint-initdb/scripts/
     command: >
-      /bin/bash -c " /opt/mssql/bin/sqlservr & sleep 120 &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2023.10.10_CreateBISdb.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2023.10.10_InsertData.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.04.24_\(1\)_CreateBankTypeTable.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.04.24_\(2\)_AlterBankTable\(AddColumn\).sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.04.25_\(1\)_InsertIntoBankTable.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.04.25_\(2\)_InsertIntoBankEmployee.sql &&  wait "
+      /bin/bash -c " /opt/mssql/bin/sqlservr & sleep 120 &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.03_CreateBISdb1.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.03_InsertData1.sql &&  wait"
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -Q \"IF EXISTS (SELECT name FROM sys.databases WHERE name = 'BIS') SELECT 1 ELSE SELECT 0\" | grep -q 1"
+          "/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -Q \"IF EXISTS (SELECT name FROM sys.databases WHERE name = 'BIS1') SELECT 1 ELSE SELECT 0\" | grep -q 1"
         ]
       interval: 30s
       timeout: 10s
@@ -36,13 +36,13 @@ services:
     environment:
       - DB_ADDRESS=sql-database1
       - DB_PORT=1433
-      - DB_NAME=BIS
+      - DB_NAME=BIS1
       - DB_PASSWORD=Ethernal123
       - SERVER_PORT=4000
-      - BENEFICIARY_BANK_URL=app2:4000
-      - P2P_NODE_ADDRESS=p2pmock:5000
-      - GPJC_API=app1
-      - GPJC=app2
+      - BENEFICIARY_BANK_URL=app3:4000
+      - P2P_NODE_ADDRESS=http://p2pmock:5000/passthrough
+      - GPJC_API_ADDRESS=app1
+      - GPJC_PORT=10501
       - BACKEND_API_ADDRESS=0.0.0.0:4000
     ports:
       - "4001:4000"
@@ -59,44 +59,44 @@ services:
       ACCEPT_EULA: Y
       SA_PASSWORD: Ethernal123
     ports:
-      - "1434:1433"
+      - "1435:1433"
     networks:
       - my-network
     volumes:
-      - ./core/DB/scripts/:/docker-entrypoint-initdb/scripts/
+      - ./app/DB/scripts/:/docker-entrypoint-initdb/scripts/
     command: >
-      /bin/bash -c " /opt/mssql/bin/sqlservr & sleep 120 &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2023.10.10_CreateBISdb.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2023.10.10_InsertData.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.04.24_\(1\)_CreateBankTypeTable.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.04.24_\(2\)_AlterBankTable\(AddColumn\).sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.04.25_\(1\)_InsertIntoBankTable.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.04.25_\(2\)_InsertIntoBankEmployee.sql &&  wait "
+      /bin/bash -c " /opt/mssql/bin/sqlservr & sleep 120 &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.03_CreateBISdb2.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.03_InsertData2.sql && /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.05_HLBPolicy.sql  && wait"
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -Q \"IF EXISTS (SELECT name FROM sys.databases WHERE name = 'BIS') SELECT 1 ELSE SELECT 0\" | grep -q 1"
+          "/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -Q \"IF EXISTS (SELECT name FROM sys.databases WHERE name = 'BIS2') SELECT 1 ELSE SELECT 0\" | grep -q 1"
         ]
       interval: 30s
       timeout: 10s
       retries: 10
       start_period: 2m
 
-  app2:
+  app3:
     build:
       context: .
       dockerfile: image/Dockerfile
       args:
-        - DNS_NAME=app2
-    container_name: app2
+        - DNS_NAME=app3
+    container_name: app3
     environment:
       - DB_ADDRESS=sql-database2
       - DB_PORT=1433
-      - DB_NAME=BIS
+      - DB_NAME=BIS2
       - DB_PASSWORD=Ethernal123
       - SERVER_PORT=4000
       - BENEFICIARY_BANK_URL=app1:4000
-      - P2P_NODE_ADDRESS=p2pmock:5000
-      - GPJC_API=app2
-      - GPJC=app1
+      - P2P_NODE_ADDRESS=http://p2pmock:5000/passthrough
+      - GPJC_API_ADDRESS=app3
+      - GPJC_PORT=10501
       - BACKEND_API_ADDRESS=0.0.0.0:4000
     ports:
-      - "4002:4000"
+      - "4003:4000"
     depends_on:
       sql-database2:
         condition: service_healthy
@@ -107,6 +107,12 @@ services:
     build:
       context: ./p2pmock
     container_name: p2pmock
+    environment:
+      - BACKEND_URI1=http://app1:4000/p2p
+      - BACKEND_URI2=http://app2:4000/p2p
+      - BACKEND_URI3=http://app3:4000/p2p
+      - BACKEND_URI4=http://app4:4000/p2p
+      - PORT=5000
     ports:
       - "5000:5000"
     networks:
