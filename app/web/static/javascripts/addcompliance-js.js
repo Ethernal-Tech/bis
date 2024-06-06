@@ -179,7 +179,7 @@ function addSeparators(event) {
 
 function getPolicies() {
     data = {
-        BankId: beneficiaryBank.value,
+        BeneficiaryBankId: beneficiaryBank.value,
         TransactionTypeId: transactionType.value
     }
 
@@ -203,7 +203,20 @@ function getPolicies() {
             }
             else {
                 hideLoader()
-                console.log(data)
+                const viewDiv = document.getElementById("view-3");
+                viewDiv.innerHTML = '';
+
+                data.policies.forEach(policy => {
+                    const policyDiv = document.createElement('div');
+                    policyDiv.className = 'policy-item';
+                    policyDiv.innerHTML = `
+                        <p>Code: ${policy.code}</p>
+                        <p>Name: ${policy.name}</p>
+                        <p>Params: ${policy.params}</p>
+                        <br>
+                    `;
+                    viewDiv.appendChild(policyDiv);
+                });
             }
         })
         .catch(error => {

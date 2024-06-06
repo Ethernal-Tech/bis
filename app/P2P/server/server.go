@@ -46,11 +46,11 @@ func (s *P2PServer) Mux() http.Handler {
 
 		switch message.Method {
 		case "create-transaction":
-			s.CreateTransaction(message.MessageID, message.Payload)
+			go s.CreateTransaction(message.MessageID, message.Payload)
 		case "get-policies":
-			s.GetPolicies(message.MessageID, message.Payload)
+			go s.GetPolicies(message.MessageID, message.Payload)
 		case "send-policies":
-			s.SendPolicies(message.MessageID, message.Payload)
+			go s.SendPolicies(message.MessageID, message.Payload)
 		case "check-confirmed":
 			s.CheckConfirmed(message.MessageID, message.Payload)
 		default:

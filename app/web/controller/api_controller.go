@@ -22,7 +22,7 @@ func (controller *APIController) GetPolicies(w http.ResponseWriter, r *http.Requ
 	time.Sleep(4 * time.Second)
 
 	data := struct {
-		BankId            string
+		BeneficiaryBankId string
 		TransactionTypeId string
 	}{}
 
@@ -33,17 +33,17 @@ func (controller *APIController) GetPolicies(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	// TODO: Get loged in users bank id
-	countryCode := controller.DB.GetCountryOfBank("984500653R409CC5AB28").Code
+	bankIdOfLoggedUser := controller.SessionManager.GetString(r.Context(), "bankId") //get logged user's bank ID
+	originatorBankCountryCode := controller.DB.GetCountryOfBank(bankIdOfLoggedUser).Code
 
 	// TODO: Handle RequesterGlobalIdentifier
 	policyRequestDto := common.PolicyRequestDTO{
-		Country:                   countryCode,
+		Country:                   originatorBankCountryCode,
 		TransactionType:           data.TransactionTypeId,
-		RequesterGlobalIdentifier: "984500653R409CC5AB28",
+		RequesterGlobalIdentifier: bankIdOfLoggedUser,
 	}
 
-	ch, err := controller.P2PClient.Send(data.BankId, "get-policies", policyRequestDto, 0)
+	ch, err := controller.P2PClient.Send(data.BeneficiaryBankId, "get-policies", policyRequestDto, 0)
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error", 500)
