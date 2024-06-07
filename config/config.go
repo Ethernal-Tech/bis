@@ -5,7 +5,7 @@ import "os"
 func ResolveP2PNodeAPIAddress() string {
 	env_address := os.Getenv("P2P_NODE_ADDRESS")
 	if env_address == "" {
-		return "localhost:5000"
+		return "http://localhost:5000/passthrough"
 	}
 
 	return env_address
@@ -68,7 +68,7 @@ func ResolveDBPort() string {
 func ResolveDBName() string {
 	env_name := os.Getenv("DB_NAME")
 	if env_name == "" {
-		return "BIS"
+		return "BIS1"
 	}
 
 	return env_name
@@ -86,7 +86,7 @@ func ResolveDBPassword() string {
 func ResolveServerPort() string {
 	env_port := os.Getenv("SERVER_PORT")
 	if env_port == "" {
-		return ":4000"
+		return ":4001"
 	}
 
 	return ":" + env_port
