@@ -90,7 +90,7 @@ type NewPolicyModel struct {
 
 type NewTransactionPolicy struct {
 	TransactionId string
-	PolicyId      int64
+	PolicyId      int
 	Status        int
 }
 

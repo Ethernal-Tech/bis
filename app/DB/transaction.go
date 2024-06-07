@@ -14,9 +14,14 @@ func (wrapper *DBHandler) InsertTransaction(t models.NewTransaction) string {
 
 	var insertedID string
 
-	insertedID, err1 := common.GenerateHash(t)
-	if err1 != nil {
-		log.Fatal(err1)
+	if t.Id != "" {
+		insertedID = t.Id
+	} else {
+		var err error
+		insertedID, err = common.GenerateHash(t)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	row := wrapper.db.QueryRow(query,
@@ -228,7 +233,7 @@ func (wrapper *DBHandler) GetTransactionsForCentralbank(bankId string, searchVal
 	return transactions, centralBankCountryId
 }
 
-func (wrapper *DBHandler) GetTransactionHistory(transactionId uint64) models.TransactionModel {
+func (wrapper *DBHandler) GetTransactionHistory(transactionId string) models.TransactionModel {
 	query := `SELECT t.Id
 					,ob.Name
 					,bb.Name
@@ -243,10 +248,10 @@ func (wrapper *DBHandler) GetTransactionHistory(transactionId uint64) models.Tra
 					,ty.Name
 					,ty.Id
 				FROM [Transaction] as t
-				JOIN Bank as ob ON ob.Id = t.OriginatorBank
-				JOIN Bank as bb ON bb.Id = t.BeneficiaryBank
-				JOIN BankClient as bcs ON bcs.Id = t.Sender
-				JOIN BankClient as bcr ON bcr.Id = t.Receiver
+				JOIN Bank as ob ON ob.GlobalIdentifier = t.OriginatorBankId
+				JOIN Bank as bb ON bb.GlobalIdentifier = t.BeneficiaryBankId
+				JOIN BankClient as bcs ON bcs.Id = t.SenderId
+				JOIN BankClient as bcr ON bcr.Id = t.ReceiverId
 				JOIN [TransactionType] as ty ON ty.Id = t.TransactionTypeId
 				WHERE t.Id = @p1`
 
@@ -289,14 +294,12 @@ func (wrapper *DBHandler) GetTransactionHistory(transactionId uint64) models.Tra
 	}
 	trnx.Status = trnx.StatusHistory[len(trnx.StatusHistory)-1].Name
 
-	query = `SELECT p.Name
-				FROM TransactionTypePolicy ttp
-				JOIN Policy as p ON ttp.PolicyId = p.Id
-				Where ttp.TransactionTypeId = (SELECT t.TransactionTypeId FROM [Transaction] as t
-												Where t.Id = @p1)
-					and ttp.CountryId = (SELECT b.CountryId FROM [Transaction] as t
-										JOIN Bank as b ON b.GlobalIdentifier = t.BeneficiaryBank
-										Where t.Id = @p1)`
+	query = `SELECT pt.Name
+				FROM TransactionPolicy tp
+				JOIN Policy as p ON tp.PolicyId = p.Id
+				JOIN PolicyType pt ON p.PolicyTypeId = pt.Id
+				Where p.TransactionTypeId = (SELECT t.TransactionTypeId FROM [Transaction] as t
+												Where t.Id = @p1)`
 
 	rows, err = wrapper.db.Query(query, sql.Named("p1", transactionId))
 	if err != nil {
@@ -317,7 +320,7 @@ func (wrapper *DBHandler) GetTransactionHistory(transactionId uint64) models.Tra
 
 func (wrapper *DBHandler) GetComplianceCheckByID(checkID string) models.NewTransaction {
 	query := `SELECT t.Id, t.OriginatorBankId, t.BeneficiaryBankId, t.SenderId, t.ReceiverId, t.Currency, t.Amount, t.TransactionTypeId, t.LoanId
-              FROM Transaction t
+              FROM [Transaction] t
               WHERE t.Id = @p1`
 
 	row := wrapper.db.QueryRow(query, sql.Named("p1", checkID))

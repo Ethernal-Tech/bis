@@ -173,13 +173,9 @@ func (controller *TransactionController) ConfirmTransaction(w http.ResponseWrite
 			http.Error(w, "Internal Server Error parsing form", 500)
 		}
 
-		transactionId, _ := strconv.Atoi(r.Form.Get("transaction"))
+		transaction := controller.DB.GetTransactionHistory(r.Form.Get("transaction"))
 
-		transaction := controller.DB.GetTransactionHistory(uint64(transactionId))
-
-		bankId := controller.DB.GetBankId(transaction.BeneficiaryBank)
-
-		policies := controller.DB.GetPolices(bankId, transaction.TypeId)
+		policies := controller.DB.GetPoliciesForTransaction(transaction.Id)
 
 		viewData := map[string]any{}
 
@@ -266,9 +262,7 @@ func (controller *TransactionController) TransactionHistory(w http.ResponseWrite
 		http.Error(w, "Internal Server Error parsing form", 500)
 	}
 
-	transactionId, _ := strconv.Atoi(r.Form.Get("transaction"))
-
-	transaction := controller.DB.GetTransactionHistory(uint64(transactionId))
+	transaction := controller.DB.GetTransactionHistory(r.Form.Get("transaction"))
 
 	bankId := controller.DB.GetBankId(transaction.BeneficiaryBank)
 

@@ -52,11 +52,11 @@ func sendInteractiveProofRequest(address string, checkID string, policyID int, r
 	targetUrl := strings.Join([]string{"http:/", address}, "/")
 	var payload []byte
 	if targetedServer == "" {
-		targetUrl = strings.Join([]string{targetUrl, "start-server"}, "/")
+		targetUrl = strings.Join([]string{targetUrl, "api", "start-server"}, "/")
 		payload = []byte(fmt.Sprintf(`{"tx_id": "%s", "policy_id": "%d"}`, checkID, policyID))
 	} else {
-		targetUrl = strings.Join([]string{targetUrl, "start-client"}, "/")
-		payload = []byte(fmt.Sprintf(`{"tx_id": "%s", "policy_id": "%d", "receiver": "%s", "to": "%s:10501"}`, checkID, policyID, receiverName, targetedServer))
+		targetUrl = strings.Join([]string{targetUrl, "api", "start-client"}, "/")
+		payload = []byte(fmt.Sprintf(`{"tx_id": "%s", "policy_id": "%d", "receiver": "%s", "to": "%s"}`, checkID, policyID, receiverName, targetedServer))
 	}
 
 	client := &http.Client{}

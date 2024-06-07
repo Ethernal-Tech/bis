@@ -20,9 +20,6 @@ WORKDIR /app
 # Fetch the necessary releases using make
 RUN make fetch-releases-multiple-machines
 
-# Install ODBC library for GPJC API
-RUN apt-get update && apt-get install -y unixodbc unixodbc-dev
-
 # Accept build argument
 ARG DNS_NAME
 

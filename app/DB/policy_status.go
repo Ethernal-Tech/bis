@@ -6,8 +6,8 @@ import (
 	"log"
 )
 
-func (wrapper *DBHandler) GetTransactionPolicyStatuses(transactionId string) []models.TransactionPolicyStatus {
-	query := `SELECT TransactionId, PolicyId, Status FROM [TransactionPolicyStatus] WHERE TransactionId = @p1`
+func (wrapper *DBHandler) GetTransactionPolicyStatuses(transactionId string) []models.NewTransactionPolicy {
+	query := `SELECT TransactionId, PolicyId, Status FROM [TransactionPolicy] WHERE TransactionId = @p1`
 
 	rows, err := wrapper.db.Query(query, sql.Named("p1", transactionId))
 	if err != nil {
@@ -16,10 +16,10 @@ func (wrapper *DBHandler) GetTransactionPolicyStatuses(transactionId string) []m
 
 	defer rows.Close()
 
-	var statuses []models.TransactionPolicyStatus
+	var statuses []models.NewTransactionPolicy
 
 	for rows.Next() {
-		var status models.TransactionPolicyStatus
+		var status models.NewTransactionPolicy
 		if err := rows.Scan(&status.TransactionId, &status.PolicyId, &status.Status); err != nil {
 			log.Fatal(err)
 		}
@@ -51,7 +51,7 @@ func (wrapper *DBHandler) GetTransactionPolicyStatus(transactionId uint64, polic
 }
 
 func (wrapper *DBHandler) UpdateTransactionPolicyStatus(transactionId string, policyId int, status int) {
-	query := `UPDATE [TransactionPolicyStatus] Set Status = @p3 Where TransactionId = @p1 and PolicyId = @p2`
+	query := `UPDATE [TransactionPolicy] Set Status = @p3 Where TransactionId = @p1 and PolicyId = @p2`
 
 	_, err := wrapper.db.Exec(query,
 		sql.Named("p1", transactionId),
