@@ -13,6 +13,7 @@ type NewBank struct {
 }
 
 type NewBankClient struct {
+	Id               uint
 	GlobalIdentifier string
 	Name             string
 	Address          string
