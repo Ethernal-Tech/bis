@@ -36,7 +36,7 @@ func (c *ProvingClient) GetVMAddress() string {
 	return strings.Join([]string{c.gpjcApiAddress, c.gpjcPort}, ":")
 }
 
-func (c *ProvingClient) SendProofRequest(proofType string, checkID string, policyID int64, receiverName string, targetedServer string /* additional parameters */) error {
+func (c *ProvingClient) SendProofRequest(proofType string, checkID string, policyID int, receiverName string, targetedServer string /* additional parameters */) error {
 
 	// logic for sending proof requests
 	// different logic based on whether the request is for interactive or non-interactive proof
@@ -48,7 +48,7 @@ func (c *ProvingClient) SendProofRequest(proofType string, checkID string, polic
 	return nil
 }
 
-func sendInteractiveProofRequest(address string, checkID string, policyID int64, receiverName string, targetedServer string) error {
+func sendInteractiveProofRequest(address string, checkID string, policyID int, receiverName string, targetedServer string) error {
 	targetUrl := strings.Join([]string{"http:/", address}, "/")
 	var payload []byte
 	if targetedServer == "" {

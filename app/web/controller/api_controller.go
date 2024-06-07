@@ -19,7 +19,7 @@ func (controller *APIController) GetPolicies(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	time.Sleep(4 * time.Second)
+	time.Sleep(2 * time.Second)
 
 	data := struct {
 		BeneficiaryBankId string
@@ -34,11 +34,10 @@ func (controller *APIController) GetPolicies(w http.ResponseWriter, r *http.Requ
 	}
 
 	bankIdOfLoggedUser := controller.SessionManager.GetString(r.Context(), "bankId") //get logged user's bank ID
-	originatorBankCountryCode := controller.DB.GetCountryOfBank(bankIdOfLoggedUser).Code
+	originatorBankCountry := controller.DB.GetCountryOfBank(bankIdOfLoggedUser)
 
-	// TODO: Handle RequesterGlobalIdentifier
 	policyRequestDto := common.PolicyRequestDTO{
-		Country:                   originatorBankCountryCode,
+		Country:                   originatorBankCountry.Code,
 		TransactionType:           data.TransactionTypeId,
 		RequesterGlobalIdentifier: bankIdOfLoggedUser,
 	}
@@ -51,8 +50,19 @@ func (controller *APIController) GetPolicies(w http.ResponseWriter, r *http.Requ
 
 	responseData := (<-ch).(common.PolicyResponseDTO)
 
-	fmt.Println("Received from request")
-	fmt.Println(responseData)
+	// Add policies to the DB if not exist
+	for _, policy := range responseData.Policies {
+		// 1. Insert policy type if not exists
+		policyTypeID := controller.DB.GetOrCreatePolicyType(policy.Code, policy.Name)
+		// 2. Insert Policy if not exists
+		transactionTypeID, err := strconv.Atoi(data.TransactionTypeId)
+		if err != nil {
+			http.Error(w, fmt.Sprint("Internal Server Error %w", err), 500)
+		}
+
+		policyEnforcingCountryId := controller.DB.GetCountryOfBank(data.BeneficiaryBankId).Id
+		controller.DB.GetOrCreatePolicy(int(policyTypeID), transactionTypeID, policyEnforcingCountryId, originatorBankCountry.Id, policy.Params)
+	}
 
 	jsonData, err := json.Marshal(responseData)
 
@@ -178,14 +188,15 @@ func (controller *APIController) CreateTx(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	// TODO: Add new client if not exists
+	senderID := controller.DB.GetOrCreateClient(messageData.SenderLei, messageData.SenderName, "", messageData.OriginatorBankGlobalIdentifier)
+	receiverID := controller.DB.GetOrCreateClient(messageData.ReceiverLei, messageData.ReceiverName, "", messageData.BeneficiaryBankGlobalIdentifier)
 
 	transaction := models.NewTransaction{
 		Id:                messageData.TransactionID,
 		OriginatorBankId:  messageData.OriginatorBankGlobalIdentifier,
 		BeneficiaryBankId: messageData.BeneficiaryBankGlobalIdentifier,
-		SenderId:          messageData.SenderLei,
-		ReceiverId:        messageData.ReceiverLei,
+		SenderId:          senderID,
+		ReceiverId:        receiverID,
 		Currency:          messageData.Currency,
 		Amount:            int(messageData.Amount),
 		TransactionTypeId: transactionType,

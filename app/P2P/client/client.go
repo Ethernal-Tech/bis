@@ -37,7 +37,7 @@ func (c *P2PClient) Send(receivingBankID string, method string, data any, messag
 	if messageID == 0 {
 		messageID = rand.Int()
 	}
-	fmt.Println(messageID)
+
 	messagePayload, err := json.Marshal(data)
 
 	if err != nil {

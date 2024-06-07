@@ -6,7 +6,6 @@ import (
 	"bisgo/app/models"
 	"bisgo/common"
 	"encoding/json"
-	"fmt"
 	"log"
 	"strconv"
 )
@@ -42,19 +41,20 @@ func (h *P2PHandler) CreateTransaction(messageID int, payload []byte) {
 		return
 	}
 
+	senderID := h.DB.GetOrCreateClient(messageData.SenderLei, messageData.SenderName, "", messageData.OriginatorBankGlobalIdentifier)
+	receiverID := h.DB.GetOrCreateClient(messageData.ReceiverLei, messageData.ReceiverName, "", messageData.BeneficiaryBankGlobalIdentifier)
+
 	transaction := models.NewTransaction{
 		Id:                messageData.TransactionID,
 		OriginatorBankId:  messageData.OriginatorBankGlobalIdentifier,
 		BeneficiaryBankId: messageData.BeneficiaryBankGlobalIdentifier,
-		SenderId:          messageData.SenderName,
-		ReceiverId:        messageData.ReceiverName,
+		SenderId:          senderID,
+		ReceiverId:        receiverID,
 		Currency:          messageData.Currency,
 		Amount:            int(messageData.Amount),
 		TransactionTypeId: transactionType,
 		LoanId:            int(messageData.LoanID),
 	}
-
-	// TODO: Insert client in DB if it not exists
 
 	transactionID := h.DB.InsertTransaction(transaction)
 	h.DB.UpdateTransactionState(transactionID, 1)
@@ -108,7 +108,6 @@ func (h *P2PHandler) GetPolicies(messageID int, payload []byte) {
 	*/
 
 	policies := h.DB.GetPolicesByCountryCode(messageData.Country, transactionType)
-	fmt.Println(policies)
 
 	response := common.PolicyResponseDTO{
 		Policies: []common.PolicyDTO{},
@@ -143,8 +142,6 @@ func (h *P2PHandler) SendPolicies(messageID int, payload []byte) {
 		log.Println(err.Error())
 		return
 	}
-
-	// TODO1: Add policies to the DB if not exist
 
 	channel <- messageData // send data to the listener
 }

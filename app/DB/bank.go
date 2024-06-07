@@ -192,8 +192,8 @@ func (wrapper *DBHandler) GetCountryOfBank(bankId string) models.NewCountry {
 	return country
 }
 
-func (wrapper *DBHandler) GetClientNameByID(clientID string) string {
-	query := `SELECT Name FROM BankClient WHERE GlobalIdentifier = @p1`
+func (wrapper *DBHandler) GetClientNameByID(clientID uint) string {
+	query := `SELECT Name FROM BankClient WHERE Id = @p1`
 
 	var clientName string
 	err := wrapper.db.QueryRow(query, sql.Named("p1", clientID)).Scan(&clientName)
@@ -205,4 +205,28 @@ func (wrapper *DBHandler) GetClientNameByID(clientID string) string {
 	}
 
 	return clientName
+}
+
+// GetOrCreateClient method to get client Id by GlobalIdentifier and Name or create a new client if not exists
+func (wrapper *DBHandler) GetOrCreateClient(globalIdentifier, name, address, bankId string) uint {
+	// Check if client exists
+	query := `SELECT Id FROM BankClient WHERE GlobalIdentifier = @p1 AND Name = @p2`
+
+	var clientId uint
+	err := wrapper.db.QueryRow(query, sql.Named("p1", globalIdentifier), sql.Named("p2", name)).Scan(&clientId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// Client does not exist, insert new client
+			insertQuery := `INSERT INTO [dbo].[BankClient] OUTPUT INSERTED.Id VALUES (@p1, @p2, @p3, @p4)`
+			err = wrapper.db.QueryRow(insertQuery, sql.Named("p1", globalIdentifier), sql.Named("p2", name), sql.Named("p3", address), sql.Named("p4", bankId)).Scan(&clientId)
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			// Other errors
+			log.Fatal(err)
+		}
+	}
+
+	return clientId
 }

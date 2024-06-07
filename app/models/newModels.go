@@ -43,8 +43,8 @@ type NewTransaction struct {
 	Id                string
 	OriginatorBankId  string
 	BeneficiaryBankId string
-	SenderId          string
-	ReceiverId        string
+	SenderId          uint
+	ReceiverId        uint
 	Currency          string
 	Amount            int
 	TransactionTypeId int
@@ -75,7 +75,7 @@ type NewPolicyType struct {
 }
 
 type NewPolicy struct {
-	Id                       int64
+	Id                       int
 	PolicyTypeId             int
 	TransactionTypeId        int
 	PolicyEnforcingCountryId int

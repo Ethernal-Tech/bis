@@ -4,7 +4,6 @@ import (
 	"bisgo/app/models"
 	"database/sql"
 	"log"
-	"strconv"
 )
 
 func (wrapper *DBHandler) GetPolicyId(code string, countryId int) int {
@@ -49,13 +48,12 @@ func (wrapper *DBHandler) GetPolicyById(policyID int) models.Policy {
 	return policy
 }
 
-func (wrapper *DBHandler) GetPolices(bankId string, transactionTypeId int) []models.PolicyModel {
-	query := `SELECT p.Id, c.Name, p.CountryId, p.Code, p.Name, ttp.Amount, ttp.Checklist
-					FROM TransactionTypePolicy ttp
-					JOIN Policy as p ON ttp.PolicyId = p.Id
-					Join Country as c ON ttp.CountryId = c.Id
-					Where ttp.TransactionTypeId = @p2
-						and ttp.CountryId = (SELECT CountryId FROM [Bank] Where Id = @p1)`
+func (wrapper *DBHandler) GetPolices(bankId string, transactionTypeId int) []models.NewPolicy {
+	query := `SELECT p.Id, p.PolicyTypeId, p.TransactionTypeId, p.PolicyEnforcingCountryId, p.OriginatingCountryId, p.Parameters
+					FROM Policy p
+					Join Country as c ON p.PolicyEnforcingCountryId = c.Id
+					Where p.TransactionTypeId = @p2
+						and p.PolicyEnforcingCountryId = (SELECT CountryId FROM [Bank] Where GlobalIdentifier = @p1)`
 
 	rows, err := wrapper.db.Query(query,
 		sql.Named("p1", bankId),
@@ -66,21 +64,16 @@ func (wrapper *DBHandler) GetPolices(bankId string, transactionTypeId int) []mod
 
 	defer rows.Close()
 
-	policies := []models.PolicyModel{}
+	policies := []models.NewPolicy{}
 	for rows.Next() {
-		var policy models.PolicyModel
-		if err := rows.Scan(&policy.Id, &policy.Country, &policy.CountryId, &policy.Code, &policy.Name, &policy.Amount, &policy.Checklist); err != nil {
+		var policy models.NewPolicy
+		if err := rows.Scan(&policy.Id, &policy.PolicyTypeId, &policy.TransactionTypeId, &policy.PolicyEnforcingCountryId, &policy.OriginatingCountryId, &policy.Parameters); err != nil {
 			log.Fatal(err)
-		}
-
-		if len(policy.Checklist) > 0 {
-			policy.Parameter = policy.Checklist
-		} else {
-			policy.Parameter = strconv.FormatUint(policy.Amount, 10)
 		}
 
 		policies = append(policies, policy)
 	}
+
 	return policies
 }
 
@@ -205,4 +198,64 @@ func (wrapper *DBHandler) UpdatePolicyChecklist(checklist string, policyId uint6
 	if err != nil {
 		log.Fatal(err)
 	}
+}
+
+// GetOrCreatePolicyType method to get policy type Id by Code and Name or create a new policy type if not exists
+func (wrapper *DBHandler) GetOrCreatePolicyType(code, name string) uint {
+	// Check if PolicyType exists
+	query := `SELECT Id FROM PolicyType WHERE Code = @p1 AND Name = @p2`
+
+	var policyTypeID uint
+	err := wrapper.db.QueryRow(query, sql.Named("p1", code), sql.Named("p2", name)).Scan(&policyTypeID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// PolicyType does not exist, insert new PolicyType
+			insertQuery := `INSERT INTO [dbo].[PolicyType] (Code, Name) OUTPUT INSERTED.Id VALUES (@p1, @p2)`
+			err = wrapper.db.QueryRow(insertQuery, sql.Named("p1", code), sql.Named("p2", name)).Scan(&policyTypeID)
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			// Other errors
+			log.Fatal(err)
+		}
+	}
+
+	return policyTypeID
+}
+
+// GetOrCreatePolicy method to get policy Id by its fields
+func (wrapper *DBHandler) GetOrCreatePolicy(policyTypeId, transactionTypeId, policyEnforcingCountryId, originatorCountryId int, parameters string) uint {
+	// Check if Policy exists
+	query := `SELECT Id FROM Policy WHERE PolicyTypeId = @p1 AND TransactionTypeId = @p2 AND PolicyEnforcingCountryId = @p3
+			  AND OriginatingCountryId = @p4 AND Parameters = @p5`
+
+	var policyID uint
+	err := wrapper.db.QueryRow(query,
+		sql.Named("p1", policyTypeId),
+		sql.Named("p2", transactionTypeId),
+		sql.Named("p3", policyEnforcingCountryId),
+		sql.Named("p4", originatorCountryId),
+		sql.Named("p5", parameters)).Scan(&policyID)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			// Policy does not exist, insert new Policy
+			insertQuery := `INSERT INTO [dbo].[Policy] (PolicyTypeId, TransactionTypeId, PolicyEnforcingCountryId, OriginatingCountryId, Parameters) OUTPUT INSERTED.Id 
+							VALUES (@p1, @p2, @p3, @p4, @p5)`
+			err = wrapper.db.QueryRow(insertQuery,
+				sql.Named("p1", policyTypeId),
+				sql.Named("p2", transactionTypeId),
+				sql.Named("p3", policyEnforcingCountryId),
+				sql.Named("p4", originatorCountryId),
+				sql.Named("p5", parameters)).Scan(&policyID)
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			// Other errors
+			log.Fatal(err)
+		}
+	}
+
+	return policyID
 }

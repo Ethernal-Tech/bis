@@ -104,21 +104,21 @@ func (controller *TransactionController) AddTransaction(w http.ResponseWriter, r
 			return
 		}
 
-		fmt.Println(data)
-
 		originatorBankId := controller.DB.GetBankId(controller.SessionManager.GetString(r.Context(), "bankName"))
 
 		amount, _ := strconv.Atoi(strings.Replace(data.Amount, ",", "", -1))
 		transactionType, _ := strconv.Atoi(data.TransactionTypeID)
 		//loanId, _ := strconv.Atoi(data.PaymentTypeID)
 
-		// TODO: If client is not in the DB add it
+		// If client is not in the DB add it
+		senderID := controller.DB.GetOrCreateClient(data.SenderLei, data.SenderName, "", originatorBankId)
+		receiverID := controller.DB.GetOrCreateClient(data.BeneficiaryLei, data.BeneficiaryName, "", data.BeneficiaryBank)
 
 		transaction := models.NewTransaction{
 			OriginatorBankId:  originatorBankId,
 			BeneficiaryBankId: data.BeneficiaryBank,
-			SenderId:          data.SenderLei,
-			ReceiverId:        data.BeneficiaryLei,
+			SenderId:          senderID,
+			ReceiverId:        receiverID,
 			Currency:          data.Currency,
 			Amount:            amount,
 			TransactionTypeId: transactionType,
@@ -127,7 +127,6 @@ func (controller *TransactionController) AddTransaction(w http.ResponseWriter, r
 
 		transactionID := controller.DB.InsertTransaction(transaction)
 		controller.DB.UpdateTransactionState(transactionID, 1)
-		fmt.Println(transactionID)
 
 		// Call P2P create-transaction of beneficiary bank
 		transactionDto := common.TransactionDTO{
@@ -280,13 +279,13 @@ func (controller *TransactionController) TransactionHistory(w http.ResponseWrite
 		Status int
 	}{}
 
-	for _, onePolicy := range policies {
-		currentStatus := controller.DB.GetTransactionPolicyStatus(uint64(transactionId), int(onePolicy.Id))
-		policiesAndStatuses = append(policiesAndStatuses, struct {
-			Policy models.PolicyModel
-			Status int
-		}{onePolicy, currentStatus})
-	}
+	// for _, onePolicy := range policies {
+	// 	currentStatus := controller.DB.GetTransactionPolicyStatus(uint64(transactionId), int(onePolicy.Id))
+	// 	policiesAndStatuses = append(policiesAndStatuses, struct {
+	// 		Policy models.PolicyModel
+	// 		Status int
+	// 	}{onePolicy, currentStatus})
+	// }
 
 	viewData := map[string]any{}
 

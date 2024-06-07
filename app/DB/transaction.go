@@ -9,7 +9,7 @@ import (
 )
 
 func (wrapper *DBHandler) InsertTransaction(t models.NewTransaction) string {
-	query := `INSERT INTO [dbo].[Transaction] OUTPUT INSERTED.Id
+	query := `INSERT INTO [dbo].[Transaction] (Id, OriginatorBankId, BeneficiaryBankId, SenderId, ReceiverId, Currency, Amount, TransactionTypeId, LoanId)
           VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9)`
 
 	var insertedID string
@@ -19,30 +19,36 @@ func (wrapper *DBHandler) InsertTransaction(t models.NewTransaction) string {
 		log.Fatal(err1)
 	}
 
-	err := wrapper.db.QueryRow(query,
+	row := wrapper.db.QueryRow(query,
 		sql.Named("p1", insertedID),
 		sql.Named("p2", t.OriginatorBankId),
 		sql.Named("p3", t.BeneficiaryBankId),
-		sql.Named("p4", t.SenderId),
-		sql.Named("p5", t.ReceiverId),
+		sql.Named("p4", int(t.SenderId)),
+		sql.Named("p5", int(t.ReceiverId)),
 		sql.Named("p6", t.Currency),
 		sql.Named("p7", t.Amount),
 		sql.Named("p8", t.TransactionTypeId),
 		sql.Named("p9", t.LoanId))
 
-	if err != nil {
-		log.Fatal(err)
+	if row.Err() != nil {
+		log.Fatal(row.Err())
 	}
 
-	// TODO2: Add correct policies/ maybe more than 1 fits criteria
-	// 		  add latest ones
 	polices := wrapper.GetPolices(t.BeneficiaryBankId, t.TransactionTypeId)
 
+	var relevantPolicyMap map[int]int = make(map[int]int)
+
 	for _, policy := range polices {
-		query = `INSERT INTO [dbo].[TransactionPolicyStatus] VALUES (@p1, @p2, @p3)`
+		if relevantPolicyMap[policy.PolicyTypeId] < policy.Id {
+			relevantPolicyMap[policy.PolicyTypeId] = policy.Id
+		}
+	}
+
+	for _, policyId := range relevantPolicyMap {
+		query = `INSERT INTO [dbo].[TransactionPolicy] VALUES (@p1, @p2, @p3)`
 		_, err := wrapper.db.Exec(query,
 			sql.Named("p1", insertedID),
-			sql.Named("p2", policy.Id),
+			sql.Named("p2", policyId),
 			sql.Named("p3", 0))
 
 		if err != nil {
@@ -134,9 +140,8 @@ func (wrapper *DBHandler) GetTransactionsForAddress(address string, searchValue 
 				LEFT JOIN [Status] as s ON s.Id = th.StatusId
 				JOIN Bank as ob ON ob.GlobalIdentifier = t.OriginatorBankId
 				JOIN Bank as bb ON bb.GlobalIdentifier = t.BeneficiaryBankId
-				JOIN BankClient as bcs ON bcs.GlobalIdentifier = t.SenderId
-				JOIN BankClient as bcr ON bcr.GlobalIdentifier = t.ReceiverId
-				WHERE t.OriginatorBankId = @p1 OR t.BeneficiaryBankId = @p2`
+				JOIN BankClient as bcs ON bcs.Id = t.SenderId
+				JOIN BankClient as bcr ON bcr.Id = t.ReceiverId`
 
 	rows, err := wrapper.db.Query(query,
 		sql.Named("p1", address),
