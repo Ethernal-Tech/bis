@@ -1,7 +1,6 @@
 package messages
 
 import (
-	"errors"
 	"sync"
 )
 
@@ -16,14 +15,14 @@ func StoreChannel(messageID int, channel chan<- any) {
 	rrChanMap.Store(messageID, channel)
 }
 
-func LoadChannel(messageID int) (chan<- any, error) {
+func LoadChannel(messageID int) (chan<- any, bool) {
 	channel, ok := rrChanMap.Load(messageID)
 
 	if !ok {
-		return nil, errors.New("error: missing peer for the message ID")
+		return nil, false
 	}
 
-	return channel.(chan<- any), nil
+	return channel.(chan<- any), true
 }
 
 func RemoveChannel(messageID int) {

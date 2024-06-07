@@ -19,9 +19,9 @@ func CreateP2PHandler(core *core.Core) *P2PHandler {
 }
 
 func (h *P2PHandler) CreateTransaction(messageID int, payload []byte) {
-	_, err := messages.LoadChannel(messageID)
+	_, ok := messages.LoadChannel(messageID)
 
-	if err != nil {
+	if !ok {
 		// handle error
 	}
 
@@ -61,9 +61,9 @@ func (h *P2PHandler) CreateTransaction(messageID int, payload []byte) {
 }
 
 func (h *P2PHandler) GetPolicies(messageID int, payload []byte) {
-	_, err := messages.LoadChannel(messageID)
+	_, ok := messages.LoadChannel(messageID)
 
-	if err != nil {
+	if !ok {
 		// handle error
 	}
 
@@ -129,9 +129,9 @@ func (h *P2PHandler) GetPolicies(messageID int, payload []byte) {
 }
 
 func (h *P2PHandler) SendPolicies(messageID int, payload []byte) {
-	channel, err := messages.LoadChannel(messageID)
+	channel, ok := messages.LoadChannel(messageID)
 
-	if err != nil {
+	if !ok {
 		// handle error
 	}
 
@@ -147,9 +147,9 @@ func (h *P2PHandler) SendPolicies(messageID int, payload []byte) {
 }
 
 func (h *P2PHandler) CheckConfirmed(messageID int, payload []byte) {
-	_, err := messages.LoadChannel(messageID)
+	_, ok := messages.LoadChannel(messageID)
 
-	if err != nil {
+	if !ok {
 		// handle error
 	}
 
@@ -166,7 +166,7 @@ func (h *P2PHandler) CheckConfirmed(messageID int, payload []byte) {
 	sender := h.DB.GetClientNameByID(check.SenderId)
 	for _, policy := range applicablePolicies {
 		if policy.PolicyType.Code == "SCL" {
-			err = h.ProvingClient.SendProofRequest("interactive", messageData.CheckID, policy.Policy.Id, sender, messageData.VMAddress)
+			err := h.ProvingClient.SendProofRequest("interactive", messageData.CheckID, policy.Policy.Id, sender, messageData.VMAddress)
 			if err != nil {
 				log.Println(err.Error())
 				return
