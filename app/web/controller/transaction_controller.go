@@ -13,7 +13,7 @@ import (
 	"text/template"
 )
 
-func (controller *TransactionController) SearchTransaction(w http.ResponseWriter, r *http.Request) {
+func (controller *TransactionController) GetTransactions(w http.ResponseWriter, r *http.Request) {
 	if controller.SessionManager.GetString(r.Context(), "inside") != "yes" {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 
@@ -26,12 +26,13 @@ func (controller *TransactionController) SearchTransaction(w http.ResponseWriter
 	var transactions []models.TransactionModel
 	if controller.SessionManager.GetBool(r.Context(), "centralBankEmployee") {
 		var countryId int
-		transactions, countryId = controller.DB.GetTransactionsForCentralbank(controller.SessionManager.Get(r.Context(), "bankId").(string), searchValue)
+		transactions, countryId = controller.DB.GetCentralBankTransactions(controller.SessionManager.Get(r.Context(), "bankId").(string), searchValue)
 		viewData["countryId"] = countryId
 	} else {
-		transactions = controller.DB.GetTransactionsForAddress(controller.SessionManager.Get(r.Context(), "bankId").(string), searchValue)
+		transactions = controller.DB.GetCommercialBankTransactions(controller.SessionManager.Get(r.Context(), "bankId").(string), searchValue)
 	}
 
+	viewData["bankName"] = controller.SessionManager.GetString(r.Context(), "bankName")
 	viewData["transactions"] = transactions
 	viewData["country"] = controller.SessionManager.GetString(r.Context(), "country")
 	viewData["centralBankEmployee"] = controller.SessionManager.GetBool(r.Context(), "centralBankEmployee")

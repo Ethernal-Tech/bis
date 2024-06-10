@@ -129,7 +129,7 @@ func (wrapper *DBHandler) GetTransactionTypes() []models.NewTransactionType {
 	return types
 }
 
-func (wrapper *DBHandler) GetTransactionsForAddress(address string, searchValue string) []models.TransactionModel {
+func (wrapper *DBHandler) GetCommercialBankTransactions(bankId string, searchValue string) []models.TransactionModel {
 	query := `SELECT t.Id
 					,ob.Name
 					,bb.Name
@@ -146,11 +146,13 @@ func (wrapper *DBHandler) GetTransactionsForAddress(address string, searchValue 
 				JOIN Bank as ob ON ob.GlobalIdentifier = t.OriginatorBankId
 				JOIN Bank as bb ON bb.GlobalIdentifier = t.BeneficiaryBankId
 				JOIN BankClient as bcs ON bcs.Id = t.SenderId
-				JOIN BankClient as bcr ON bcr.Id = t.ReceiverId`
+				JOIN BankClient as bcr ON bcr.Id = t.ReceiverId
+				WHERE (t.OriginatorBankId = @p1 OR t.BeneficiaryBankId = @p2) and (ob.Name like @p3 OR bb.Name like @p3 OR bcs.Name like @p3 OR bcr.Name like @p3)`
 
 	rows, err := wrapper.db.Query(query,
-		sql.Named("p1", address),
-		sql.Named("p2", address))
+		sql.Named("p1", bankId),
+		sql.Named("p2", bankId),
+		sql.Named("p3", "%"+searchValue+"%"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -169,7 +171,7 @@ func (wrapper *DBHandler) GetTransactionsForAddress(address string, searchValue 
 	return transactions
 }
 
-func (wrapper *DBHandler) GetTransactionsForCentralbank(bankId string, searchValue string) ([]models.TransactionModel, int) {
+func (wrapper *DBHandler) GetCentralBankTransactions(bankId string, searchValue string) ([]models.TransactionModel, int) {
 	query := `SELECT CountryId FROM Bank
 			Where GlobalIdentifier = @p1`
 
@@ -204,8 +206,8 @@ func (wrapper *DBHandler) GetTransactionsForCentralbank(bankId string, searchVal
 				LEFT JOIN [Status] as s ON s.Id = th.StatusId
 				JOIN Bank as ob ON ob.GlobalIdentifier = t.OriginatorBankId
 				JOIN Bank as bb ON bb.GlobalIdentifier = t.BeneficiaryBankId
-				JOIN BankClient as bcs ON bcs.GlobalIdentifier = t.SenderId
-				JOIN BankClient as bcr ON bcr.GlobalIdentifier = t.ReceiverId
+				JOIN BankClient as bcs ON bcs.Id = t.SenderId
+				JOIN BankClient as bcr ON bcr.Id = t.ReceiverId
 				WHERE (ob.CountryId = @p1 OR bb.CountryId = @p2) and (ob.Name like @p3 OR bb.Name like @p3 OR bcs.Name like @p3 OR bcr.Name like @p3)`
 
 	rows, err = wrapper.db.Query(query,

@@ -22,7 +22,7 @@ func (controller *CBController) ShowAnalytics(w http.ResponseWriter, r *http.Req
 	viewData["centralBankEmployee"] = controller.SessionManager.GetBool(r.Context(), "centralBankEmployee")
 
 	centralBankId := controller.SessionManager.Get(r.Context(), "bankId").(string)
-	transactions, countryId := controller.DB.GetTransactionsForCentralbank(centralBankId, "")
+	transactions, countryId := controller.DB.GetCentralBankTransactions(centralBankId, "")
 
 	sentAmount := 0
 	receivedAmount := 0
