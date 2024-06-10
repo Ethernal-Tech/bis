@@ -226,7 +226,7 @@ func (controller *TransactionController) ConfirmTransaction(w http.ResponseWrite
 			} else if policy.PolicyType.Code == "SCL" {
 				// SCL //
 				// TODO: Start gpjc proving server
-				err = controller.ProvingClient.SendProofRequest("interactive", complianceCheckId, policy.Policy.Id, "", "")
+				controller.RulesEngine.Do(complianceCheckId, "interactive", nil)
 				if err != nil {
 					http.Error(w, fmt.Sprint("Internal Server Error %w", err), 500)
 				}
@@ -237,7 +237,7 @@ func (controller *TransactionController) ConfirmTransaction(w http.ResponseWrite
 
 		checkConfirmedData := common.CheckConfirmedDTO{
 			CheckID:   complianceCheckId,
-			VMAddress: controller.ProvingClient.GetVMAddress(),
+			VMAddress: controller.RulesEngine.GetVMAddress(),
 		}
 
 		_, err = controller.P2PClient.Send(check.OriginatorBankId, "check-confirmed", checkConfirmedData, 0)

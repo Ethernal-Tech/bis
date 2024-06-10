@@ -3,7 +3,7 @@ package core
 import (
 	"bisgo/app/DB"
 	p2pclient "bisgo/app/P2P/client"
-	provingclient "bisgo/app/proving/client"
+	engine "bisgo/app/rules_engine"
 	"bisgo/app/web/manager"
 )
 
@@ -14,7 +14,7 @@ type Core struct {
 	SessionManager      *manager.SessionManager
 	SanctionListManager *manager.SanctionListManager
 	P2PClient           *p2pclient.P2PClient
-	ProvingClient       *provingclient.ProvingClient
+	RulesEngine         *engine.RulesEngine
 }
 
 // CreateCore function initializes and returns a new instance of the Core component.
@@ -24,6 +24,6 @@ func CreateCore() *Core {
 		SessionManager:      manager.CreateSessionManager(),
 		SanctionListManager: manager.CreateSanctionListManager(),
 		P2PClient:           p2pclient.GetP2PClient(),
-		ProvingClient:       provingclient.GetProvingClient(),
+		RulesEngine:         engine.GetRulesEngine(),
 	}
 }

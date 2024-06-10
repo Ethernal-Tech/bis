@@ -161,16 +161,8 @@ func (h *P2PHandler) CheckConfirmed(messageID int, payload []byte) {
 		return
 	}
 
-	applicablePolicies := h.DB.GetPoliciesForTransaction(messageData.CheckID)
-	check := h.DB.GetComplianceCheckByID(messageData.CheckID)
-	sender := h.DB.GetClientNameByID(check.SenderId)
-	for _, policy := range applicablePolicies {
-		if policy.PolicyType.Code == "SCL" {
-			err := h.ProvingClient.SendProofRequest("interactive", messageData.CheckID, policy.Policy.Id, sender, messageData.VMAddress)
-			if err != nil {
-				log.Println(err.Error())
-				return
-			}
-		}
+	data := map[string]any{
+		"vm_address": messageData.VMAddress,
 	}
+	h.RulesEngine.Do(messageData.CheckID, "interactive", data)
 }
