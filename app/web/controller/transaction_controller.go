@@ -227,7 +227,7 @@ func (controller *TransactionController) ConfirmTransaction(w http.ResponseWrite
 			} else if policy.PolicyType.Code == "SCL" {
 				// SCL //
 				// TODO: Start gpjc proving server
-				controller.RulesEngine.Do(complianceCheckId, "interactive", nil)
+				controller.RulesEngine.Do(complianceCheckId, "interactive", map[string]any{"vm_address": ""})
 				if err != nil {
 					http.Error(w, fmt.Sprint("Internal Server Error %w", err), 500)
 				}
