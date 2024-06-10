@@ -209,7 +209,7 @@ input:focus {
     margin-left: 4px;
 }
 
-.note {
+.view-2-note, .view-3-note {
     color: #AA322F;
     margin: 0px auto;
     margin-top: 34px;
@@ -345,4 +345,62 @@ input:focus {
     100% {
         transform: rotate(360deg);
     }
+}
+
+.view-3-content {
+    display: flex;
+    width: 880px;
+    height: 434px;
+    margin: 0px auto;
+    justify-content: space-between;
+}
+
+.policies {
+    margin: 0px auto;
+    margin-top: 40px;
+    width: 46%;
+    height: 374px;
+    border: 1px solid rgb(183, 183, 183);
+    overflow: auto;
+}
+
+.policies::-webkit-scrollbar {
+    width: 4px;
+    visibility: hidden;
+}
+
+.policies::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: #AA322F;
+}
+
+.policy {
+    height: 52px;
+    border-bottom: 1px solid rgb(183, 183, 183);
+    display: flex;
+    align-items: center;
+}
+
+.policy-params {
+    margin-top: 2px;
+}
+
+.policy-icon {
+    flex: 1;
+    margin-left: 12px;
+}
+
+.policy-content {
+    height: 100%;
+    flex: 9;
+    display: flex;
+    flex-direction: column;
+    font-size: 15px;
+    justify-content: center;
+    align-items: center;
+}
+
+.policy-code-name {
+    font-weight: 600;
+    color: #AA322F;
 }

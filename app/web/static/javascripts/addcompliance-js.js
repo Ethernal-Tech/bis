@@ -31,6 +31,12 @@ let amountTI
 let transactionTypeTI
 let beneficiaryBankTI
 
+let view1CL = document.getElementById("view-1").classList
+let view2CL = document.getElementById("view-2").classList
+let view2indCL = document.querySelector(".view-indicator > div:nth-child(2)").classList
+let view3CL = document.getElementById("view-3").classList
+let view3indCL = document.querySelector(".view-indicator > div:nth-child(3)").classList
+
 let loader
 
 function setElements() {
@@ -132,8 +138,6 @@ function upgradeView() {
         view2CL.add("not-display")
         view3indCL.remove("remove-color")
         view3indCL.add("add-color")
-        view3CL.remove("not-display")
-        view3CL.add("display")
 
         getPolicies()
     } else if (currentView == 3) {
@@ -184,7 +188,7 @@ function getPolicies() {
     }
 
     showLoader()
-    fetch("/api/getpolicies", {
+    fetch("http://localhost:9999/data", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -203,20 +207,21 @@ function getPolicies() {
             }
             else {
                 hideLoader()
-                const viewDiv = document.getElementById("view-3");
-                viewDiv.innerHTML = '';
+                console.log(data)
 
-                data.policies.forEach(policy => {
-                    const policyDiv = document.createElement('div');
-                    policyDiv.className = 'policy-item';
-                    policyDiv.innerHTML = `
-                        <p>Code: ${policy.code}</p>
-                        <p>Name: ${policy.name}</p>
-                        <p>Params: ${policy.params}</p>
-                        <br>
-                    `;
-                    viewDiv.appendChild(policyDiv);
-                });
+                // data.policies.forEach(policy => {
+                //     const policyDiv = document.createElement('div');
+                //     policyDiv.className = 'policy-item';
+                //     policyDiv.innerHTML = `
+                //         <p>Code: ${policy.code}</p>
+                //         <p>Name: ${policy.name}</p>
+                //         <p>Params: ${policy.params}</p>
+                //         <br>
+                //     `;
+                //     viewDiv.appendChild(policyDiv);
+                // });
+                view3CL.remove("not-display")
+                view3CL.add("display")
             }
         })
         .catch(error => {
