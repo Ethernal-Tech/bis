@@ -5,7 +5,9 @@ import (
 	"bisgo/app/P2P/messages"
 	"bisgo/app/models"
 	"bisgo/common"
+	"bisgo/config"
 	"encoding/json"
+	"fmt"
 	"log"
 	"strconv"
 )
@@ -81,31 +83,32 @@ func (h *P2PHandler) GetPolicies(messageID int, payload []byte) {
 		return
 	}
 
+	fmt.Println(messageData)
+
 	// Comercial bank has to update polices from the central bank first
 	// TODO: Add reference to this
-	/*
-		isCentralBank := true
-		fmt.Println("central bank")
-		if !isCentralBank {
-			centralBankRequest := common.PolicyRequestDTO{
-				Country:                   messageData.Country,
-				TransactionType:           messageData.TransactionType,
-				RequesterGlobalIdentifier: "myGlobalIdentifier", // TODO: Add reference to this
-			}
-
-			// TODO: Add reference to this
-			channel, err := h.P2PClient.Send("myCentralBankIdentifier", "get-policies", centralBankRequest, 0)
-			if err != nil {
-				log.Println(err.Error())
-				return
-			}
-
-			responseData := (<-channel).(common.PolicyResponseDTO)
-			fmt.Println(responseData)
-
-			// TODO: Update in DB if needed
+	if !config.ResovleIsCentralBank() {
+		centralBankRequest := common.PolicyRequestDTO{
+			Country:                   messageData.Country,
+			TransactionType:           messageData.TransactionType,
+			RequesterGlobalIdentifier: config.ResolveMyGlobalIdentifier(), // TODO: Add reference to this
 		}
-	*/
+
+		// TODO: Add reference to this
+		channel, err := h.P2PClient.Send(config.ResolveCBGlobalIdentifier(), "get-policies", centralBankRequest, 0)
+		if err != nil {
+			log.Println(err.Error())
+			return
+		}
+
+		responseData := (<-channel).(common.PolicyResponseDTO)
+		fmt.Println(responseData)
+
+		for _, policy := range responseData.Policies {
+			policyTypeID := h.DB.GetOrCreatePolicyType(policy.Code, policy.Name)
+			h.DB.GetOrCreatePolicy(int(policyTypeID), transactionType, h.DB.GetCountryByCode(config.ResolveCountryCode()).Id, h.DB.GetCountryByCode(messageData.Country).Id, policy.Params)
+		}
+	}
 
 	policies := h.DB.GetPolicesByCountryCode(messageData.Country, transactionType)
 

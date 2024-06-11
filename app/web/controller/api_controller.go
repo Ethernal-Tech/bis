@@ -9,7 +9,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"time"
+	"strings"
 )
 
 func (controller *APIController) GetPolicies(w http.ResponseWriter, r *http.Request) {
@@ -19,7 +19,7 @@ func (controller *APIController) GetPolicies(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	time.Sleep(2 * time.Second)
+	//time.Sleep(2 * time.Second)
 
 	data := struct {
 		BeneficiaryBankId string
@@ -90,9 +90,11 @@ func (controller *APIController) SubmitTransactionProof(w http.ResponseWriter, r
 		return
 	}
 
-	controller.DB.InsertTransactionProof(messageData.TransactionId, messageData.Value)
+	values := strings.Split(messageData.Value, ";")
 
-	if messageData.Value == "0" {
+	controller.DB.InsertTransactionProof(messageData.TransactionId, values[1]+values[2])
+
+	if values[0] == "0" {
 		policyId, _ := strconv.Atoi(messageData.PolicyId)
 		controller.DB.UpdateTransactionPolicyStatus(messageData.TransactionId, policyId, 1)
 		controller.DB.UpdateTransactionState(messageData.TransactionId, 4)
