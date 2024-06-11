@@ -21,11 +21,11 @@ func (controller *TransactionController) GetTransactions(w http.ResponseWriter, 
 	}
 
 	var searchModel models.SearchModel
-	err := json.NewDecoder(r.Body).Decode(&searchModel)
-	if err != nil {
-		http.Error(w, "Error parsing JSON: "+err.Error(), http.StatusBadRequest)
-		return
-	}
+	// err := json.NewDecoder(r.Body).Decode(&searchModel)
+	// if err != nil {
+	// 	http.Error(w, "Error parsing JSON: "+err.Error(), http.StatusBadRequest)
+	// 	return
+	// }
 
 	viewData := map[string]any{}
 	var transactions []models.TransactionModel
