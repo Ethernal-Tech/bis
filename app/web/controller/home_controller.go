@@ -67,17 +67,7 @@ func (controller *HomeController) Home(w http.ResponseWriter, r *http.Request) {
 	}
 	viewData := map[string]any{}
 
-	// var transactions []models.TransactionModel
-	// if controller.SessionManager.GetBool(r.Context(), "centralBankEmployee") {
-	// 	var countryId int
-	// 	transactions, countryId = controller.DB.GetCentralBankTransactions(controller.SessionManager.Get(r.Context(), "bankId").(string), "")
-	// 	viewData["countryId"] = countryId
-	// } else {
-	// 	transactions = controller.DB.GetCommercialBankTransactions(controller.SessionManager.Get(r.Context(), "bankId").(string), "")
-	// }
-
 	viewData["username"] = controller.SessionManager.GetString(r.Context(), "username")
-	// viewData["transactions"] = transactions
 	viewData["bankName"] = controller.SessionManager.GetString(r.Context(), "bankName")
 	viewData["country"] = controller.SessionManager.GetString(r.Context(), "country")
 	viewData["centralBankEmployee"] = controller.SessionManager.GetBool(r.Context(), "centralBankEmployee")
