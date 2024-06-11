@@ -20,16 +20,21 @@ func (controller *TransactionController) GetTransactions(w http.ResponseWriter, 
 		return
 	}
 
-	searchValue := r.URL.Query().Get("searchValue")
+	var searchModel models.SearchModel
+	err := json.NewDecoder(r.Body).Decode(&searchModel)
+	if err != nil {
+		http.Error(w, "Error parsing JSON: "+err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	viewData := map[string]any{}
 	var transactions []models.TransactionModel
 	if controller.SessionManager.GetBool(r.Context(), "centralBankEmployee") {
 		var countryId int
-		transactions, countryId = controller.DB.GetCentralBankTransactions(controller.SessionManager.Get(r.Context(), "bankId").(string), searchValue)
+		transactions, countryId = controller.DB.GetCentralBankTransactions(controller.SessionManager.Get(r.Context(), "bankId").(string), searchModel)
 		viewData["countryId"] = countryId
 	} else {
-		transactions = controller.DB.GetCommercialBankTransactions(controller.SessionManager.Get(r.Context(), "bankId").(string), searchValue)
+		transactions = controller.DB.GetCommercialBankTransactions(controller.SessionManager.Get(r.Context(), "bankId").(string), searchModel)
 	}
 
 	viewData["bankName"] = controller.SessionManager.GetString(r.Context(), "bankName")

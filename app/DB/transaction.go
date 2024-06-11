@@ -129,30 +129,69 @@ func (wrapper *DBHandler) GetTransactionTypes() []models.NewTransactionType {
 	return types
 }
 
-func (wrapper *DBHandler) GetCommercialBankTransactions(bankId string, searchValue string) []models.TransactionModel {
-	query := `SELECT t.Id
-					,ob.Name
-					,bb.Name
-					,bcs.GlobalIdentifier
-					,bcr.GlobalIdentifier
-					,bcs.Name
-					,bcr.Name
-					,t.Currency
-					,t.Amount
-					,s.Name
-				FROM [Transaction] as t
-				LEFT JOIN (SELECT MAX(StatusId) AS StatusId, Transactionid FROM TransactionHistory GROUP BY Transactionid) as th ON th.Transactionid = t.Id 
-				LEFT JOIN [Status] as s ON s.Id = th.StatusId
-				JOIN Bank as ob ON ob.GlobalIdentifier = t.OriginatorBankId
-				JOIN Bank as bb ON bb.GlobalIdentifier = t.BeneficiaryBankId
-				JOIN BankClient as bcs ON bcs.Id = t.SenderId
-				JOIN BankClient as bcr ON bcr.Id = t.ReceiverId
-				WHERE (t.OriginatorBankId = @p1 OR t.BeneficiaryBankId = @p2) and (ob.Name like @p3 OR bb.Name like @p3 OR bcs.Name like @p3 OR bcr.Name like @p3)`
+func (wrapper *DBHandler) GetCommercialBankTransactions(bankId string, searchModel models.SearchModel) []models.TransactionModel {
+	// query := `SELECT t.Id
+	// 				,ob.Name
+	// 				,bb.Name
+	// 				,bcs.GlobalIdentifier
+	// 				,bcr.GlobalIdentifier
+	// 				,bcs.Name
+	// 				,bcr.Name
+	// 				,t.Currency
+	// 				,t.Amount
+	// 				,s.Name
+	// 			FROM [Transaction] as t
+	// 			LEFT JOIN (SELECT MAX(StatusId) AS StatusId, Transactionid FROM TransactionHistory GROUP BY Transactionid) as th ON th.Transactionid = t.Id
+	// 			LEFT JOIN [Status] as s ON s.Id = th.StatusId
+	// 			JOIN Bank as ob ON ob.GlobalIdentifier = t.OriginatorBankId
+	// 			JOIN Bank as bb ON bb.GlobalIdentifier = t.BeneficiaryBankId
+	// 			JOIN BankClient as bcs ON bcs.Id = t.SenderId
+	// 			JOIN BankClient as bcr ON bcr.Id = t.ReceiverId
+	// 			WHERE (t.OriginatorBankId = @p1 OR t.BeneficiaryBankId = @p2) and (ob.Name like @p3 OR bb.Name like @p3 OR bcs.Name like @p3 OR bcr.Name like @p3)`
+
+	query := `WITH CreatedTransactions AS (
+					SELECT	th.TransactionId,
+							th.Date AS CreatedDate
+					FROM [dbo].[TransactionHistory] th
+					WHERE th.StatusId = 1`
+
+	if searchModel.From != "" {
+		query += " AND th.Date >= '" + searchModel.From + "'"
+	}
+	if searchModel.To != "" {
+		query += " AND th.Date <= '" + searchModel.To + "'"
+	}
+
+	query += `), LatestStatus AS (
+					SELECT  th.TransactionId,
+							th.StatusId,
+							th.Date,
+							ROW_NUMBER() OVER (PARTITION BY th.TransactionId ORDER BY th.Date DESC) AS rn
+					FROM [dbo].[TransactionHistory] th)
+
+				SELECT   t.Id
+						,ob.Name
+						,bb.Name
+						,bcs.GlobalIdentifier
+						,bcr.GlobalIdentifier
+						,bcs.Name
+						,bcr.Name
+						,t.Currency
+						,t.Amount
+						,s.Name
+					FROM [dbo].[Transaction] t
+					JOIN CreatedTransactions ct ON t.Id = ct.TransactionId
+					JOIN LatestStatus ls ON t.Id = ls.TransactionId AND ls.rn = 1
+					JOIN [dbo].[Status] s ON ls.StatusId = s.Id
+					JOIN Bank as ob ON ob.GlobalIdentifier = t.OriginatorBankId
+					JOIN Bank as bb ON bb.GlobalIdentifier = t.BeneficiaryBankId
+					JOIN BankClient as bcs ON bcs.Id = t.SenderId
+					JOIN BankClient as bcr ON bcr.Id = t.ReceiverId
+				WHERE (t.OriginatorBankId = @p1 OR t.BeneficiaryBankId = @p1) and (ob.Name like @p2 OR bb.Name like @p2 OR bcs.Name like @p2 OR bcr.Name like @p2)`
 
 	rows, err := wrapper.db.Query(query,
 		sql.Named("p1", bankId),
-		sql.Named("p2", bankId),
-		sql.Named("p3", "%"+searchValue+"%"))
+		sql.Named("p2", "%"+searchModel.Value+"%"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -171,7 +210,7 @@ func (wrapper *DBHandler) GetCommercialBankTransactions(bankId string, searchVal
 	return transactions
 }
 
-func (wrapper *DBHandler) GetCentralBankTransactions(bankId string, searchValue string) ([]models.TransactionModel, int) {
+func (wrapper *DBHandler) GetCentralBankTransactions(bankId string, searchModel models.SearchModel) ([]models.TransactionModel, int) {
 	query := `SELECT CountryId FROM Bank
 			Where GlobalIdentifier = @p1`
 
@@ -213,7 +252,7 @@ func (wrapper *DBHandler) GetCentralBankTransactions(bankId string, searchValue 
 	rows, err = wrapper.db.Query(query,
 		sql.Named("p1", centralBankCountryId),
 		sql.Named("p2", centralBankCountryId),
-		sql.Named("p3", "%"+searchValue+"%"))
+		sql.Named("p3", "%"+searchModel.Value+"%"))
 	if err != nil {
 		log.Fatal(err)
 	}

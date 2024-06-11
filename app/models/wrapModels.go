@@ -60,3 +60,10 @@ type BankModel struct {
 	Name    string
 	Country string
 }
+
+type SearchModel struct {
+	Value  string `json:"value"`
+	From   string `json:"from"`
+	To     string `json:"to"`
+	Amount string `json:"amount"`
+}

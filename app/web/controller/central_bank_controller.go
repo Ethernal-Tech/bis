@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"bisgo/app/models"
 	"log"
 	"math"
 	"net/http"
@@ -22,7 +23,7 @@ func (controller *CBController) ShowAnalytics(w http.ResponseWriter, r *http.Req
 	viewData["centralBankEmployee"] = controller.SessionManager.GetBool(r.Context(), "centralBankEmployee")
 
 	centralBankId := controller.SessionManager.Get(r.Context(), "bankId").(string)
-	transactions, countryId := controller.DB.GetCentralBankTransactions(centralBankId, "")
+	transactions, countryId := controller.DB.GetCentralBankTransactions(centralBankId, models.SearchModel{})
 
 	sentAmount := 0
 	receivedAmount := 0
