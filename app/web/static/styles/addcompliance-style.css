@@ -359,6 +359,7 @@ input:focus {
     margin: 0px auto;
     margin-top: 40px;
     width: 46%;
+    box-sizing: border-box;
     height: 374px;
     border: 1px solid rgb(183, 183, 183);
     overflow: auto;
@@ -376,7 +377,9 @@ input:focus {
 
 .policy {
     height: 52px;
-    border-bottom: 1px solid rgb(183, 183, 183);
+    margin: 10px;
+    border: 1px solid rgb(183, 183, 183);
+    border-radius: 4px;
     display: flex;
     align-items: center;
 }

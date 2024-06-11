@@ -1,6 +1,9 @@
 package config
 
-import "os"
+import (
+	"log"
+	"os"
+)
 
 func ResolveP2PNodeAPIAddress() string {
 	env_address := os.Getenv("P2P_NODE_ADDRESS")
@@ -9,6 +12,15 @@ func ResolveP2PNodeAPIAddress() string {
 	}
 
 	return env_address
+}
+
+func ResolvePeerID() string {
+	env_val := os.Getenv("PEER_ID")
+	if env_val == "" {
+		log.Fatal("PEER_ID env variable must be set")
+	}
+
+	return env_val
 }
 
 func ResolveGpjcApiAddress() string {
@@ -90,4 +102,39 @@ func ResolveServerPort() string {
 	}
 
 	return ":" + env_port
+}
+
+func ResovleIsCentralBank() bool {
+	if os.Getenv("IS_CENTRAL_BANK") == "" {
+		return false
+	}
+
+	return true
+}
+
+func ResolveMyGlobalIdentifier() string {
+	env_global_ident := os.Getenv("MY_GLOBAL_IDENTIFIER")
+	if env_global_ident == "" {
+		log.Fatal("MY_GLOBAL_IDENTIFIER environment variable must be set for every bank")
+	}
+
+	return env_global_ident
+}
+
+func ResolveCBGlobalIdentifier() string {
+	env_global_ident := os.Getenv("CB_GLOBAL_IDENTIFIER")
+	if env_global_ident == "" {
+		log.Fatal("Expected to have defined CB_GLOBAL_IDENTIFIER for this bank")
+	}
+
+	return env_global_ident
+}
+
+func ResolveCountryCode() string {
+	env_code := os.Getenv("COUNTRY_CODE")
+	if env_code == "" {
+		log.Fatal("Expected to have defined COUNTRY_CODE for this bank")
+	}
+
+	return env_code
 }

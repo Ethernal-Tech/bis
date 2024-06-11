@@ -46,7 +46,7 @@ func (c *P2PClient) Send(receivingBankID string, method string, data any, messag
 
 	messageData := messages.P2PClientMessage{
 		PeerID:    receivingBankPeerID,
-		MessageID: messageID,
+		MessageID: uint64(messageID),
 		Method:    method,
 		Payload:   messagePayload,
 	}
@@ -60,10 +60,11 @@ func (c *P2PClient) Send(receivingBankID string, method string, data any, messag
 	client := &http.Client{}
 
 	request, err := http.NewRequest("POST", c.p2pNodeAddress, bytes.NewBuffer(message))
-
 	if err != nil {
 		return nil, err
 	}
+
+	request.Header.Add("Content-Type", "application/json")
 
 	response, err := client.Do(request)
 	if err != nil {
