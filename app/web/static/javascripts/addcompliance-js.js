@@ -188,7 +188,7 @@ function getPolicies() {
     }
 
     showLoader()
-    fetch("http://localhost:9999/data", {
+    fetch("api/getpolicies", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -208,18 +208,42 @@ function getPolicies() {
             else {
                 hideLoader()
                 console.log(data)
+                let policiesDiv = document.getElementById('policies')
+                policiesDiv.innerHTML = ''
+                data.policies.forEach(policy => {
+                    const policyDiv = document.createElement('div');
+                    policyDiv.classList.add('policy')
 
-                // data.policies.forEach(policy => {
-                //     const policyDiv = document.createElement('div');
-                //     policyDiv.className = 'policy-item';
-                //     policyDiv.innerHTML = `
-                //         <p>Code: ${policy.code}</p>
-                //         <p>Name: ${policy.name}</p>
-                //         <p>Params: ${policy.params}</p>
-                //         <br>
-                //     `;
-                //     viewDiv.appendChild(policyDiv);
-                // });
+                    let param
+
+                    if (policy.code == "CFM") {
+                        let inputValue = parseFloat(policy.params.replace(/,/g, ''));
+
+                        if (!isNaN(inputValue)) {
+                            param = inputValue.toLocaleString();
+                        } else {
+                            param = '';
+                        }
+                    } else {
+                        param = policy.params
+                    }
+
+                    policyDiv.innerHTML = `
+                    <svg class="policy-icon" xmlns="http://www.w3.org/2000/svg" width="32px" height="32px" fill="rgb(247, 233, 156)" class="bi bi-file-earmark-text-fill" viewBox="0 0 16 16">
+                        <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M4.5 9a.5.5 0 0 1 0-1h7a.5.5 0 0 1 0 1zM4 10.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m.5 2.5a.5.5 0 0 1 0-1h4a.5.5 0 0 1 0 1z"/>
+                    </svg>
+                    <div class="policy-content">
+                        <div class="policy-code-name">
+                            ${policy.code} - ${policy.name}
+                        </div>
+                        <div class="policy-params">
+                            ${param}
+                        </div>
+                    </div>
+                    `;
+
+                    policiesDiv.appendChild(policyDiv);
+                });
                 view3CL.remove("not-display")
                 view3CL.add("display")
             }
