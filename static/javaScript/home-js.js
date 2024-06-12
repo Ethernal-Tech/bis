@@ -3,7 +3,7 @@ window.onload = function() {
         "value": null,
         "from": null,
         "to": null,
-        // "amount": null
+        "statusId": null
     };
 
     fetch('/transactions', {
@@ -55,16 +55,14 @@ window.onload = function() {
             var searchValue = document.getElementById("searchValue").value;
             var dateFrom = document.getElementById("dateFrom").value;
             var dateTo = document.getElementById("dateTo").value;
-            // var amount = document.getElementById("amount").value;
+            var statusId = document.getElementById("status").value;
             
             var searchData = {
                 "value": searchValue,
                 "from": dateFrom.replace('T', ' '),
                 "to": dateTo.replace('T', ' '),
-                // "amount": amount
+                "statusId": statusId
             };
-
-            console.log("Search parameters: ", { searchData });
             
             fetch("/transactions", {
                 method: 'POST',
@@ -73,10 +71,6 @@ window.onload = function() {
                 },
                 body: JSON.stringify(searchData)
             })
-            // .then(response => {
-            //     if (!response.ok) {
-            //         throw new Error('Network response was not ok');
-            //     }})
             .then(response => response.text())
             .then(partialHTML => {
                 var transactionsDiv = document.getElementById('transactionsDiv');
@@ -97,7 +91,6 @@ window.onload = function() {
                 modal.style.display = "none";
             })
         }
-        //****modal****
 };
 
 window.addEventListener("load", () => {
@@ -112,7 +105,7 @@ window.addEventListener("load", () => {
             "value": e.target.value,
             "from": null,
             "to": null,
-            // "amount": null
+            "statusId": null
         };
         fetch('/transactions', {
                 method: 'POST',

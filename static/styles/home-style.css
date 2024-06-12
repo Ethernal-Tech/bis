@@ -363,6 +363,12 @@ header>div>div {
     box-sizing: border-box;
 }
 
+.modal-field select {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
 /* Icon Button Styles */
 .icon-button {
     background: none;

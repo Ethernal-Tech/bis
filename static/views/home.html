@@ -81,10 +81,20 @@
                     <label for="dateTo">Transaction Date To:</label>
                     <input type="datetime-local" id="dateTo" name="dateTo">
                 </div>
-                <!-- <div class="modal-field">
-                    <label for="amount">Transaction Amount:</label>
-                    <input placeholder="Amount" type="number" id="amount" name="amount">
-                </div> -->
+                <div class="modal-field">
+                    <label for="status">Transaction Status:</label>
+                    <select id="status" name="status">
+                        <option value=""></option>
+                        <option value="1">Transaction Created</option>
+                        <option value="2">Policies Applied</option>
+                        <option value="3">Compliance Proof Requested</option>
+                        <option value="4">Compliance Check Passed</option>
+                        <option value="5">Proof Invalid</option>
+                        <option value="6">Asset Sent</option>
+                        <option value="7">Transaction Completed</option>
+                        <option value="8">Transaction Canceled</option>
+                    </select>
+                </div>
                 <button id="searchBtn" class="advanced-search-button">Search</button>
             </div>
         </div>
