@@ -2,7 +2,6 @@ package DB
 
 import (
 	"database/sql"
-	"fmt"
 	"log"
 	"strings"
 )
@@ -31,7 +30,6 @@ func (wrapper *DBHandler) CheckCFM(receiverId string, countryId int) int64 {
 	rows.Close()
 
 	c := strings.Join(bankIds, `','`)
-	fmt.Println(c)
 
 	query = `SELECT
 			(SELECT ISNULL(SUM(Amount), 0)
@@ -45,13 +43,10 @@ func (wrapper *DBHandler) CheckCFM(receiverId string, countryId int) int64 {
 			Where SenderId = @p1 and OriginatorBankId IN ('` + c + `') and TransactionTypeId IN (2)))
 			as difference`
 
-	fmt.Println(query)
-
 	rows, err = wrapper.db.Query(query,
 		sql.Named("p1", receiverId))
 
 	if err != nil {
-		fmt.Println("PAO SAM")
 		log.Fatal(err)
 	}
 	defer rows.Close()

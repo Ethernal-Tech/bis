@@ -52,11 +52,11 @@ func (s *P2PServer) Mux() http.Handler {
 		case "send-policies":
 			go s.SendPolicies(message.MessageID, message.Payload)
 		case "check-confirmed":
-			s.CheckConfirmed(message.MessageID, message.Payload)
+			go s.CheckConfirmed(message.MessageID, message.Payload)
 		case "cfm-result-beneficiary":
-			s.CFMResultBeneficiary(message.MessageID, message.Payload)
+			go s.CFMResultBeneficiary(message.MessageID, message.Payload)
 		case "cfm-result-originator":
-			s.CFMResultOriginator(message.MessageID, message.Payload)
+			go s.CFMResultOriginator(message.MessageID, message.Payload)
 		default:
 			http.Error(w, "Invalid method", http.StatusBadRequest)
 			return

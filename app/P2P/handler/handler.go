@@ -88,8 +88,6 @@ func (h *P2PHandler) GetPolicies(messageID int, payload []byte) {
 		return
 	}
 
-	fmt.Println(messageData)
-
 	// Comercial bank has to update polices from the central bank first
 	// TODO: Add reference to this
 	if !config.ResovleIsCentralBank() {
@@ -107,7 +105,6 @@ func (h *P2PHandler) GetPolicies(messageID int, payload []byte) {
 		}
 
 		responseData := (<-channel).(common.PolicyResponseDTO)
-		fmt.Println(responseData)
 
 		for _, policy := range responseData.Policies {
 			policyTypeID := h.DB.GetOrCreatePolicyType(policy.Code, policy.Name)
@@ -196,7 +193,11 @@ func (h *P2PHandler) CFMResultBeneficiary(messageID int, payload []byte) {
 
 	check := h.DB.GetComplianceCheckByID(messageData.TransctionID)
 
-	h.P2PClient.Send(check.OriginatorBankId, "cfm-result-originator", any(messageData), 0)
+	_, err := h.P2PClient.Send(check.OriginatorBankId, "cfm-result-originator", any(messageData), 0)
+
+	if err != nil {
+		fmt.Println(err.Error())
+	}
 }
 
 func (h *P2PHandler) CFMResultOriginator(messageID int, payload []byte) {
