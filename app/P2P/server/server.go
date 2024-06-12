@@ -53,6 +53,8 @@ func (s *P2PServer) Mux() http.Handler {
 			go s.SendPolicies(message.MessageID, message.Payload)
 		case "check-confirmed":
 			s.CheckConfirmed(message.MessageID, message.Payload)
+		case "cfm-check-result":
+			s.CheckConfirmed(message.MessageID, message.Payload)
 		default:
 			http.Error(w, "Invalid method", http.StatusBadRequest)
 			return

@@ -21,6 +21,7 @@ func CreateP2PHandler(core *core.Core) *P2PHandler {
 }
 
 func (h *P2PHandler) CreateTransaction(messageID int, payload []byte) {
+
 	_, ok := messages.LoadChannel(messageID)
 
 	if !ok {
@@ -60,6 +61,10 @@ func (h *P2PHandler) CreateTransaction(messageID int, payload []byte) {
 
 	transactionID := h.DB.InsertTransaction(transaction)
 	h.DB.UpdateTransactionState(transactionID, 1)
+
+	if config.ResovleIsCentralBank() {
+		h.RulesEngine.Do(messageData.TransactionID, "interactive", nil)
+	}
 }
 
 func (h *P2PHandler) GetPolicies(messageID int, payload []byte) {
@@ -168,4 +173,19 @@ func (h *P2PHandler) CheckConfirmed(messageID int, payload []byte) {
 		"vm_address": messageData.VMAddress,
 	}
 	h.RulesEngine.Do(messageData.CheckID, "interactive", data)
+}
+
+func (h *P2PHandler) CFMCheckResult(messageID int, payload []byte) {
+	var messageData common.CFMCheckDTO
+	if err := json.Unmarshal(payload, &messageData); err != nil {
+		log.Println(err.Error())
+		return
+	}
+
+	applicablePolicies := h.DB.GetPoliciesForTransaction(messageData.TransctionID)
+	for _, policy := range applicablePolicies {
+		if policy.PolicyType.Code == "CFM" {
+			h.DB.UpdateTransactionPolicyStatus(messageData.TransctionID, policy.Policy.Id, messageData.Result)
+		}
+	}
 }

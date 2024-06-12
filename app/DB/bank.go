@@ -230,6 +230,21 @@ func (wrapper *DBHandler) GetClientNameByID(clientID uint) string {
 	return clientName
 }
 
+func (wrapper *DBHandler) GetClientByID(clientID uint) models.BankClient {
+	query := `SELECT Id, GlobalIdentifier, Name, Address, BankId FROM BankClient WHERE Id = @p1`
+
+	var client models.BankClient
+	err := wrapper.db.QueryRow(query, sql.Named("p1", clientID)).Scan(&client.Id, &client.GlobalIdentifier, &client.Name, &client.Address, &client.BankId)
+	if err != nil {
+		if err == sql.ErrNoRows {
+			return models.BankClient{}
+		}
+		log.Fatal(err)
+	}
+
+	return client
+}
+
 // GetOrCreateClient method to get client Id by GlobalIdentifier and Name or create a new client if not exists
 func (wrapper *DBHandler) GetOrCreateClient(globalIdentifier, name, address, bankId string) uint {
 	// Check if client exists

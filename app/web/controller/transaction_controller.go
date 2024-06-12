@@ -3,6 +3,7 @@ package controller
 import (
 	"bisgo/app/models"
 	"bisgo/common"
+	"bisgo/config"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -220,24 +221,11 @@ func (controller *TransactionController) ConfirmTransaction(w http.ResponseWrite
 		}
 
 		complianceCheckId := r.Form.Get("transactionid")
-		applicablePolicies := controller.DB.GetPoliciesForTransaction(complianceCheckId)
 		check := controller.DB.GetComplianceCheckByID(complianceCheckId)
 
 		controller.DB.UpdateTransactionState(check.Id, 2)
 
-		for _, policy := range applicablePolicies {
-			if policy.PolicyType.Code == "CFM" {
-				// CFM check //
-				// TODO: Notify central bank about the CFM check if it exists
-			} else if policy.PolicyType.Code == "SCL" {
-				// SCL //
-				// TODO: Start gpjc proving server
-				controller.RulesEngine.Do(complianceCheckId, "interactive", map[string]any{"vm_address": ""})
-				if err != nil {
-					http.Error(w, fmt.Sprint("Internal Server Error %w", err), 500)
-				}
-			}
-		}
+		controller.RulesEngine.Do(complianceCheckId, "interactive", map[string]any{"vm_address": ""})
 
 		controller.DB.UpdateTransactionState(check.Id, 3)
 
@@ -247,6 +235,30 @@ func (controller *TransactionController) ConfirmTransaction(w http.ResponseWrite
 		}
 
 		_, err = controller.P2PClient.Send(check.OriginatorBankId, "check-confirmed", checkConfirmedData, 0)
+		if err != nil {
+			http.Error(w, fmt.Sprint("Internal Server Error %w", err), 500)
+		}
+
+		sender := controller.DB.GetClientByID(check.SenderId)
+		receiver := controller.DB.GetClientByID(check.ReceiverId)
+
+		transactionDto := common.TransactionDTO{
+			TransactionID:                   check.Id,
+			SenderLei:                       sender.GlobalIdentifier,
+			SenderName:                      sender.Name,
+			ReceiverLei:                     receiver.GlobalIdentifier,
+			ReceiverName:                    receiver.Name,
+			OriginatorBankGlobalIdentifier:  check.OriginatorBankId,
+			BeneficiaryBankGlobalIdentifier: check.BeneficiaryBankId,
+			PaymentType:                     "",
+			TransactionType:                 fmt.Sprint(check.TransactionTypeId),
+			Amount:                          uint64(check.Amount),
+			Currency:                        check.Currency,
+			SwiftBICCode:                    "",
+			LoanID:                          uint64(0),
+		}
+
+		_, err = controller.P2PClient.Send(config.ResolveCBGlobalIdentifier(), "create-transaction", transactionDto, 0)
 		if err != nil {
 			http.Error(w, fmt.Sprint("Internal Server Error %w", err), 500)
 		}

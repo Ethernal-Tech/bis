@@ -51,3 +51,8 @@ type CheckConfirmedDTO struct {
 	CheckID   string `json:"tx_id"`
 	VMAddress string `json:"vm_address"`
 }
+
+type CFMCheckDTO struct {
+	TransctionID string `json:"tx_id"`
+	Result       int    `json:"result"`
+}
