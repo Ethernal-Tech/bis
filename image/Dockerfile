@@ -20,8 +20,6 @@ WORKDIR /app
 # Fetch the necessary releases using make
 RUN make fetch-releases-multiple-machines
 
-COPY gpjc-api/target/release/gpjc-api /app
-
 # Accept build argument
 ARG DNS_NAME
 
