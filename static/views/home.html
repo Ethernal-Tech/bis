@@ -22,6 +22,13 @@
     <div class="buttons">
         <div class="searchDiv">
             <input id="searchField" class="search-field" placeholder="Search" />
+            <div class="advanced-search-field">
+                <button id="advancedSearchBtn" class="icon-button" title="Advanced Search">
+                    <svg width="24px" height="24px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path fill="none" stroke="#000" stroke-width="2" d="M15,16 L21,22 L15,16 Z M10,18 C13.8659932,18 17,14.8659932 17,11 C17,7.13400675 13.8659932,4 10,4 C6.13400675,4 3,7.13400675 3,11 C3,14.8659932 6.13400675,18 10,18 Z M20,1 L20,7 M17,4 L23,4"/>
+                    </svg>
+                </button>
+            </div>
         </div>
         {{if eq .centralBankEmployee false}}
         <div class="addTrxDiv">
@@ -55,6 +62,34 @@
     <div id="transactionsDiv">
 
     </div>
+
+    <!-- Modal Dialog -->
+    <div id="advancedSearchModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Advanced Search</h2>
+            <div class="modal-body">
+                <div class="modal-field">
+                    <label for="searchValue">Search:</label>
+                    <input placeholder="Search company or bank"  id="searchValue" name="searchValue">
+                </div>
+                <div class="modal-field">
+                    <label for="dateFrom">Transaction Date From:</label>
+                    <input type="datetime-local" id="dateFrom" name="dateFrom">
+                </div>
+                <div class="modal-field">
+                    <label for="dateTo">Transaction Date To:</label>
+                    <input type="datetime-local" id="dateTo" name="dateTo">
+                </div>
+                <!-- <div class="modal-field">
+                    <label for="amount">Transaction Amount:</label>
+                    <input placeholder="Amount" type="number" id="amount" name="amount">
+                </div> -->
+                <button id="searchBtn" class="advanced-search-button">Search</button>
+            </div>
+        </div>
+    </div>
+
 </body>
 
 </html>

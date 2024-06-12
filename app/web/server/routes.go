@@ -25,7 +25,7 @@ func (server *WebServer) Routes() http.Handler {
 
 	// Transaction controller
 	{
-		router.HandlerFunc(http.MethodGet, "/home/Transactions", server.GetTransactions)
+		router.HandlerFunc(http.MethodPost, "/transactions", server.GetTransactions)
 		router.HandlerFunc(http.MethodGet, "/addtransaction", server.AddTransaction)
 		router.HandlerFunc(http.MethodPost, "/addtransaction", server.AddTransaction)
 		router.HandlerFunc(http.MethodGet, "/confirmtransaction", server.ConfirmTransaction)
