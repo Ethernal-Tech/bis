@@ -44,11 +44,16 @@ func (controller *APIController) GetPolicies(w http.ResponseWriter, r *http.Requ
 
 	ch, err := controller.P2PClient.Send(data.BeneficiaryBankId, "get-policies", policyRequestDto, 0)
 	if err != nil {
+		fmt.Println("ovde usao :(((((((")
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error", 500)
 	}
 
+	fmt.Println("1")
+
 	responseData := (<-ch).(common.PolicyResponseDTO)
+
+	fmt.Println("2")
 
 	// Add policies to the DB if not exist
 	for _, policy := range responseData.Policies {
@@ -102,22 +107,6 @@ func (controller *APIController) SubmitTransactionProof(w http.ResponseWriter, r
 		policyId, _ := strconv.Atoi(messageData.PolicyId)
 		controller.DB.UpdateTransactionPolicyStatus(messageData.TransactionId, policyId, 2)
 		controller.DB.UpdateTransactionState(messageData.TransactionId, 5)
-	}
-
-	policyStatuses := controller.DB.GetTransactionPolicyStatuses(messageData.TransactionId)
-
-	check := true
-
-	for _, status := range policyStatuses {
-		if status.Status != 1 {
-			check = false
-		}
-	}
-
-	if check {
-		controller.DB.UpdateTransactionState(messageData.TransactionId, 6)
-		controller.DB.UpdateTransactionState(messageData.TransactionId, 7)
-	} else {
 		controller.DB.UpdateTransactionState(messageData.TransactionId, 8)
 	}
 

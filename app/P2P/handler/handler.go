@@ -175,7 +175,7 @@ func (h *P2PHandler) CheckConfirmed(messageID int, payload []byte) {
 	h.RulesEngine.Do(messageData.CheckID, "interactive", data)
 }
 
-func (h *P2PHandler) CFMCheckResult(messageID int, payload []byte) {
+func (h *P2PHandler) CFMResultBeneficiary(messageID int, payload []byte) {
 	var messageData common.CFMCheckDTO
 	if err := json.Unmarshal(payload, &messageData); err != nil {
 		log.Println(err.Error())
@@ -186,6 +186,35 @@ func (h *P2PHandler) CFMCheckResult(messageID int, payload []byte) {
 	for _, policy := range applicablePolicies {
 		if policy.PolicyType.Code == "CFM" {
 			h.DB.UpdateTransactionPolicyStatus(messageData.TransctionID, policy.Policy.Id, messageData.Result)
+			if messageData.Result == 2 {
+				h.DB.UpdateTransactionState(messageData.TransctionID, 8)
+			} else {
+				h.DB.UpdateTransactionState(messageData.TransctionID, 7)
+			}
+		}
+	}
+
+	check := h.DB.GetComplianceCheckByID(messageData.TransctionID)
+
+	h.P2PClient.Send(check.OriginatorBankId, "cfm-result-originator", any(messageData), 0)
+}
+
+func (h *P2PHandler) CFMResultOriginator(messageID int, payload []byte) {
+	var messageData common.CFMCheckDTO
+	if err := json.Unmarshal(payload, &messageData); err != nil {
+		log.Println(err.Error())
+		return
+	}
+
+	applicablePolicies := h.DB.GetPoliciesForTransaction(messageData.TransctionID)
+	for _, policy := range applicablePolicies {
+		if policy.PolicyType.Code == "CFM" {
+			h.DB.UpdateTransactionPolicyStatus(messageData.TransctionID, policy.Policy.Id, messageData.Result)
+			if messageData.Result == 2 {
+				h.DB.UpdateTransactionState(messageData.TransctionID, 8)
+			} else {
+				h.DB.UpdateTransactionState(messageData.TransctionID, 7)
+			}
 		}
 	}
 }

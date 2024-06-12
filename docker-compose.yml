@@ -141,6 +141,7 @@ services:
       - DB_PORT=1433
       - DB_NAME=BIS4
       - DB_PASSWORD=Ethernal123
+      - COUNTRY_CODE=60
       - SERVER_PORT=4000
       - PEER_ID=12D3KooW9z8jijSnjH85ZwTLyGGhqPujfn15uRpzx24QQiPZcUAE
       - IS_CENTRAL_BANK=true

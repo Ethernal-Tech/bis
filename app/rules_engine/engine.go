@@ -36,7 +36,7 @@ func (e *RulesEngine) Do(transactionID string, proofType string, data map[string
 	for _, policy := range policies {
 		switch policy.PolicyType.Code {
 		case "SCL":
-			if config.ResovleIsCentralBank() {
+			if !config.ResovleIsCentralBank() {
 				go e.sanctionCheckList(proofType, policy.Policy.Parameters, transactionID, policy.Policy.Id, data["vm_address"].(string))
 			}
 		case "CFM":
@@ -79,9 +79,9 @@ func (e *RulesEngine) capitalFlowManagement(proofType string, parameters string,
 		// TODO: update transaction CFM status for central bank (TransactionPolicyDB); ATM it will be updated only in commercial bank
 
 		if float64(amount) >= float64(poliyAmountInt)*ratio {
-			e.p2pClient.Send(check.BeneficiaryBankId, "cfm-check-result", any(common.CFMCheckDTO{transactionID, 2}), 0)
+			e.p2pClient.Send(check.BeneficiaryBankId, "cfm-result-beneficiary", any(common.CFMCheckDTO{transactionID, 2}), 0)
 		} else {
-			e.p2pClient.Send(check.BeneficiaryBankId, "cfm-check-result", any(common.CFMCheckDTO{transactionID, 1}), 0)
+			e.p2pClient.Send(check.BeneficiaryBankId, "cfm-result-beneficiary", any(common.CFMCheckDTO{transactionID, 1}), 0)
 		}
 	} else if proofType == "noninteractive" {
 

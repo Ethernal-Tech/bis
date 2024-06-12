@@ -230,14 +230,14 @@ func (wrapper *DBHandler) GetClientNameByID(clientID uint) string {
 	return clientName
 }
 
-func (wrapper *DBHandler) GetClientByID(clientID uint) models.BankClient {
+func (wrapper *DBHandler) GetClientByID(clientID uint) models.NewBankClient {
 	query := `SELECT Id, GlobalIdentifier, Name, Address, BankId FROM BankClient WHERE Id = @p1`
 
-	var client models.BankClient
+	var client models.NewBankClient
 	err := wrapper.db.QueryRow(query, sql.Named("p1", clientID)).Scan(&client.Id, &client.GlobalIdentifier, &client.Name, &client.Address, &client.BankId)
 	if err != nil {
 		if err == sql.ErrNoRows {
-			return models.BankClient{}
+			return models.NewBankClient{}
 		}
 		log.Fatal(err)
 	}
