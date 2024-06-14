@@ -14,7 +14,7 @@ import (
 var peers sync.Map
 
 func init() {
-	queriedPeers, err := GetAvaiablePeers()
+	queriedPeers, err := getAvaiablePeers()
 	if err != nil {
 		fmt.Println(err)
 	}
@@ -27,7 +27,7 @@ func init() {
 func GetBankPeerID(bankID string) (string, error) {
 	peerID, ok := peers.Load(bankID)
 	if !ok {
-		queriedPeers, err := GetAvaiablePeers()
+		queriedPeers, err := getAvaiablePeers()
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -50,11 +50,10 @@ func GetBankPeerID(bankID string) (string, error) {
 	return peerID.(string), nil
 }
 
-func GetAvaiablePeers() (map[string]string, error) {
+func getAvaiablePeers() (map[string]string, error) {
 	client := &http.Client{}
 
 	request, err := http.NewRequest("GET", strings.Replace(config.ResolveP2PNodeAPIAddress(), "passthrough", "peers", 1), nil)
-
 	if err != nil {
 		return nil, err
 	}
