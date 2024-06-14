@@ -55,6 +55,8 @@ func GetBankPeerID(bankID string) (string, error) {
 func getAvailablePeers() (map[string]string, error) {
 	client := &http.Client{}
 
+	// TODO: implement a timeout on a p2p node's response (context)
+
 	request, err := http.NewRequest("GET", strings.Replace(config.ResolveP2PNodeAPIAddress(), "passthrough", "peers", 1), nil)
 	if err != nil {
 		errlog.Println(err)
