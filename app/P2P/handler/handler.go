@@ -20,7 +20,7 @@ func CreateP2PHandler(core *core.Core) *P2PHandler {
 	return &P2PHandler{core}
 }
 
-func (h *P2PHandler) CreateTransaction(messageID int, payload []byte) {
+func (h *P2PHandler) CreateTransaction(messageID int, payload []byte) error {
 
 	_, ok := messages.LoadChannel(messageID)
 
@@ -35,13 +35,13 @@ func (h *P2PHandler) CreateTransaction(messageID int, payload []byte) {
 	var messageData common.TransactionDTO
 	if err := json.Unmarshal(payload, &messageData); err != nil {
 		log.Println(err.Error())
-		return
+		return nil
 	}
 
 	transactionType, err := strconv.Atoi(messageData.TransactionType)
 	if err != nil {
 		log.Println(err.Error())
-		return
+		return nil
 	}
 
 	senderID := h.DB.GetOrCreateClient(messageData.SenderLei, messageData.SenderName, "", messageData.OriginatorBankGlobalIdentifier)
@@ -65,9 +65,11 @@ func (h *P2PHandler) CreateTransaction(messageID int, payload []byte) {
 	if config.ResovleIsCentralBank() {
 		h.RulesEngine.Do(messageData.TransactionID, "interactive", nil)
 	}
+
+	return nil
 }
 
-func (h *P2PHandler) GetPolicies(messageID int, payload []byte) {
+func (h *P2PHandler) GetPolicies(messageID int, payload []byte) error {
 	_, ok := messages.LoadChannel(messageID)
 
 	if !ok {
@@ -79,13 +81,13 @@ func (h *P2PHandler) GetPolicies(messageID int, payload []byte) {
 	var messageData common.PolicyRequestDTO
 	if err := json.Unmarshal(payload, &messageData); err != nil {
 		log.Println(err.Error())
-		return
+		return nil
 	}
 
 	transactionType, err := strconv.Atoi(messageData.TransactionType)
 	if err != nil {
 		log.Println(err.Error())
-		return
+		return nil
 	}
 
 	// Comercial bank has to update polices from the central bank first
@@ -101,7 +103,7 @@ func (h *P2PHandler) GetPolicies(messageID int, payload []byte) {
 		channel, err := h.P2PClient.Send(config.ResolveCBGlobalIdentifier(), "get-policies", centralBankRequest, 0)
 		if err != nil {
 			log.Println(err.Error())
-			return
+			return nil
 		}
 
 		responseData := (<-channel).(common.PolicyResponseDTO)
@@ -129,11 +131,13 @@ func (h *P2PHandler) GetPolicies(messageID int, payload []byte) {
 	_, err = h.P2PClient.Send(messageData.RequesterGlobalIdentifier, "send-policies", response, messageID)
 	if err != nil {
 		log.Println(err.Error())
-		return
+		return nil
 	}
+
+	return nil
 }
 
-func (h *P2PHandler) SendPolicies(messageID int, payload []byte) {
+func (h *P2PHandler) SendPolicies(messageID int, payload []byte) error {
 	channel, ok := messages.LoadChannel(messageID)
 
 	if !ok {
@@ -145,13 +149,15 @@ func (h *P2PHandler) SendPolicies(messageID int, payload []byte) {
 	var messageData common.PolicyResponseDTO
 	if err := json.Unmarshal(payload, &messageData); err != nil {
 		log.Println(err.Error())
-		return
+		return nil
 	}
 
 	channel <- messageData // send data to the listener
+
+	return nil
 }
 
-func (h *P2PHandler) CheckConfirmed(messageID int, payload []byte) {
+func (h *P2PHandler) CheckConfirmed(messageID int, payload []byte) error {
 	_, ok := messages.LoadChannel(messageID)
 
 	if !ok {
@@ -163,20 +169,22 @@ func (h *P2PHandler) CheckConfirmed(messageID int, payload []byte) {
 	var messageData common.CheckConfirmedDTO
 	if err := json.Unmarshal(payload, &messageData); err != nil {
 		log.Println(err.Error())
-		return
+		return nil
 	}
 
 	data := map[string]any{
 		"vm_address": messageData.VMAddress,
 	}
 	h.RulesEngine.Do(messageData.CheckID, "interactive", data)
+
+	return nil
 }
 
-func (h *P2PHandler) CFMResultBeneficiary(messageID int, payload []byte) {
+func (h *P2PHandler) CFMResultBeneficiary(messageID int, payload []byte) error {
 	var messageData common.CFMCheckDTO
 	if err := json.Unmarshal(payload, &messageData); err != nil {
 		log.Println(err.Error())
-		return
+		return nil
 	}
 
 	applicablePolicies := h.DB.GetPoliciesForTransaction(messageData.TransctionID)
@@ -198,13 +206,15 @@ func (h *P2PHandler) CFMResultBeneficiary(messageID int, payload []byte) {
 	if err != nil {
 		fmt.Println(err.Error())
 	}
+
+	return nil
 }
 
-func (h *P2PHandler) CFMResultOriginator(messageID int, payload []byte) {
+func (h *P2PHandler) CFMResultOriginator(messageID int, payload []byte) error {
 	var messageData common.CFMCheckDTO
 	if err := json.Unmarshal(payload, &messageData); err != nil {
 		log.Println(err.Error())
-		return
+		return nil
 	}
 
 	applicablePolicies := h.DB.GetPoliciesForTransaction(messageData.TransctionID)
@@ -218,4 +228,6 @@ func (h *P2PHandler) CFMResultOriginator(messageID int, payload []byte) {
 			}
 		}
 	}
+
+	return nil
 }

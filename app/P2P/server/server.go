@@ -50,21 +50,29 @@ func (s *P2PServer) Mux() http.Handler {
 			return
 		}
 
-		switch message.Method {
-		case "create-transaction":
-			go s.CreateTransaction(message.MessageID, message.Payload)
-		case "get-policies":
-			go s.GetPolicies(message.MessageID, message.Payload)
-		case "send-policies":
-			go s.SendPolicies(message.MessageID, message.Payload)
-		case "check-confirmed":
-			go s.CheckConfirmed(message.MessageID, message.Payload)
-		case "cfm-result-beneficiary":
-			go s.CFMResultBeneficiary(message.MessageID, message.Payload)
-		case "cfm-result-originator":
-			go s.CFMResultOriginator(message.MessageID, message.Payload)
-		default:
-			errlog.Println(errors.New("invalid p2p method received"))
-		}
+		go func() {
+			var err error
+
+			switch message.Method {
+			case "create-transaction":
+				err = s.CreateTransaction(message.MessageID, message.Payload)
+			case "get-policies":
+				err = s.GetPolicies(message.MessageID, message.Payload)
+			case "send-policies":
+				err = s.SendPolicies(message.MessageID, message.Payload)
+			case "check-confirmed":
+				err = s.CheckConfirmed(message.MessageID, message.Payload)
+			case "cfm-result-beneficiary":
+				err = s.CFMResultBeneficiary(message.MessageID, message.Payload)
+			case "cfm-result-originator":
+				err = s.CFMResultOriginator(message.MessageID, message.Payload)
+			default:
+				err = errors.New("invalid p2p method received")
+			}
+
+			if err != nil {
+				errlog.Println(err)
+			}
+		}()
 	})
 }
