@@ -11,7 +11,7 @@ func init() {
 	// configuration settings
 }
 
-// TODO: add a function that will periodically (in time intervals) remove unused channels (goroutines)
+// TODO: add a function that will periodically (in time intervals) remove unused channels (start it as a goroutine from init)
 
 func StoreChannel(messageID int, channel chan<- any) {
 	rrChanMap.Store(messageID, channel)
