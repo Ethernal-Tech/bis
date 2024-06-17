@@ -7,8 +7,11 @@ import (
 	"bisgo/errlog"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
+	"strings"
+	"time"
 )
 
 type P2PServer struct {
@@ -53,6 +56,8 @@ func (s *P2PServer) Mux() http.Handler {
 		go func() {
 			var err error
 
+			messageTypeLog(r, message.Method)
+
 			switch message.Method {
 			case "create-transaction":
 				err = s.CreateTransaction(message.MessageID, message.Payload)
@@ -75,4 +80,11 @@ func (s *P2PServer) Mux() http.Handler {
 			}
 		}()
 	})
+}
+
+func messageTypeLog(r *http.Request, method string) {
+	dateTime := strings.Split(time.Now().String(), ".")[0]
+	sender := r.RemoteAddr
+
+	fmt.Printf("\033[34m%v INFO\033[0m: [%v] %v\n", dateTime, sender, method)
 }
