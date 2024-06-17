@@ -5,6 +5,7 @@ COPY app /app/app
 COPY common /app/common
 COPY config /app/config
 COPY static /app/static
+COPY errlog /app/errlog
 COPY main.go /app
 COPY go.mod /app
 COPY go.sum /app
