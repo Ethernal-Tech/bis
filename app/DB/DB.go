@@ -2,9 +2,9 @@ package DB
 
 import (
 	"bisgo/config"
+	"bisgo/errlog"
 	"database/sql"
 	"fmt"
-	"log"
 	"runtime"
 	"time"
 
@@ -32,22 +32,20 @@ func init() {
 		// windows authentication
 		// db, err = sql.Open("sqlserver", fmt.Sprintf("sqlserver://@localhost:1434?database=%s&trusted_connection=yes", config.ResolveDBName()))
 
-		//user authentication
-		connString := fmt.Sprintf("server=localhost;port=1433;database=%s;user id=testLogin;password=password", config.ResolveDBName())
-		db, err = sql.Open("sqlserver", connString)
+		// user authentication
+		db, err = sql.Open("sqlserver", fmt.Sprintf("server=localhost;port=1433;database=%s;user id=testLogin;password=password", config.ResolveDBName()))
 	default:
-		log.Fatalf("\033[31m"+"DB handler is currently not supported for %s operating system."+"\033[31m", runtime.GOOS)
+		errlog.Println(fmt.Errorf("\033[31m"+"DB handler is currently not supported for %s operating system."+"\033[31m", runtime.GOOS))
 	}
 
 	if err != nil {
-		log.Fatalf("\033[31m" + "Failed to connect to the database!" + "\033[31m")
+		errlog.Println(err)
 	}
 
-	numOfRetries := 60
-	for i := 0; i < numOfRetries; i++ {
+	for i := 0; i < 60; i++ {
 		err = db.Ping()
 		if err != nil {
-			log.Print(err)
+			errlog.Println(err)
 		} else {
 			break
 		}
