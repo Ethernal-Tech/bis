@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -22,9 +23,10 @@ func (controller *PolicyController) ShowPolicies(w http.ResponseWriter, r *http.
 	viewData["country"] = controller.SessionManager.GetString(r.Context(), "country")
 	viewData["centralBankEmployee"] = controller.SessionManager.GetBool(r.Context(), "centralBankEmployee")
 
-	policies := controller.DB.PoliciesFromCountry(controller.SessionManager.GetString(r.Context(), "bankId"))
+	policies := controller.DB.GetAllPolicies()
 
 	viewData["policies"] = policies
+	fmt.Println(policies)
 
 	ts, err := template.ParseFiles("./static/views/policies.html")
 	if err != nil {

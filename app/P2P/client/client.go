@@ -5,8 +5,10 @@ import (
 	manager "bisgo/app/P2P/peers_manager"
 	"bisgo/common"
 	"bisgo/config"
+	"bisgo/errlog"
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"math/rand"
@@ -29,9 +31,9 @@ func GetP2PClient() *P2PClient {
 
 func (c *P2PClient) Send(receivingBankID string, method string, data any, messageID int) (<-chan any, error) {
 	receivingBankPeerID, err := manager.GetBankPeerID(receivingBankID)
-
 	if err != nil {
-		return nil, err
+		errlog.Println(err)
+		return nil, errors.New("unknown receiving bank ID")
 	}
 
 	if messageID == 0 {
@@ -39,9 +41,9 @@ func (c *P2PClient) Send(receivingBankID string, method string, data any, messag
 	}
 
 	messagePayload, err := json.Marshal(data)
-
 	if err != nil {
-		return nil, err
+		errlog.Println(fmt.Errorf("%v %w", data, err))
+		return nil, errors.New("serialization failed due to malformed input data")
 	}
 
 	messageData := messages.P2PClientMessage{
@@ -52,32 +54,46 @@ func (c *P2PClient) Send(receivingBankID string, method string, data any, messag
 	}
 
 	message, err := json.Marshal(messageData)
-
 	if err != nil {
-		return nil, err
+		errlog.Println(fmt.Errorf("%v %w", messageData, err))
+		return nil, errors.New("cannot create p2p message")
 	}
 
 	client := &http.Client{}
 
+	// TODO: implement a timeout on a p2p node's response (context)
+
 	request, err := http.NewRequest("POST", c.p2pNodeAddress, bytes.NewBuffer(message))
 	if err != nil {
-		return nil, err
+		errlog.Println(err)
+		return nil, errors.New("cannot create a p2p wrapping (HTTP POST) message due to internal system problems; not caused by incorrect parameters")
 	}
 
 	request.Header.Add("Content-Type", "application/json")
 
 	response, err := client.Do(request)
 	if err != nil {
-		return nil, err
-	}
-
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
+		errlog.Println(err)
+		return nil, errors.New("cannot send a p2p wrapping (HTTP POST) message due to internal system problems; not caused by incorrect parameters")
 	}
 
 	if response.StatusCode != 200 {
-		return nil, handleError(body)
+		returnErr := errors.New("p2p node rejected the message")
+		body, err := io.ReadAll(response.Body)
+		if err != nil {
+			errlog.Println(err)
+			return nil, returnErr
+		}
+
+		var response common.ErrorResponse
+		if err := json.Unmarshal(body, &response); err != nil {
+			errlog.Println(err)
+			return nil, returnErr
+		}
+
+		errlog.Println(errors.New("p2p node response: " + response.Message))
+
+		return nil, returnErr
 	}
 
 	channel := make(chan any, 1)
@@ -85,12 +101,4 @@ func (c *P2PClient) Send(receivingBankID string, method string, data any, messag
 	messages.StoreChannel(messageID, channel)
 
 	return channel, nil
-}
-
-func handleError(responseBody []byte) error {
-	var resp common.ErrorResponse
-	if err := json.Unmarshal(responseBody, &resp); err != nil {
-		return err
-	}
-	return fmt.Errorf("call to p2p failed with error: " + resp.Message)
 }

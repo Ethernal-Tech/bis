@@ -45,7 +45,7 @@ run-docker: create-certs
 	docker-compose up --build -d
 
 stop-docker: 
-	docker-compose down --rmi local
+	docker-compose down --rmi local -v
 
 test: run-docker
 	sleep 90

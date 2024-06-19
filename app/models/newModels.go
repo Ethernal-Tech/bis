@@ -81,11 +81,19 @@ type NewPolicy struct {
 	PolicyEnforcingCountryId int
 	OriginatingCountryId     int
 	Parameters               string
+	IsPrivate                bool
+	Latest                   bool
 }
 
 type NewPolicyModel struct {
 	Policy     NewPolicy
 	PolicyType NewPolicyType
+}
+
+type NewFullPolicyModel struct {
+	TransactionType NewTransactionType
+	Policy          NewPolicy
+	PolicyType      NewPolicyType
 }
 
 type NewTransactionPolicy struct {

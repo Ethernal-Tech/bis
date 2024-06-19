@@ -33,6 +33,8 @@ services:
       args:
         - DNS_NAME=jpm
     container_name: jpm
+    volumes:
+      - .:/app
     environment:
       - DB_ADDRESS=sql-database-jpm
       - DB_PORT=1433
@@ -83,6 +85,8 @@ services:
       args:
         - DNS_NAME=hlb
     container_name: hlb
+    volumes:
+      - .:/app
     environment:
       - DB_ADDRESS=sql-database-hlb
       - DB_PORT=1433
@@ -136,6 +140,8 @@ services:
       args:
         - DNS_NAME=bnm
     container_name: bnm
+    volumes:
+      - .:/app
     environment:
       - DB_ADDRESS=sql-database-bnm
       - DB_PORT=1433

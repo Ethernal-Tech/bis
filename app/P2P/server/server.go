@@ -4,9 +4,14 @@ import (
 	"bisgo/app/P2P/core"
 	"bisgo/app/P2P/handler"
 	"bisgo/app/P2P/messages"
+	"bisgo/errlog"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
 	"net/http"
+	"strings"
+	"time"
 )
 
 type P2PServer struct {
@@ -31,37 +36,55 @@ func GetP2PServer() *P2PServer {
 
 func (s *P2PServer) Mux() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		// returning a 200 OK response regardless of message correctness, handling of invalid messages is internal
+		w.WriteHeader(http.StatusOK)
+
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
-			http.Error(w, "Unable to read request body", http.StatusBadRequest)
+			errlog.Println(err)
 			return
 		}
 
 		var message messages.P2PServerMessasge
 		err = json.Unmarshal(body, &message)
 		if err != nil {
-			http.Error(w, "Invalid JSON format", http.StatusBadRequest)
+			errlog.Println(err)
 			return
 		}
 
-		switch message.Method {
-		case "create-transaction":
-			go s.CreateTransaction(message.MessageID, message.Payload)
-		case "get-policies":
-			go s.GetPolicies(message.MessageID, message.Payload)
-		case "send-policies":
-			go s.SendPolicies(message.MessageID, message.Payload)
-		case "check-confirmed":
-			go s.CheckConfirmed(message.MessageID, message.Payload)
-		case "cfm-result-beneficiary":
-			go s.CFMResultBeneficiary(message.MessageID, message.Payload)
-		case "cfm-result-originator":
-			go s.CFMResultOriginator(message.MessageID, message.Payload)
-		default:
-			http.Error(w, "Invalid method", http.StatusBadRequest)
-			return
-		}
+		go func() {
+			var err error
 
-		w.WriteHeader(http.StatusOK)
+			messageTypeLog(r, message.Method)
+
+			switch message.Method {
+			case "create-transaction":
+				err = s.CreateTransaction(message.MessageID, message.Payload)
+			case "get-policies":
+				err = s.GetPolicies(message.MessageID, message.Payload)
+			case "send-policies":
+				err = s.SendPolicies(message.MessageID, message.Payload)
+			case "check-confirmed":
+				err = s.CheckConfirmed(message.MessageID, message.Payload)
+			case "cfm-result-beneficiary":
+				err = s.CFMResultBeneficiary(message.MessageID, message.Payload)
+			case "cfm-result-originator":
+				err = s.CFMResultOriginator(message.MessageID, message.Payload)
+			default:
+				err = errors.New("invalid p2p method received")
+			}
+
+			if err != nil {
+				errlog.Println(err)
+			}
+		}()
 	})
+}
+
+func messageTypeLog(r *http.Request, method string) {
+	dateTime := strings.Split(time.Now().String(), ".")[0]
+	sender := r.RemoteAddr
+
+	fmt.Printf("\033[34m%v INFO\033[0m: [%v] %v\n", dateTime, sender, method)
 }

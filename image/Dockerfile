@@ -5,6 +5,7 @@ COPY app /app/app
 COPY common /app/common
 COPY config /app/config
 COPY static /app/static
+COPY errlog /app/errlog
 COPY main.go /app
 COPY go.mod /app
 COPY go.sum /app
@@ -45,4 +46,4 @@ RUN mv /app/ca.crt /app/private-join-and-compute && \
 EXPOSE 4000
 
 # Run the application
-CMD /app/gpjc-api ${DNS_NAME} Ethernal123 & go run .
+CMD chmod +x /app/gpjc-api & /app/gpjc-api ${DNS_NAME} Ethernal123 & go run .

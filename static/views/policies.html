@@ -15,7 +15,7 @@
         <div>
             <a href="/home"><img src="/static/images/logo.png" alt="" height="36px"></a>
             <div>{{if eq .centralBankEmployee true}}Central Bank{{else}}Bank{{end}}: {{.bankName}} - {{.country}}, <a
-                class="logout" href="/logout">logout</a></div>
+                    class="logout" href="/logout">logout</a></div>
         </div>
     </header>
 
@@ -30,6 +30,7 @@
             <div class="transactionType">TRANSACTION TYPE</div>
             <div class="policyName">POLICY NAME</div>
             <div class="parameter">PARAMETER</div>
+            <div class="latest">LATEST</div>
             {{if .centralBankEmployee}}
             <div class="edit">EDIT</div>
             {{end}}
@@ -37,17 +38,18 @@
         <div class="table-body">
             {{range .policies}}
             <div class="table-row">
-                <div>{{.TransactionType}}</div>
-                <div>{{.Name}}</div>
-                {{if eq .Code "CFM"}}
-                <div name="Amount">{{.Parameter}}</div>
+                <div>{{.TransactionType.Name}}</div>
+                <div>{{.PolicyType.Name}}</div>
+                {{if eq .PolicyType.Code "CFM"}}
+                <div name="Amount">{{.Policy.Parameters}}</div>
                 {{else}}
-                <div>{{.Parameter}}</div>
+                <div>{{.Policy.Parameters}}</div>
                 {{end}}
+                <div>{{.Policy.Latest}}</div>
                 {{if $.centralBankEmployee}}
                 <div>
-                    <a class="" href="/editpolicy?policyId={{.Id}}">
-                        {{ if eq .Code "SCL"}}
+                    <a class="" href="/editpolicy?policyId={{.Policy.Id}}">
+                        {{ if eq .PolicyType.Code "SCL"}}
                         <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor"
                             class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
                             <path fill-rule="evenodd"
