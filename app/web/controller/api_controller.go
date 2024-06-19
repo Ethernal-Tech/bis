@@ -33,13 +33,13 @@ func (controller *APIController) GetPolicies(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	bankIdOfLoggedUser := controller.SessionManager.GetString(r.Context(), "bankId") //get logged user's bank ID
-	originatorBankCountry := controller.DB.GetCountryOfBank(bankIdOfLoggedUser)
+	senderBankId := controller.SessionManager.GetString(r.Context(), "bankId") //get logged user's bank ID
+	senderBankCountry := controller.DB.GetCountryOfBank(senderBankId)
 
 	policyRequestDto := common.PolicyRequestDTO{
-		Country:                   originatorBankCountry.Code,
+		Country:                   senderBankCountry.Code,
 		TransactionType:           data.TransactionTypeId,
-		RequesterGlobalIdentifier: bankIdOfLoggedUser,
+		RequesterGlobalIdentifier: senderBankId, //the bank that requests policies
 	}
 
 	ch, err := controller.P2PClient.Send(data.BeneficiaryBankId, "get-policies", policyRequestDto, 0)
@@ -61,7 +61,7 @@ func (controller *APIController) GetPolicies(w http.ResponseWriter, r *http.Requ
 		}
 
 		policyEnforcingCountryId := controller.DB.GetCountryOfBank(data.BeneficiaryBankId).Id
-		controller.DB.GetOrCreatePolicy(int(policyTypeID), transactionTypeID, policyEnforcingCountryId, originatorBankCountry.Id, policy.Params)
+		controller.DB.GetOrCreatePolicy(int(policyTypeID), transactionTypeID, policyEnforcingCountryId, senderBankCountry.Id, policy.Params)
 	}
 
 	jsonData, err := json.Marshal(responseData)
