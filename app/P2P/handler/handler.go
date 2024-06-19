@@ -109,11 +109,30 @@ func (h *P2PHandler) GetPolicies(messageID int, payload []byte) error {
 		Policies: []common.PolicyDTO{},
 	}
 
+	var relevantPolicyMap map[int]models.NewPolicyModel = make(map[int]models.NewPolicyModel)
+
+	privateChecks := false
 	for _, policy := range policies {
+		if relevantPolicyMap[policy.Policy.PolicyTypeId].Policy.Id < policy.Policy.Id && !policy.Policy.IsPrivate {
+			relevantPolicyMap[policy.Policy.PolicyTypeId] = policy
+		} else if policy.Policy.IsPrivate {
+			privateChecks = true
+		}
+	}
+
+	for _, policy := range relevantPolicyMap {
 		response.Policies = append(response.Policies, common.PolicyDTO{
 			Code:   policy.PolicyType.Code,
 			Name:   policy.PolicyType.Name,
 			Params: policy.Policy.Parameters,
+		})
+	}
+
+	if privateChecks {
+		response.Policies = append(response.Policies, common.PolicyDTO{
+			Code:   "Other",
+			Name:   "Internal Checks",
+			Params: "",
 		})
 	}
 

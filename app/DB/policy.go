@@ -78,7 +78,7 @@ func (wrapper *DBHandler) GetPolices(bankId string, transactionTypeId int) []mod
 }
 
 func (wrapper *DBHandler) GetPolicesByCountryCode(originatingCountryCode string, transactionTypeId int) []models.NewPolicyModel {
-	query := `SELECT p.Id, p.PolicyTypeId, pt.Code, pt.Name, p.TransactionTypeId, p.PolicyEnforcingCountryId, p.OriginatingCountryId, p.Parameters
+	query := `SELECT p.Id, p.PolicyTypeId, pt.Code, pt.Name, p.TransactionTypeId, p.PolicyEnforcingCountryId, p.OriginatingCountryId, p.Parameters, p.IsPrivate, p.Latest
               FROM Policy p
               JOIN PolicyType pt ON p.PolicyTypeId = pt.Id
               JOIN Country c ON p.OriginatingCountryId = c.Id
@@ -96,7 +96,7 @@ func (wrapper *DBHandler) GetPolicesByCountryCode(originatingCountryCode string,
 	policies := []models.NewPolicyModel{}
 	for rows.Next() {
 		var policy models.NewPolicyModel
-		if err := rows.Scan(&policy.Policy.Id, &policy.Policy.PolicyTypeId, &policy.PolicyType.Code, &policy.PolicyType.Name, &policy.Policy.TransactionTypeId, &policy.Policy.PolicyEnforcingCountryId, &policy.Policy.OriginatingCountryId, &policy.Policy.Parameters); err != nil {
+		if err := rows.Scan(&policy.Policy.Id, &policy.Policy.PolicyTypeId, &policy.PolicyType.Code, &policy.PolicyType.Name, &policy.Policy.TransactionTypeId, &policy.Policy.PolicyEnforcingCountryId, &policy.Policy.OriginatingCountryId, &policy.Policy.Parameters, &policy.Policy.IsPrivate, &policy.Policy.Latest); err != nil {
 			log.Fatal(err)
 		}
 
@@ -153,11 +153,11 @@ func (wrapper *DBHandler) GetPolicy(policyId uint64) models.PolicyModel {
 }
 
 func (wrapper *DBHandler) GetPoliciesForTransaction(transactionID string) []models.NewPolicyModel {
-	query := `SELECT p.Id, p.PolicyTypeId, pt.Code, pt.Name, p.TransactionTypeId, p.PolicyEnforcingCountryId, p.OriginatingCountryId, p.Parameters
+	query := `SELECT p.Id, p.PolicyTypeId, pt.Code, pt.Name, p.TransactionTypeId, p.PolicyEnforcingCountryId, p.OriginatingCountryId, p.Parameters, p.IsPrivate, p.Latest
               FROM Policy p
               JOIN PolicyType pt ON p.PolicyTypeId = pt.Id
               JOIN TransactionPolicy tp ON p.Id = tp.PolicyId
-              WHERE tp.TransactionId = @p1`
+              WHERE tp.TransactionId = @p1 AND p.Latest = 1`
 
 	rows, err := wrapper.db.Query(query, sql.Named("p1", transactionID))
 	if err != nil {
@@ -169,7 +169,35 @@ func (wrapper *DBHandler) GetPoliciesForTransaction(transactionID string) []mode
 	policies := []models.NewPolicyModel{}
 	for rows.Next() {
 		var policy models.NewPolicyModel
-		if err := rows.Scan(&policy.Policy.Id, &policy.Policy.PolicyTypeId, &policy.PolicyType.Code, &policy.PolicyType.Name, &policy.Policy.TransactionTypeId, &policy.Policy.PolicyEnforcingCountryId, &policy.Policy.OriginatingCountryId, &policy.Policy.Parameters); err != nil {
+		if err := rows.Scan(&policy.Policy.Id, &policy.Policy.PolicyTypeId, &policy.PolicyType.Code, &policy.PolicyType.Name, &policy.Policy.TransactionTypeId, &policy.Policy.PolicyEnforcingCountryId, &policy.Policy.OriginatingCountryId, &policy.Policy.Parameters, &policy.Policy.IsPrivate, &policy.Policy.Latest); err != nil {
+			log.Fatal(err)
+		}
+
+		policies = append(policies, policy)
+	}
+	return policies
+}
+
+func (wrapper *DBHandler) GetAllPolicies() []models.NewFullPolicyModel {
+	query := `SELECT p.Id, p.PolicyTypeId, pt.Code, pt.Name, p.TransactionTypeId, p.PolicyEnforcingCountryId, p.OriginatingCountryId, p.Parameters, p.IsPrivate, p.Latest, tt.Id, tt.Code, tt.Name
+              FROM Policy p
+              JOIN PolicyType pt ON p.PolicyTypeId = pt.Id
+			  JOIN TransactionType tt ON p.TransactionTypeId = tt.Id`
+
+	rows, err := wrapper.db.Query(query)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer rows.Close()
+
+	policies := []models.NewFullPolicyModel{}
+	for rows.Next() {
+		var policy models.NewFullPolicyModel
+		if err := rows.Scan(&policy.Policy.Id, &policy.Policy.PolicyTypeId, &policy.PolicyType.Code,
+			&policy.PolicyType.Name, &policy.Policy.TransactionTypeId, &policy.Policy.PolicyEnforcingCountryId,
+			&policy.Policy.OriginatingCountryId, &policy.Policy.Parameters, &policy.Policy.IsPrivate, &policy.Policy.Latest,
+			&policy.TransactionType.Id, &policy.TransactionType.Code, &policy.TransactionType.Name); err != nil {
 			log.Fatal(err)
 		}
 
@@ -228,7 +256,7 @@ func (wrapper *DBHandler) GetOrCreatePolicyType(code, name string) uint {
 func (wrapper *DBHandler) GetOrCreatePolicy(policyTypeId, transactionTypeId, policyEnforcingCountryId, originatorCountryId int, parameters string) uint {
 	// Check if Policy exists
 	query := `SELECT Id FROM Policy WHERE PolicyTypeId = @p1 AND TransactionTypeId = @p2 AND PolicyEnforcingCountryId = @p3
-			  AND OriginatingCountryId = @p4 AND Parameters = @p5`
+			  AND OriginatingCountryId = @p4 AND Parameters = @p5 AND Latest = 1`
 
 	var policyID uint
 	err := wrapper.db.QueryRow(query,
@@ -240,14 +268,20 @@ func (wrapper *DBHandler) GetOrCreatePolicy(policyTypeId, transactionTypeId, pol
 	if err != nil {
 		if err == sql.ErrNoRows {
 			// Policy does not exist, insert new Policy
-			insertQuery := `INSERT INTO [dbo].[Policy] (PolicyTypeId, TransactionTypeId, PolicyEnforcingCountryId, OriginatingCountryId, Parameters) OUTPUT INSERTED.Id 
-							VALUES (@p1, @p2, @p3, @p4, @p5)`
+			insertQuery := `INSERT INTO [dbo].[Policy] (PolicyTypeId, TransactionTypeId, PolicyEnforcingCountryId, OriginatingCountryId, Parameters, IsPrivate, Latest) OUTPUT INSERTED.Id 
+							VALUES (@p1, @p2, @p3, @p4, @p5, 0, 1)`
 			err = wrapper.db.QueryRow(insertQuery,
 				sql.Named("p1", policyTypeId),
 				sql.Named("p2", transactionTypeId),
 				sql.Named("p3", policyEnforcingCountryId),
 				sql.Named("p4", originatorCountryId),
 				sql.Named("p5", parameters)).Scan(&policyID)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			// If the policy already exists with the different parameters set it state to not be latest
+			err = wrapper.policyLatestStateChange(policyTypeId, transactionTypeId, policyEnforcingCountryId, originatorCountryId, parameters)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -258,4 +292,44 @@ func (wrapper *DBHandler) GetOrCreatePolicy(policyTypeId, transactionTypeId, pol
 	}
 
 	return policyID
+}
+
+func (wrapper *DBHandler) policyLatestStateChange(policyTypeId, transactionTypeId, policyEnforcingCountryId, originatorCountryId int, parameters string) error {
+	// Check if Policy exists
+	query := `SELECT Id FROM Policy WHERE PolicyTypeId = @p1 AND TransactionTypeId = @p2 AND PolicyEnforcingCountryId = @p3
+			  AND OriginatingCountryId = @p4 AND Parameters <> @p5 AND Latest = 1`
+
+	var policyIDs []uint
+
+	rows, err := wrapper.db.Query(query,
+		sql.Named("p1", policyTypeId),
+		sql.Named("p2", transactionTypeId),
+		sql.Named("p3", policyEnforcingCountryId),
+		sql.Named("p4", originatorCountryId),
+		sql.Named("p5", parameters))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var policyID uint
+		if err := rows.Scan(&policyID); err != nil {
+			return err
+		}
+
+		policyIDs = append(policyIDs, policyID)
+	}
+
+	for _, policyID := range policyIDs {
+		query := `UPDATE [Policy] Set Latest = 0 Where Id = @p1`
+
+		_, err := wrapper.db.Exec(query, sql.Named("p1", policyID))
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
