@@ -1,7 +1,8 @@
 package config
 
 import (
-	"log"
+	"bisgo/errlog"
+	"errors"
 	"os"
 )
 
@@ -17,7 +18,7 @@ func ResolveP2PNodeAPIAddress() string {
 func ResolvePeerID() string {
 	env_val := os.Getenv("PEER_ID")
 	if env_val == "" {
-		log.Fatal("PEER_ID env variable must be set")
+		errlog.Println(errors.New("environment variable PEER_ID must be set"))
 	}
 
 	return env_val
@@ -105,17 +106,13 @@ func ResolveServerPort() string {
 }
 
 func ResovleIsCentralBank() bool {
-	if os.Getenv("IS_CENTRAL_BANK") == "" {
-		return false
-	}
-
-	return true
+	return os.Getenv("IS_CENTRAL_BANK") != ""
 }
 
 func ResolveMyGlobalIdentifier() string {
 	env_global_ident := os.Getenv("MY_GLOBAL_IDENTIFIER")
 	if env_global_ident == "" {
-		log.Fatal("MY_GLOBAL_IDENTIFIER environment variable must be set for every bank")
+		errlog.Println(errors.New("environment variable MY_GLOBAL_IDENTIFIER is not set"))
 	}
 
 	return env_global_ident
@@ -124,7 +121,7 @@ func ResolveMyGlobalIdentifier() string {
 func ResolveCBGlobalIdentifier() string {
 	env_global_ident := os.Getenv("CB_GLOBAL_IDENTIFIER")
 	if env_global_ident == "" {
-		log.Fatal("Expected to have defined CB_GLOBAL_IDENTIFIER for this bank")
+		errlog.Println(errors.New("environment variable CB_GLOBAL_IDENTIFIER is not set"))
 	}
 
 	return env_global_ident
@@ -133,7 +130,7 @@ func ResolveCBGlobalIdentifier() string {
 func ResolveJurisdictionCode() string {
 	env_code := os.Getenv("JURISDICTION_CODE")
 	if env_code == "" {
-		log.Fatal("Expected to have defined JURISDICTION_CODE for this bank")
+		errlog.Println(errors.New("environment variable JURISDICTION_CODE is not set"))
 	}
 
 	return env_code
