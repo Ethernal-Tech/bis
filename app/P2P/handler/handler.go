@@ -83,7 +83,7 @@ func (h *P2PHandler) GetPolicies(messageID int, payload []byte) error {
 	// TODO: Add reference to this
 	if !config.ResovleIsCentralBank() {
 		centralBankRequest := common.PolicyRequestDTO{
-			Country:                   messageData.Country,
+			Jurisdiction:              messageData.Jurisdiction,
 			TransactionType:           messageData.TransactionType,
 			RequesterGlobalIdentifier: config.ResolveMyGlobalIdentifier(), // TODO: Add reference to this
 		}
@@ -99,11 +99,11 @@ func (h *P2PHandler) GetPolicies(messageID int, payload []byte) error {
 
 		for _, policy := range responseData.Policies {
 			policyTypeID := h.DB.GetOrCreatePolicyType(policy.Code, policy.Name)
-			h.DB.GetOrCreatePolicy(int(policyTypeID), transactionType, h.DB.GetCountryByCode(config.ResolveCountryCode()).Id, h.DB.GetCountryByCode(messageData.Country).Id, policy.Params)
+			h.DB.GetOrCreatePolicy(int(policyTypeID), transactionType, config.ResolveJurisdictionCode(), messageData.Jurisdiction, policy.Params)
 		}
 	}
 
-	policies := h.DB.GetPolicesByCountryCode(messageData.Country, transactionType)
+	policies := h.DB.GetPolicesByJurisdictionCode(messageData.Jurisdiction, transactionType)
 
 	response := common.PolicyResponseDTO{
 		Policies: []common.PolicyDTO{},

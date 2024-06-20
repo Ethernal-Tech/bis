@@ -32,7 +32,7 @@ type TransactionDTO struct {
 }
 
 type PolicyRequestDTO struct {
-	Country                   string `json:"country"`
+	Jurisdiction              string `json:"jurisdiction"`
 	TransactionType           string `json:"tx_type"`
 	RequesterGlobalIdentifier string `json:"requester"`
 }

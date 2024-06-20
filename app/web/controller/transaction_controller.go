@@ -31,7 +31,7 @@ func (controller *TransactionController) GetTransactions(w http.ResponseWriter, 
 	viewData := map[string]any{}
 	var transactions []models.TransactionModel
 	if controller.SessionManager.GetBool(r.Context(), "centralBankEmployee") {
-		var countryId int
+		var countryId string
 		transactions, countryId = controller.DB.GetCentralBankTransactions(controller.SessionManager.Get(r.Context(), "bankId").(string), searchModel)
 		viewData["countryId"] = countryId
 	} else {

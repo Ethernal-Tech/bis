@@ -130,10 +130,10 @@ func ResolveCBGlobalIdentifier() string {
 	return env_global_ident
 }
 
-func ResolveCountryCode() string {
-	env_code := os.Getenv("COUNTRY_CODE")
+func ResolveJurisdictionCode() string {
+	env_code := os.Getenv("JURISDICTION_CODE")
 	if env_code == "" {
-		log.Fatal("Expected to have defined COUNTRY_CODE for this bank")
+		log.Fatal("Expected to have defined JURISDICTION_CODE for this bank")
 	}
 
 	return env_code

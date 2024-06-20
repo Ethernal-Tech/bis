@@ -7,10 +7,10 @@ import (
 )
 
 func (wrapper *DBHandler) Login(username, password string) *models.BankEmployeeModel {
-	query := `SELECT be.Name, be.Username, be.Password, be.BankId, b.Name BankName, c.Name Country
+	query := `SELECT be.Name, be.Username, be.Password, be.BankId, b.Name BankName, j.Name Jurisdiction
 				FROM [dbo].[BankEmployee] be
 				JOIN [dbo].[Bank] b ON be.BankId = b.GlobalIdentifier
-				JOIN [dbo].[Country] c ON b.CountryId = c.Id
+				JOIN [dbo].[Jurisdiction] j ON b.JurisdictionId = j.Id
 			  	WHERE be.Username = @p1 AND be.Password = @p2`
 
 	rows, err := wrapper.db.Query(query, sql.Named("p1", username), sql.Named("p2", password))
@@ -102,7 +102,7 @@ func (wrapper *DBHandler) GetBankClientId(bankClientName string) string {
 }
 
 func (wrapper *DBHandler) GetBank(bankId string) models.NewBank {
-	query := `SELECT b.GlobalIdentifier, b.Name, b.CountryId
+	query := `SELECT b.GlobalIdentifier, b.Name, b.JurisdictionId
           FROM Bank b
           WHERE b.GlobalIdentifier = @p1`
 
@@ -116,7 +116,7 @@ func (wrapper *DBHandler) GetBank(bankId string) models.NewBank {
 	var bank models.NewBank
 
 	for rows.Next() {
-		if err := rows.Scan(&bank.GlobalIdentifier, &bank.Name, &bank.CountryId); err != nil {
+		if err := rows.Scan(&bank.GlobalIdentifier, &bank.Name, &bank.JurisdictionId); err != nil {
 			log.Fatal(err)
 		}
 	}
@@ -125,9 +125,9 @@ func (wrapper *DBHandler) GetBank(bankId string) models.NewBank {
 }
 
 func (wrapper *DBHandler) GetBanks() []models.BankModel {
-	query := `SELECT b.GlobalIdentifier, b.Name, c.Name CountryName
+	query := `SELECT b.GlobalIdentifier, b.Name, j.Name JurisdictionName
           FROM Bank b
-          JOIN Country c ON b.CountryId = c.Id`
+          JOIN Jurisdiction j ON b.JurisdictionId = j.Id`
 
 	rows, err := wrapper.db.Query(query)
 	if err != nil {
@@ -145,74 +145,6 @@ func (wrapper *DBHandler) GetBanks() []models.BankModel {
 		banks = append(banks, bank)
 	}
 	return banks
-}
-
-func (wrapper *DBHandler) GetCountry(countryId uint) models.NewCountry {
-	query := `SELECT c.Id, c.Name, c.Code
-					From Country c
-					WHERE c.Id = @p1`
-
-	rows, err := wrapper.db.Query(query, sql.Named("p1", countryId))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer rows.Close()
-
-	var country models.NewCountry
-
-	for rows.Next() {
-		if err := rows.Scan(&country.Id, &country.Name, &country.Code); err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	return country
-}
-
-func (wrapper *DBHandler) GetCountryByCode(countryCode string) models.NewCountry {
-	query := `SELECT c.Id, c.Name, c.Code
-					From Country c
-					WHERE c.Code = @p1`
-
-	rows, err := wrapper.db.Query(query, sql.Named("p1", countryCode))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer rows.Close()
-
-	var country models.NewCountry
-
-	for rows.Next() {
-		if err := rows.Scan(&country.Id, &country.Name, &country.Code); err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	return country
-}
-
-func (wrapper *DBHandler) GetCountryOfBank(bankId string) models.NewCountry {
-	query := `SELECT c.Id, c.Name, c.Code FROM Bank as b
-					LEFT JOIN Country as c on b.CountryId = c.Id
-					Where GlobalIdentifier = @p1`
-
-	rows, err := wrapper.db.Query(query, sql.Named("p1", bankId))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer rows.Close()
-
-	var country models.NewCountry
-
-	for rows.Next() {
-		if err := rows.Scan(&country.Id, &country.Name, &country.Code); err != nil {
-			log.Fatal(err)
-		}
-	}
-	return country
 }
 
 func (wrapper *DBHandler) GetClientNameByID(clientID uint) string {

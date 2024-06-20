@@ -8,7 +8,7 @@ type NewBank struct {
 	GlobalIdentifier string
 	Name             string
 	Address          string
-	CountryId        uint
+	JurisdictionId   string
 	BankTypeId       uint
 }
 
@@ -33,10 +33,9 @@ type NewBankType struct {
 	Name string
 }
 
-type NewCountry struct {
-	Id   int
+type Jurisdiction struct {
+	Id   string
 	Name string
-	Code string
 }
 
 type NewTransaction struct {
@@ -75,14 +74,14 @@ type NewPolicyType struct {
 }
 
 type NewPolicy struct {
-	Id                       int
-	PolicyTypeId             int
-	TransactionTypeId        int
-	PolicyEnforcingCountryId int
-	OriginatingCountryId     int
-	Parameters               string
-	IsPrivate                bool
-	Latest                   bool
+	Id                            int
+	PolicyTypeId                  int
+	TransactionTypeId             int
+	PolicyEnforcingJurisdictionId string
+	OriginatingJurisdictionId     string
+	Parameters                    string
+	IsPrivate                     bool
+	Latest                        bool
 }
 
 type NewPolicyModel struct {

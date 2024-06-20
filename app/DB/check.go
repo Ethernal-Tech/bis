@@ -6,14 +6,14 @@ import (
 	"strings"
 )
 
-func (wrapper *DBHandler) CheckCFM(receiverId string, countryId int) int64 {
+func (wrapper *DBHandler) CheckCFM(receiverId string, jurisdictionId string) int64 {
 	query := `SELECT b.GlobalIdentifier FROM BankClient as bc 
-				JOIN (SELECT * FROM Bank Where CountryId = @p2) as b ON b.GlobalIdentifier = bc.BankId
+				JOIN (SELECT * FROM Bank Where JurisdictionId = @p2) as b ON b.GlobalIdentifier = bc.BankId
 				Where bc.GlobalIdentifier = @p1`
 
 	rows, err := wrapper.db.Query(query,
 		sql.Named("p1", receiverId),
-		sql.Named("p2", countryId))
+		sql.Named("p2", jurisdictionId))
 
 	if err != nil {
 		log.Fatal(err)

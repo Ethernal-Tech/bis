@@ -195,8 +195,8 @@ func (wrapper *DBHandler) GetCommercialBankTransactions(bankId string, searchMod
 	return transactions
 }
 
-func (wrapper *DBHandler) GetCentralBankTransactions(bankId string, searchModel models.SearchModel) ([]models.TransactionModel, int) {
-	query := `SELECT CountryId FROM Bank
+func (wrapper *DBHandler) GetCentralBankTransactions(bankId string, searchModel models.SearchModel) ([]models.TransactionModel, string) {
+	query := `SELECT JurisdictionId FROM Bank
 			Where GlobalIdentifier = @p1`
 
 	rows, err := wrapper.db.Query(query,
@@ -206,11 +206,11 @@ func (wrapper *DBHandler) GetCentralBankTransactions(bankId string, searchModel 
 	}
 	defer rows.Close()
 
-	var centralBankCountryId int
+	var centralBankJurisdictionId string
 	for rows.Next() {
-		if err = rows.Scan(&centralBankCountryId); err != nil {
+		if err = rows.Scan(&centralBankJurisdictionId); err != nil {
 			log.Println("Error scanning row:", err)
-			return []models.TransactionModel{}, 0
+			return []models.TransactionModel{}, ""
 		}
 	}
 
@@ -236,7 +236,7 @@ func (wrapper *DBHandler) GetCentralBankTransactions(bankId string, searchModel 
 
 		SELECT   t.Id
 				,ob.Name
-				,ob.CountryId
+				,ob.JurisdictionId
 				,bb.Name
 				,bcs.GlobalIdentifier
 				,bcr.GlobalIdentifier
@@ -253,14 +253,14 @@ func (wrapper *DBHandler) GetCentralBankTransactions(bankId string, searchModel 
 			JOIN Bank as bb ON bb.GlobalIdentifier = t.BeneficiaryBankId
 			JOIN BankClient as bcs ON bcs.Id = t.SenderId
 			JOIN BankClient as bcr ON bcr.Id = t.ReceiverId
-		WHERE (ob.CountryId = @p1 OR bb.CountryId = @p1) and (ob.Name like @p2 OR bb.Name like @p2 OR bcs.Name like @p2 OR bcr.Name like @p2)`
+		WHERE (ob.JurisdictionId = @p1 OR bb.JurisdictionId = @p1) and (ob.Name like @p2 OR bb.Name like @p2 OR bcs.Name like @p2 OR bcr.Name like @p2)`
 
 	if searchModel.StatusId != "" {
 		query += ` AND ls.StatusId = ` + searchModel.StatusId
 	}
 
 	rows, err = wrapper.db.Query(query,
-		sql.Named("p1", centralBankCountryId),
+		sql.Named("p1", centralBankJurisdictionId),
 		sql.Named("p2", "%"+searchModel.Value+"%"))
 	if err != nil {
 		log.Fatal(err)
@@ -274,13 +274,13 @@ func (wrapper *DBHandler) GetCentralBankTransactions(bankId string, searchModel 
 			&trnx.SenderGlobalIdentifier, &trnx.ReceiverGlobalIdentifier, &trnx.SenderName, &trnx.ReceiverName,
 			&trnx.Currency, &trnx.Amount, &trnx.Status); err != nil {
 			log.Println("Error scanning row:", err)
-			return []models.TransactionModel{}, 0
+			return []models.TransactionModel{}, ""
 		}
 
 		trnx = *convertTxStatusDBtoPR(&trnx)
 		transactions = append(transactions, trnx)
 	}
-	return transactions, centralBankCountryId
+	return transactions, centralBankJurisdictionId
 }
 
 func (wrapper *DBHandler) GetTransactionHistory(transactionId string) models.TransactionModel {

@@ -34,10 +34,10 @@ func (controller *APIController) GetPolicies(w http.ResponseWriter, r *http.Requ
 	}
 
 	senderBankId := controller.SessionManager.GetString(r.Context(), "bankId") //get logged user's bank ID
-	senderBankCountry := controller.DB.GetCountryOfBank(senderBankId)
+	senderBankJurisdiction := controller.DB.GetJurisdictionOfBank(senderBankId)
 
 	policyRequestDto := common.PolicyRequestDTO{
-		Country:                   senderBankCountry.Code,
+		Jurisdiction:              senderBankJurisdiction.Id,
 		TransactionType:           data.TransactionTypeId,
 		RequesterGlobalIdentifier: senderBankId, //the bank that requests policies
 	}
@@ -60,8 +60,8 @@ func (controller *APIController) GetPolicies(w http.ResponseWriter, r *http.Requ
 			http.Error(w, fmt.Sprint("Internal Server Error %w", err), 500)
 		}
 
-		policyEnforcingCountryId := controller.DB.GetCountryOfBank(data.BeneficiaryBankId).Id
-		controller.DB.GetOrCreatePolicy(int(policyTypeID), transactionTypeID, policyEnforcingCountryId, senderBankCountry.Id, policy.Params)
+		policyEnforcingJurisdictionId := controller.DB.GetJurisdictionOfBank(data.BeneficiaryBankId).Id
+		controller.DB.GetOrCreatePolicy(int(policyTypeID), transactionTypeID, policyEnforcingJurisdictionId, senderBankJurisdiction.Id, policy.Params)
 	}
 
 	jsonData, err := json.Marshal(responseData)

@@ -65,7 +65,7 @@ func (e *RulesEngine) capitalFlowManagement(proofType string, parameters string,
 	if proofType == "interactive" {
 		check := e.db.GetComplianceCheckByID(transactionID)
 		receiver := e.db.GetClientByID(check.ReceiverId)
-		amount := e.db.CheckCFM(receiver.GlobalIdentifier, e.db.GetCountryByCode(config.ResolveCountryCode()).Id)
+		amount := e.db.CheckCFM(receiver.GlobalIdentifier, config.ResolveJurisdictionCode())
 
 		policyAmountStr := strings.ReplaceAll(parameters, ",", "")
 		poliyAmountInt, err := strconv.Atoi(policyAmountStr)
