@@ -82,7 +82,7 @@ func (wrapper *DBHandler) GetPolicesByJurisdictionCode(originatingJurisdictionCo
               FROM Policy p
               JOIN PolicyType pt ON p.PolicyTypeId = pt.Id
               JOIN Jurisdiction j ON p.OriginatingJurisdictionId = j.Id
-              WHERE j.Id = @p1 AND p.TransactionTypeId = @p2`
+              WHERE j.Id = @p1 AND p.TransactionTypeId = @p2 and p.Latest = 1`
 
 	rows, err := wrapper.db.Query(query,
 		sql.Named("p1", originatingJurisdictionCode),
