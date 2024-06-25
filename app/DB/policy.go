@@ -51,7 +51,6 @@ func (wrapper *DBHandler) GetPolicyById(policyID int) models.Policy {
 func (wrapper *DBHandler) GetPolices(bankId string, transactionTypeId int) []models.NewPolicy {
 	query := `SELECT p.Id, p.PolicyTypeId, p.TransactionTypeId, p.PolicyEnforcingJurisdictionId, p.OriginatingJurisdictionId, p.Parameters
 					FROM Policy p
-					Join Jurisdiction as j ON p.PolicyEnforcingJurisdictionId = j.Id
 					Where p.TransactionTypeId = @p2
 						and p.PolicyEnforcingJurisdictionId = (SELECT JurisdictionId FROM [Bank] Where GlobalIdentifier = @p1)`
 
@@ -81,8 +80,7 @@ func (wrapper *DBHandler) GetPolicesByJurisdictionCode(originatingJurisdictionCo
 	query := `SELECT p.Id, p.PolicyTypeId, pt.Code, pt.Name, p.TransactionTypeId, p.PolicyEnforcingJurisdictionId, p.OriginatingJurisdictionId, p.Parameters, p.IsPrivate, p.Latest
               FROM Policy p
               JOIN PolicyType pt ON p.PolicyTypeId = pt.Id
-              JOIN Jurisdiction j ON p.OriginatingJurisdictionId = j.Id
-              WHERE j.Id = @p1 AND p.TransactionTypeId = @p2 and p.Latest = 1`
+              WHERE p.OriginatingJurisdictionId = @p1 AND p.TransactionTypeId = @p2 and p.Latest = 1`
 
 	rows, err := wrapper.db.Query(query,
 		sql.Named("p1", originatingJurisdictionCode),
@@ -234,7 +232,9 @@ func (wrapper *DBHandler) GetOrCreatePolicyType(code, name string) uint {
 	query := `SELECT Id FROM PolicyType WHERE Code = @p1 AND Name = @p2`
 
 	var policyTypeID uint
-	err := wrapper.db.QueryRow(query, sql.Named("p1", code), sql.Named("p2", name)).Scan(&policyTypeID)
+	err := wrapper.db.QueryRow(query,
+		sql.Named("p1", code),
+		sql.Named("p2", name)).Scan(&policyTypeID)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			// PolicyType does not exist, insert new PolicyType

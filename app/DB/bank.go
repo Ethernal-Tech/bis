@@ -183,12 +183,18 @@ func (wrapper *DBHandler) GetOrCreateClient(globalIdentifier, name, address, ban
 	query := `SELECT Id FROM BankClient WHERE GlobalIdentifier = @p1 AND Name = @p2`
 
 	var clientId uint
-	err := wrapper.db.QueryRow(query, sql.Named("p1", globalIdentifier), sql.Named("p2", name)).Scan(&clientId)
+	err := wrapper.db.QueryRow(query,
+		sql.Named("p1", globalIdentifier),
+		sql.Named("p2", name)).Scan(&clientId)
 	if err != nil {
 		if err == sql.ErrNoRows {
 			// Client does not exist, insert new client
 			insertQuery := `INSERT INTO [dbo].[BankClient] OUTPUT INSERTED.Id VALUES (@p1, @p2, @p3, @p4)`
-			err = wrapper.db.QueryRow(insertQuery, sql.Named("p1", globalIdentifier), sql.Named("p2", name), sql.Named("p3", address), sql.Named("p4", bankId)).Scan(&clientId)
+			err = wrapper.db.QueryRow(insertQuery,
+				sql.Named("p1", globalIdentifier),
+				sql.Named("p2", name),
+				sql.Named("p3", address),
+				sql.Named("p4", bankId)).Scan(&clientId)
 			if err != nil {
 				log.Fatal(err)
 			}
