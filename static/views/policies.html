@@ -30,7 +30,6 @@
             <div class="transactionType">TRANSACTION TYPE</div>
             <div class="policyName">POLICY NAME</div>
             <div class="parameter">PARAMETER</div>
-            <div class="latest">LATEST</div>
             {{if .centralBankEmployee}}
             <div class="edit">EDIT</div>
             {{end}}
@@ -45,7 +44,6 @@
                 {{else}}
                 <div>{{.Policy.Parameters}}</div>
                 {{end}}
-                <div>{{.Policy.Latest}}</div>
                 {{if $.centralBankEmployee}}
                 <div>
                     <a class="" href="/editpolicy?policyId={{.Policy.Id}}">

@@ -104,7 +104,8 @@ func (wrapper *DBHandler) GetPolicesByJurisdictionCode(originatingJurisdictionCo
 }
 
 func (wrapper *DBHandler) PoliciesFromJurisdiction(bankId string) []models.PolicyModel {
-	query := `SELECT p.Id, pt.Code, pt.Name, tt.Name, p.Parameters FROM Policy as p
+	query := `SELECT p.Id, pt.Code, pt.Name, tt.Name, p.Parameters 
+					FROM Policy as p
 					LEFT JOIN PolicyType as pt on p.PolicyTypeId = pt.Id
 					LEFT JOIN TransactionType as tt on p.TransactionTypeId = tt.Id
 					Where p.PolicyEnforcingJurisdictionId = (SELECT JurisdictionId FROM [Bank] Where GlobalIdentifier = @p1)`
@@ -129,7 +130,8 @@ func (wrapper *DBHandler) PoliciesFromJurisdiction(bankId string) []models.Polic
 }
 
 func (wrapper *DBHandler) GetPolicy(policyId uint64) models.PolicyModel {
-	query := `SELECT p.Id, pt.Code, pt.Name, p.Parameters FROM Policy as p
+	query := `SELECT p.Id, pt.Code, pt.Name, p.Parameters 
+					FROM Policy as p
 					LEFT JOIN PolicyType as pt on p.PolicyTypeId = pt.Id
 					Where p.Id = @p1`
 
@@ -180,7 +182,8 @@ func (wrapper *DBHandler) GetAllPolicies() []models.NewFullPolicyModel {
 	query := `SELECT p.Id, p.PolicyTypeId, pt.Code, pt.Name, p.TransactionTypeId, p.PolicyEnforcingJurisdictionId, p.OriginatingJurisdictionId, p.Parameters, p.IsPrivate, p.Latest, tt.Id, tt.Code, tt.Name
               FROM Policy p
               JOIN PolicyType pt ON p.PolicyTypeId = pt.Id
-			  JOIN TransactionType tt ON p.TransactionTypeId = tt.Id`
+			  JOIN TransactionType tt ON p.TransactionTypeId = tt.Id
+			  Where p.Latest = 1`
 
 	rows, err := wrapper.db.Query(query)
 	if err != nil {
@@ -204,12 +207,50 @@ func (wrapper *DBHandler) GetAllPolicies() []models.NewFullPolicyModel {
 	return policies
 }
 
-func (wrapper *DBHandler) UpdatePolicyAmount(amount uint64, policyId uint64) {
-	query := `UPDATE [Policy] Set Parameters = @p1 Where Id = @p2`
+func (wrapper *DBHandler) UpdateCFMPolicyAmount(amount uint64, policyId uint64) {
+	query := `SELECT p.Id, 
+					p.PolicyTypeId,
+					p.TransactionTypeId,
+					p.PolicyEnforcingJurisdictionId,
+					p.OriginatingJurisdictionId,
+					p.Parameters,
+					p.IsPrivate,
+					p.Latest 
+				FROM Policy as p
+				LEFT JOIN PolicyType as pt on p.PolicyTypeId = pt.Id
+				Where p.Id = @p1`
 
-	_, err := wrapper.db.Exec(query,
-		sql.Named("p1", amount),
-		sql.Named("p2", policyId))
+	rows, err := wrapper.db.Query(query,
+		sql.Named("p1", policyId))
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer rows.Close()
+
+	var policy models.NewPolicy
+	for rows.Next() {
+		if err := rows.Scan(&policy.Id, &policy.PolicyTypeId, &policy.TransactionTypeId, &policy.PolicyEnforcingJurisdictionId, &policy.OriginatingJurisdictionId,
+			&policy.Parameters, &policy.IsPrivate, &policy.Latest); err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	query = `UPDATE [Policy] Set Latest = 0 Where Id = @p1`
+
+	_, err = wrapper.db.Exec(query,
+		sql.Named("p1", policyId))
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	insertQuery := `INSERT INTO [dbo].[Policy] (PolicyTypeId, TransactionTypeId, PolicyEnforcingJurisdictionId, OriginatingJurisdictionId, Parameters, IsPrivate, Latest) 
+							VALUES (@p1, @p2, @p3, @p4, @p5, 0, 1)`
+	_, err = wrapper.db.Exec(insertQuery,
+		sql.Named("p1", policy.PolicyTypeId),
+		sql.Named("p2", policy.TransactionTypeId),
+		sql.Named("p3", policy.PolicyEnforcingJurisdictionId),
+		sql.Named("p4", policy.OriginatingJurisdictionId),
+		sql.Named("p5", amount))
 	if err != nil {
 		log.Fatal(err)
 	}

@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"fmt"
 	"log"
 	"net/http"
 	"strconv"
@@ -26,7 +25,6 @@ func (controller *PolicyController) ShowPolicies(w http.ResponseWriter, r *http.
 	policies := controller.DB.GetAllPolicies()
 
 	viewData["policies"] = policies
-	fmt.Println(policies)
 
 	ts, err := template.ParseFiles("./static/views/policies.html")
 	if err != nil {
@@ -100,7 +98,7 @@ func (controller *PolicyController) EditPolicy(w http.ResponseWriter, r *http.Re
 				return
 			}
 
-			controller.DB.UpdatePolicyAmount(uint64(amount), uint64(policyId))
+			controller.DB.UpdateCFMPolicyAmount(uint64(amount), uint64(policyId))
 		} else {
 			fileName, err := controller.SanctionListManager.GetNewestSanctionsList()
 			if err != nil {
