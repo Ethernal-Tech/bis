@@ -1,6 +1,6 @@
 module bisgo
 
-go 1.19
+go 1.22
 
 require (
 	github.com/alexedwards/scs/v2 v2.5.1
