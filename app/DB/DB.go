@@ -5,6 +5,7 @@ import (
 	"bisgo/errlog"
 	"database/sql"
 	"fmt"
+	"os"
 	"runtime"
 	"time"
 
@@ -36,17 +37,22 @@ func init() {
 		db, err = sql.Open("sqlserver", fmt.Sprintf("server=localhost;port=1433;database=%s;user id=testLogin;password=password", config.ResolveDBName()))
 	default:
 		errlog.Println(fmt.Errorf("\033[31m"+"DB handler is currently not supported for %s operating system."+"\033[31m", runtime.GOOS))
+		os.Exit(1)
 	}
 
 	if err != nil {
 		errlog.Println(err)
+		os.Exit(1)
 	}
 
+	fmt.Println("Pinging the database in process... This could take up to 60 seconds...")
 	for i := 0; i < 60; i++ {
 		err = db.Ping()
-		if err != nil {
+		if err != nil && i == 59 {
 			errlog.Println(err)
-		} else {
+			os.Exit(1)
+		} else if err == nil {
+			fmt.Println("Done")
 			break
 		}
 
