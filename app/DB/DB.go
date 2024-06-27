@@ -46,7 +46,7 @@ func init() {
 	}
 
 	fmt.Println("Pinging the database in process... This could take up to 60 seconds...")
-	for i := 0; i < 60; i++ {
+	for i := range 60 {
 		err = db.Ping()
 		if err != nil && i == 59 {
 			errlog.Println(err)
