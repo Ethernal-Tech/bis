@@ -122,6 +122,10 @@ func (controller *PolicyController) AddPolicyGetModel(w http.ResponseWriter, r *
 	}
 
 	viewData := map[string]any{}
+
+	policyTypes := controller.DB.GetPolicyTypes()
+	viewData["policyTypes"] = policyTypes
+
 	ap, err := template.ParseFiles("./static/views/_addPolicyPartial.html")
 	if err != nil {
 		log.Println(err.Error())

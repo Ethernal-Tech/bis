@@ -374,3 +374,29 @@ func (wrapper *DBHandler) policyLatestStateChange(policyTypeId, transactionTypeI
 
 	return nil
 }
+
+func (wrapper *DBHandler) GetPolicyTypes() []models.NewPolicyType {
+	query := `SELECT Id
+					,Code
+					,Name
+				FROM PolicyType`
+
+	policyTypes := []models.NewPolicyType{}
+	rows, err := wrapper.db.Query(query)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var policyType models.NewPolicyType
+		if err := rows.Scan(&policyType.Id,
+			&policyType.Code,
+			&policyType.Name); err != nil {
+			log.Fatal(err)
+		}
+		policyTypes = append(policyTypes, policyType)
+	}
+	return policyTypes
+}
