@@ -92,12 +92,27 @@ func (controller *APIController) SubmitTransactionProof(w http.ResponseWriter, r
 
 	values := strings.Split(messageData.Value, ";")
 
-	controller.DB.InsertTransactionProof(messageData.TransactionId, values[1]+values[2])
+	controller.DB.InsertTransactionProof(messageData.TransactionId, messageData.Value)
 
-	if values[0] == "0" {
+	if strings.Split(values[0], ",")[0] == "0" {
 		policyId, _ := strconv.Atoi(messageData.PolicyId)
 		controller.DB.UpdateTransactionPolicyStatus(messageData.TransactionId, policyId, 1)
 		controller.DB.UpdateTransactionState(messageData.TransactionId, 4)
+
+		// TODO: Move to sep function
+		statuses := controller.DB.GetTransactionPolicyStatuses(messageData.TransactionId)
+		noOfPassed := 0
+		for _, status := range statuses {
+			if status.Status == 1 {
+				noOfPassed += 1
+			} else if status.Status == 2 {
+				controller.DB.UpdateTransactionState(messageData.TransactionId, 8)
+			}
+		}
+
+		if noOfPassed == len(statuses) {
+			controller.DB.UpdateTransactionState(messageData.TransactionId, 7)
+		}
 	} else {
 		policyId, _ := strconv.Atoi(messageData.PolicyId)
 		controller.DB.UpdateTransactionPolicyStatus(messageData.TransactionId, policyId, 2)

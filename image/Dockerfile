@@ -46,4 +46,4 @@ RUN mv /app/ca.crt /app/private-join-and-compute && \
 EXPOSE 4000
 
 # Run the application
-CMD chmod +x /app/gpjc-api & /app/gpjc-api ${DNS_NAME} Ethernal123 & go run .
+CMD /app/gpjc-api ${DNS_NAME} Ethernal123 & go run .

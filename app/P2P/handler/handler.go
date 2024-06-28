@@ -193,9 +193,19 @@ func (h *P2PHandler) CFMResultBeneficiary(messageID int, payload []byte) error {
 	for _, policy := range applicablePolicies {
 		if policy.PolicyType.Code == "CFM" {
 			h.DB.UpdateTransactionPolicyStatus(messageData.TransctionID, policy.Policy.Id, messageData.Result)
-			if messageData.Result == 2 {
-				h.DB.UpdateTransactionState(messageData.TransctionID, 8)
-			} else {
+
+			// TODO: Move to sep function
+			statuses := h.DB.GetTransactionPolicyStatuses(messageData.TransctionID)
+			noOfPassed := 0
+			for _, status := range statuses {
+				if status.Status == 1 {
+					noOfPassed += 1
+				} else if status.Status == 2 {
+					h.DB.UpdateTransactionState(messageData.TransctionID, 8)
+				}
+			}
+
+			if noOfPassed == len(statuses) {
 				h.DB.UpdateTransactionState(messageData.TransctionID, 7)
 			}
 		}
@@ -225,9 +235,19 @@ func (h *P2PHandler) CFMResultOriginator(messageID int, payload []byte) error {
 	for _, policy := range applicablePolicies {
 		if policy.PolicyType.Code == "CFM" {
 			h.DB.UpdateTransactionPolicyStatus(messageData.TransctionID, policy.Policy.Id, messageData.Result)
-			if messageData.Result == 2 {
-				h.DB.UpdateTransactionState(messageData.TransctionID, 8)
-			} else {
+
+			// TODO: Move to sep function
+			statuses := h.DB.GetTransactionPolicyStatuses(messageData.TransctionID)
+			noOfPassed := 0
+			for _, status := range statuses {
+				if status.Status == 1 {
+					noOfPassed += 1
+				} else if status.Status == 2 {
+					h.DB.UpdateTransactionState(messageData.TransctionID, 8)
+				}
+			}
+
+			if noOfPassed == len(statuses) {
 				h.DB.UpdateTransactionState(messageData.TransctionID, 7)
 			}
 		}
