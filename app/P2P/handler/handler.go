@@ -4,6 +4,7 @@ import (
 	"bisgo/app/P2P/core"
 	"bisgo/app/P2P/messages"
 	"bisgo/app/models"
+	"bisgo/app/web/manager"
 	"bisgo/common"
 	"bisgo/config"
 	"bisgo/errlog"
@@ -14,10 +15,11 @@ import (
 
 type P2PHandler struct {
 	*core.Core
+	*manager.ComplianceCheckStateManager
 }
 
 func CreateP2PHandler(core *core.Core) *P2PHandler {
-	return &P2PHandler{core}
+	return &P2PHandler{core, manager.CreateComplianceCheckStateManager()}
 }
 
 // TODO: if an error occurs, the channel should be closed so that the listener does not wait forever
@@ -172,6 +174,8 @@ func (h *P2PHandler) CheckConfirmed(messageID int, payload []byte) error {
 		return returnErr
 	}
 
+	h.DB.UpdateTransactionState(messageData.CheckID, 2)
+
 	data := map[string]any{
 		"vm_address": messageData.VMAddress,
 	}
@@ -192,22 +196,7 @@ func (h *P2PHandler) CFMResultBeneficiary(messageID int, payload []byte) error {
 	applicablePolicies := h.DB.GetPoliciesForTransaction(messageData.TransctionID)
 	for _, policy := range applicablePolicies {
 		if policy.PolicyType.Code == "CFM" {
-			h.DB.UpdateTransactionPolicyStatus(messageData.TransctionID, policy.Policy.Id, messageData.Result)
-
-			// TODO: Move to sep function
-			statuses := h.DB.GetTransactionPolicyStatuses(messageData.TransctionID)
-			noOfPassed := 0
-			for _, status := range statuses {
-				if status.Status == 1 {
-					noOfPassed += 1
-				} else if status.Status == 2 {
-					h.DB.UpdateTransactionState(messageData.TransctionID, 8)
-				}
-			}
-
-			if noOfPassed == len(statuses) {
-				h.DB.UpdateTransactionState(messageData.TransctionID, 7)
-			}
+			h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.TransctionID, policy.Policy.Id, messageData.Result == 2)
 		}
 	}
 
@@ -234,22 +223,7 @@ func (h *P2PHandler) CFMResultOriginator(messageID int, payload []byte) error {
 	applicablePolicies := h.DB.GetPoliciesForTransaction(messageData.TransctionID)
 	for _, policy := range applicablePolicies {
 		if policy.PolicyType.Code == "CFM" {
-			h.DB.UpdateTransactionPolicyStatus(messageData.TransctionID, policy.Policy.Id, messageData.Result)
-
-			// TODO: Move to sep function
-			statuses := h.DB.GetTransactionPolicyStatuses(messageData.TransctionID)
-			noOfPassed := 0
-			for _, status := range statuses {
-				if status.Status == 1 {
-					noOfPassed += 1
-				} else if status.Status == 2 {
-					h.DB.UpdateTransactionState(messageData.TransctionID, 8)
-				}
-			}
-
-			if noOfPassed == len(statuses) {
-				h.DB.UpdateTransactionState(messageData.TransctionID, 7)
-			}
+			h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.TransctionID, policy.Policy.Id, messageData.Result == 2)
 		}
 	}
 

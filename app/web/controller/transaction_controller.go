@@ -227,6 +227,9 @@ func (controller *TransactionController) ConfirmTransaction(w http.ResponseWrite
 
 		controller.RulesEngine.Do(complianceCheckId, "interactive", map[string]any{"vm_address": ""})
 
+		// TODO: This should probably be handled inside of the rules engine
+		//		 CB should be notified about the compliance proof request so it knows about the checks
+		//		 and their states
 		controller.DB.UpdateTransactionState(check.Id, 3)
 
 		checkConfirmedData := common.CheckConfirmedDTO{
