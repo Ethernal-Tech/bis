@@ -49,7 +49,6 @@ func (server *WebServer) Routes() http.Handler {
 	{
 		router.HandlerFunc(http.MethodPost, "/api/getpolicies", server.GetPolicies)
 		router.HandlerFunc(http.MethodPost, "/api/getpolicy", server.GetPolicy)
-		router.HandlerFunc(http.MethodPost, "/api/submitTransactionProof", server.SubmitTransactionProof)
 		router.HandlerFunc(http.MethodPost, "/api/create-transaction", server.CreateTx)
 	}
 

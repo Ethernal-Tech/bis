@@ -1,5 +1,5 @@
 # Use the official Golang image as a base
-FROM golang:1.19
+FROM golang:1.22
 
 COPY app /app/app
 COPY common /app/common

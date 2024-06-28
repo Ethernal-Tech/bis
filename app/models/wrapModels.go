@@ -49,10 +49,10 @@ type PolicyModel struct {
 	TransactionType string
 }
 
-type TransactionProofRequest struct {
-	Value         string
-	TransactionId string
-	PolicyId      string
+type InteractiveComplianceCheckProofRequest struct {
+	Value             string `json:"value"`
+	ComplianceCheckID string `json:"compliance_check_id"`
+	PolicyID          string `json:"policy_id"`
 }
 
 type BankModel struct {

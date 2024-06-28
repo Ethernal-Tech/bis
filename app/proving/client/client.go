@@ -53,10 +53,10 @@ func sendInteractiveProofRequest(address string, checkID string, policyID int, r
 	var payload []byte
 	if targetedServer == "" {
 		targetUrl = strings.Join([]string{targetUrl, "api", "start-server"}, "/")
-		payload = []byte(fmt.Sprintf(`{"tx_id": "%s", "policy_id": "%d"}`, checkID, policyID))
+		payload = []byte(fmt.Sprintf(`{"compliance_check_id": "%s", "policy_id": "%d"}`, checkID, policyID))
 	} else {
 		targetUrl = strings.Join([]string{targetUrl, "api", "start-client"}, "/")
-		payload = []byte(fmt.Sprintf(`{"tx_id": "%s", "policy_id": "%d", "receiver": "%s", "to": "%s"}`, checkID, policyID, receiverName, targetedServer))
+		payload = []byte(fmt.Sprintf(`{"compliance_check_id": "%s", "policy_id": "%d", "receiver": "%s", "to": "%s"}`, checkID, policyID, receiverName, targetedServer))
 	}
 
 	client := &http.Client{}

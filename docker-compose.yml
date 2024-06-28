@@ -44,7 +44,7 @@ services:
       - P2P_NODE_ADDRESS=http://jpm-p2p:80/passthrough
       - GPJC_API_ADDRESS=jpm
       - GPJC_PORT=10501
-      - BACKEND_API_ADDRESS=0.0.0.0:4000
+      - GPJC_PUBLISH_ADDR=0.0.0.0:4000
     ports:
       - "4001:4000"
     depends_on:
@@ -99,7 +99,7 @@ services:
       - P2P_NODE_ADDRESS=http://hlb-p2p:80/passthrough
       - GPJC_API_ADDRESS=hlb
       - GPJC_PORT=10501
-      - BACKEND_API_ADDRESS=0.0.0.0:4000
+      - GPJC_PUBLISH_ADDR=0.0.0.0:4000
     ports:
       - "4003:4000"
     depends_on:

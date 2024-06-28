@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 )
 
 func (controller *APIController) GetPolicies(w http.ResponseWriter, r *http.Request) {
@@ -77,54 +76,6 @@ func (controller *APIController) GetPolicies(w http.ResponseWriter, r *http.Requ
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error", 500)
-	}
-}
-
-func (controller *APIController) SubmitTransactionProof(w http.ResponseWriter, r *http.Request) {
-	body, _ := io.ReadAll(r.Body)
-
-	var messageData models.TransactionProofRequest
-	if err := json.Unmarshal(body, &messageData); err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error 1", 500)
-		return
-	}
-
-	values := strings.Split(messageData.Value, ";")
-
-	controller.DB.InsertTransactionProof(messageData.TransactionId, messageData.Value)
-
-	if strings.Split(values[0], ",")[0] == "0" {
-		policyId, _ := strconv.Atoi(messageData.PolicyId)
-		controller.DB.UpdateTransactionPolicyStatus(messageData.TransactionId, policyId, 1)
-		controller.DB.UpdateTransactionState(messageData.TransactionId, 4)
-
-		// TODO: Move to sep function
-		statuses := controller.DB.GetTransactionPolicyStatuses(messageData.TransactionId)
-		noOfPassed := 0
-		for _, status := range statuses {
-			if status.Status == 1 {
-				noOfPassed += 1
-			} else if status.Status == 2 {
-				controller.DB.UpdateTransactionState(messageData.TransactionId, 8)
-			}
-		}
-
-		if noOfPassed == len(statuses) {
-			controller.DB.UpdateTransactionState(messageData.TransactionId, 7)
-		}
-	} else {
-		policyId, _ := strconv.Atoi(messageData.PolicyId)
-		controller.DB.UpdateTransactionPolicyStatus(messageData.TransactionId, policyId, 2)
-		controller.DB.UpdateTransactionState(messageData.TransactionId, 5)
-		controller.DB.UpdateTransactionState(messageData.TransactionId, 8)
-	}
-
-	err := json.NewEncoder(w).Encode("Ok")
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error 2", 500)
-		return
 	}
 }
 
