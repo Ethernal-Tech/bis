@@ -113,3 +113,25 @@ func (controller *PolicyController) EditPolicy(w http.ResponseWriter, r *http.Re
 		http.Redirect(w, r, "/policies", http.StatusSeeOther)
 	}
 }
+
+func (controller *PolicyController) AddPolicyGetModel(w http.ResponseWriter, r *http.Request) {
+	if controller.SessionManager.GetString(r.Context(), "inside") != "yes" {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+
+		return
+	}
+
+	viewData := map[string]any{}
+	ap, err := template.ParseFiles("./static/views/_addPolicyPartial.html")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error 1", 500)
+		return
+	}
+
+	err = ap.Execute(w, viewData)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error 2", 500)
+	}
+}

@@ -66,8 +66,28 @@ header>div>div {
     background-color: #ffffff;
     height: 46px;
     width: 320px;
-    margin-top: 70px;
-    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    color: #706f6f;
+    font-weight: 400;
+    border: 2px solid #706f6f;
+    transition: 0.4s;
+}
+
+.add-button:hover {
+    letter-spacing: 2px;
+}
+
+.add-button {
+    text-decoration: none;
+    user-select: none;
+    font-size: 20px;
+    font-family: 'Segoe UI';
+    background-color: #ffffff;
+    height: 46px;
+    width: 320px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -150,4 +170,82 @@ header>div>div {
 .table-body::-webkit-scrollbar-thumb {
     border-radius: 4px;
     background-color: #EAA121;
+}
+
+
+
+.container {
+    width: 86%;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: stretch;
+}
+
+.column {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    margin-top: 70px;
+    margin-bottom: 32px;
+}
+
+.column:nth-child(1) {
+    justify-content: center;
+}
+
+.column:nth-child(2) {
+    justify-content: center;
+}
+
+.column:nth-child(3) {
+    justify-content: end;
+}
+
+
+
+
+
+/* Modal Styles */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 1400px;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 6.8% auto auto auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 600px;
+    max-height: 70vh;
+    border-radius: 15px;
+    text-decoration: none;
+    font-size: 20px;
+    font-family: 'Segoe UI';
+    color: #706f6f;
+    font-weight: 400;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
 }

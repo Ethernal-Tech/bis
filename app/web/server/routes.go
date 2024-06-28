@@ -38,6 +38,7 @@ func (server *WebServer) Routes() http.Handler {
 		router.HandlerFunc(http.MethodGet, "/policies", server.ShowPolicies)
 		router.HandlerFunc(http.MethodGet, "/editpolicy", server.EditPolicy)
 		router.HandlerFunc(http.MethodPost, "/editpolicy", server.EditPolicy)
+		router.HandlerFunc(http.MethodGet, "/addpolicy", server.AddPolicyGetModel)
 	}
 
 	// Central bank controller
