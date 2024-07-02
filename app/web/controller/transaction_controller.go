@@ -289,6 +289,9 @@ func (controller *TransactionController) TransactionHistory(w http.ResponseWrite
 
 	policies := controller.DB.GetPolices(bankId, transaction.TypeId)
 
+	policyStatuses := controller.DB.GetTransactionPolicyStatuses(transaction.Id)
+	fmt.Println(policyStatuses)
+
 	policiesAndStatuses := []struct {
 		Policy models.PolicyModel
 		Status int

@@ -53,6 +53,11 @@ func (s *P2PServer) Mux() http.Handler {
 			return
 		}
 
+		payload := make([]byte, len(message.Payload))
+		for i, v := range message.Payload {
+			payload[i] = byte(v)
+		}
+
 		go func() {
 			var err error
 
@@ -60,17 +65,17 @@ func (s *P2PServer) Mux() http.Handler {
 
 			switch message.Method {
 			case "create-transaction":
-				err = s.CreateTransaction(message.MessageID, message.Payload)
+				err = s.CreateTransaction(message.MessageID, payload)
 			case "get-policies":
-				err = s.GetPolicies(message.MessageID, message.Payload)
+				err = s.GetPolicies(message.MessageID, payload)
 			case "send-policies":
-				err = s.SendPolicies(message.MessageID, message.Payload)
+				err = s.SendPolicies(message.MessageID, payload)
 			case "check-confirmed":
-				err = s.CheckConfirmed(message.MessageID, message.Payload)
+				err = s.CheckConfirmed(message.MessageID, payload)
 			case "cfm-result-beneficiary":
-				err = s.CFMResultBeneficiary(message.MessageID, message.Payload)
+				err = s.CFMResultBeneficiary(message.MessageID, payload)
 			case "cfm-result-originator":
-				err = s.CFMResultOriginator(message.MessageID, message.Payload)
+				err = s.CFMResultOriginator(message.MessageID, payload)
 			default:
 				err = errors.New("invalid p2p method received")
 			}

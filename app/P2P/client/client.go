@@ -40,10 +40,15 @@ func (c *P2PClient) Send(receivingBankID string, method string, data any, messag
 		messageID = rand.Int()
 	}
 
-	messagePayload, err := json.Marshal(data)
+	bytePayload, err := json.Marshal(data)
 	if err != nil {
 		errlog.Println(fmt.Errorf("%v %w", data, err))
 		return nil, errors.New("serialization failed due to malformed input data")
+	}
+
+	messagePayload := make([]int, len(bytePayload))
+	for i, v := range bytePayload {
+		messagePayload[i] = int(v)
 	}
 
 	messageData := messages.P2PClientMessage{
