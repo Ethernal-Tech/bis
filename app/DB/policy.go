@@ -52,7 +52,8 @@ func (wrapper *DBHandler) GetPolices(bankId string, transactionTypeId int) []mod
 	query := `SELECT p.Id, p.PolicyTypeId, p.TransactionTypeId, p.PolicyEnforcingJurisdictionId, p.OriginatingJurisdictionId, p.Parameters
 					FROM Policy p
 					Where p.TransactionTypeId = @p2
-						and p.PolicyEnforcingJurisdictionId = (SELECT JurisdictionId FROM [Bank] Where GlobalIdentifier = @p1)`
+						and p.PolicyEnforcingJurisdictionId = (SELECT JurisdictionId FROM [Bank] Where GlobalIdentifier = @p1)
+						and p.Latest = 1`
 
 	rows, err := wrapper.db.Query(query,
 		sql.Named("p1", bankId),

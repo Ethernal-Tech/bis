@@ -41,19 +41,11 @@ func (wrapper *DBHandler) InsertTransaction(t models.NewTransaction) string {
 
 	polices := wrapper.GetPolices(t.BeneficiaryBankId, t.TransactionTypeId)
 
-	var relevantPolicyMap map[int]int = make(map[int]int)
-
 	for _, policy := range polices {
-		if relevantPolicyMap[policy.PolicyTypeId] < policy.Id {
-			relevantPolicyMap[policy.PolicyTypeId] = policy.Id
-		}
-	}
-
-	for _, policyId := range relevantPolicyMap {
 		query = `INSERT INTO [dbo].[TransactionPolicy] VALUES (@p1, @p2, @p3)`
 		_, err := wrapper.db.Exec(query,
 			sql.Named("p1", insertedID),
-			sql.Named("p2", policyId),
+			sql.Named("p2", policy.Id),
 			sql.Named("p3", 0))
 
 		if err != nil {
