@@ -6,6 +6,7 @@ import (
 	"bisgo/app/web/manager"
 	"bisgo/errlog"
 	"encoding/json"
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -42,6 +43,35 @@ func (h *ProvingHandler) HandleInteractiveProof(body []byte) {
 	}
 }
 
-func (h *ProvingHandler) HandleNonInteractiveProof() {
+func (h *ProvingHandler) HandleNonInteractiveProof(body []byte) {
+	fmt.Println("called /proof/noninteractive")
 
+	// Remove the leading and trailing quotes
+	trimmedBody := strings.Trim(string(body), "\"")
+
+	// Unescape the JSON string
+	unescapedBody, err := strconv.Unquote("\"" + trimmedBody + "\"")
+	if err != nil {
+		errlog.Println(err)
+		return
+	}
+
+	var messageData models.NonInteractiveComplianceCheckProofRequest
+	if err := json.Unmarshal([]byte(unescapedBody), &messageData); err != nil {
+		errlog.Println(err)
+		return
+	}
+
+	fmt.Println(messageData)
+
+	if messageData.Status == "Failed" {
+		// TODO: Should we rerun?
+	} else {
+		if messageData.SanctionedCheckOutput.NotSanctioned {
+			// Passed sanction check
+
+		} else {
+			// Failed sanction check
+		}
+	}
 }

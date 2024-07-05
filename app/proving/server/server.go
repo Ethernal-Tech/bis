@@ -41,7 +41,7 @@ func (s *ProvingServer) Mux() http.Handler {
 		case strings.Contains(r.URL.Path, "/proof/interactive"):
 			s.HandleInteractiveProof(body)
 		case strings.Contains(r.URL.Path, "/proof/noninteractive"):
-			s.HandleNonInteractiveProof()
+			s.HandleNonInteractiveProof(body)
 		default:
 			http.Error(w, "Invalid proof type", http.StatusBadRequest)
 			return

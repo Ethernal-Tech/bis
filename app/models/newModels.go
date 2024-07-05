@@ -107,6 +107,29 @@ type NewTransactionProof struct {
 	Proof         string
 }
 
+type NonInteractiveComplianceCheckProofRequest struct {
+	ID                    string                              `json:"id"`
+	SanctionedCheckInput  NonInteractiveSanctionedCheckInput  `json:"sanctioned_check_input"`
+	SanctionedCheckOutput NonInteractiveSanctionedCheckOutput `json:"sanctioned_check_output"`
+	Status                string                              `json:"status"`
+}
+
+type NonInteractiveSanctionedCheckInput struct {
+	ComplianceCheckID string  `json:"compliance_check_id"`
+	PolicyID          string  `json:"policy_id"`
+	ParticipantsList  [][]int `json:"participants_list"`
+	PubSanctionsList  [][]int `json:"pub_sanctions_list"`
+}
+
+type NonInteractiveSanctionedCheckOutput struct {
+	ComplianceCheckID    string `json:"compliance_check_id"`
+	PolicyID             string `json:"policy_id"`
+	ParticipantsListHash []int  `json:"participants_list_hash"`
+	PubSanctionsListHash []int  `json:"pub_sanctions_list_hash"`
+	NotSanctioned        bool   `json:"not_sanctioned"`
+	Proof                []int  `json:"groth16_bn254_proof"`
+}
+
 // TODO: Remove ASSET statuses
 // const (
 // 	Created         int = 0
