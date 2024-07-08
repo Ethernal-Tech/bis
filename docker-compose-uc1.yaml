@@ -7,8 +7,8 @@ services:
     environment:
       ACCEPT_EULA: Y
       SA_PASSWORD: Ethernal123
-    # ports:
-    #   - "1434:1433"
+    ports:
+      - "1434:1433"
     networks:
       - peers
     volumes:
@@ -33,8 +33,6 @@ services:
       args:
         - DNS_NAME=jpm
     container_name: jpm
-    # volumes:
-    #   - .:/app
     environment:
       - DB_ADDRESS=sql-database-jpm
       - DB_PORT=1433
@@ -59,6 +57,8 @@ services:
     environment:
       ACCEPT_EULA: Y
       SA_PASSWORD: Ethernal123
+    ports:
+      - "1435:1433"
     networks:
       - peers
     volumes:
@@ -110,6 +110,8 @@ services:
     environment:
       ACCEPT_EULA: Y
       SA_PASSWORD: Ethernal123
+    ports:
+      - "1436:1433"
     networks:
       - peers
     volumes:
