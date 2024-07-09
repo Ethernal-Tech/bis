@@ -42,7 +42,7 @@ create-certs:
 	./image/gpjc_scripts/ca_script.sh
 
 run-docker: create-certs
-	docker compose -f docker-compose-uc1.yaml up --build --remove-orphans -d --force-recreate --wait --wait-timeout 120
+	docker compose -f docker-compose-uc1.yaml up --build --remove-orphans -d --force-recreate --wait --wait-timeout 240
 
 stop-docker: 
 	docker compose -f docker-compose-uc1.yaml down --rmi local -v

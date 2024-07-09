@@ -1,0 +1,27 @@
+name: Run Containers
+
+on:
+  push:
+    branches: [ action-test ]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  run-containers:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Docker
+      uses: docker/setup-buildx-action@v2
+
+    - name: Run containers
+      run: make run-docker
+
+    - name: Wait for 5 minutes
+      run: sleep 300
+
+    - name: Stop containers
+      run: make stop-docker
