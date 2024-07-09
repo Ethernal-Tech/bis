@@ -67,5 +67,5 @@ func (h *DBHandler) AddComplianceCheck(complianceCheck models.ComplianceCheck) (
 		}
 	}
 
-	return complianceCheckId, nil
+	return complianceCheck.Id, nil
 }

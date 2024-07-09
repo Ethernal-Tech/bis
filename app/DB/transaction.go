@@ -39,19 +39,19 @@ func (wrapper *DBHandler) InsertTransaction(t models.NewTransaction) string {
 		log.Fatal(row.Err())
 	}
 
-	polices := wrapper.GetPolices(t.BeneficiaryBankId, t.TransactionTypeId)
+	//polices := wrapper.GetPolices(t.BeneficiaryBankId, t.TransactionTypeId)
 
-	for _, policy := range polices {
-		query = `INSERT INTO [dbo].[TransactionPolicy] VALUES (@p1, @p2, @p3)`
-		_, err := wrapper.db.Exec(query,
-			sql.Named("p1", insertedID),
-			sql.Named("p2", policy.Id),
-			sql.Named("p3", 0))
+	// for _, policy := range polices {
+	// 	query = `INSERT INTO [dbo].[TransactionPolicy] VALUES (@p1, @p2, @p3)`
+	// 	_, err := wrapper.db.Exec(query,
+	// 		sql.Named("p1", insertedID),
+	// 		sql.Named("p2", policy.Id),
+	// 		sql.Named("p3", 0))
 
-		if err != nil {
-			log.Fatal(err)
-		}
-	}
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// }
 
 	return insertedID
 }
