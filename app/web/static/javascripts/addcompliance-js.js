@@ -4,8 +4,6 @@ window.onload = function () {
     document.getElementById("amount").addEventListener("input", addSeparators)
 
     setElements()
-
-    addSeparators()
 }
 
 let currentView = 1
