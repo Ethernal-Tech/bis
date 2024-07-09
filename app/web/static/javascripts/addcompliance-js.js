@@ -155,7 +155,7 @@ function upgradeView() {
             "beneficiaryBank": beneficiaryBank.value
         };
 
-        fetch("/addtransaction", {
+        fetch("/addcompliancecheck", {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

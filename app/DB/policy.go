@@ -50,36 +50,87 @@ func (wrapper *DBHandler) GetPolicyById(policyID int) models.Policy {
 	return policy
 }
 
-func (wrapper *DBHandler) GetPolices(bankId string, transactionTypeId int) []models.NewPolicy {
-	query := `SELECT p.Id, p.PolicyTypeId, p.TransactionTypeId, p.PolicyEnforcingJurisdictionId, p.OriginatingJurisdictionId, p.Parameters
-					FROM Policy p
-					Where p.TransactionTypeId = @p2
-						and p.PolicyEnforcingJurisdictionId = (SELECT JurisdictionId FROM [Bank] Where GlobalIdentifier = @p1)
-						and p.Latest = 1`
-	rows, err := wrapper.db.Query(query,
-		sql.Named("p1", bankId),
-		sql.Named("p2", transactionTypeId))
+// GetPolicies returns all policies that beneficiary bank (and its central bank) imposes to originator bank for the given transaction type.
+func (h *DBHandler) GetPolicies(originatorBankId string, beneficiaryBankId string, transactionTypeId int) ([]models.NewPolicy, error) {
+	returnErr := errors.New("unsuccessful obtainance of policies")
+
+	// query to obtain jurisdiction of the originator bank
+	query := `SELECT JurisdictionId FROM Bank WHERE GlobalIdentifier = @p1`
+
+	var originatorJurisdiction string
+	err := h.db.QueryRow(query, sql.Named("p1", originatorBankId)).Scan(&originatorJurisdiction)
 	if err != nil {
-		log.Fatal(err)
+		errlog.Println(err)
+		return nil, returnErr
+	}
+
+	// query to obtain jurisdiction of the beneficiary bank
+	query = `SELECT JurisdictionId FROM Bank WHERE GlobalIdentifier = @p1`
+
+	var beneficiaryJurisdiction string
+	err = h.db.QueryRow(query, sql.Named("p1", beneficiaryBankId)).Scan(&beneficiaryJurisdiction)
+	if err != nil {
+		errlog.Println(err)
+		return nil, returnErr
+	}
+
+	// query to obtain the central bank of the beneficiary bank jurisdiction
+	query = `SELECT GlobalIdentifier FROM Bank WHERE JurisdictionId = @p1 AND BankTypeId = 2`
+
+	var beneficiaryCentralBankId string
+	err = h.db.QueryRow(query, sql.Named("p1", beneficiaryJurisdiction)).Scan(&beneficiaryCentralBankId)
+	if err != nil {
+		errlog.Println(err)
+		return nil, returnErr
+	}
+
+	// query to obtain all policies that beneficiary jurisdiction (commercial bank + central bank) imposes to originator jurisdiction for the given transaction type
+	query = `SELECT Id, PolicyTypeId, TransactionTypeId, Owner, PolicyEnforcingJurisdictionId, OriginatingJurisdictionId, Parameters, IsPrivate, Latest 
+				FROM Policy WHERE OriginatingJurisdictionId = @p1 
+				AND PolicyEnforcingJurisdictionId = @p2 
+				AND TransactionTypeId = @p3
+				AND Owner IN (@p4, @p5) 
+				AND Latest = 1`
+	rows, err := h.db.Query(query,
+		sql.Named("p1", originatorJurisdiction),
+		sql.Named("p2", beneficiaryJurisdiction),
+		sql.Named("p3", transactionTypeId),
+		sql.Named("p4", beneficiaryBankId),
+		sql.Named("p5", beneficiaryCentralBankId))
+	if err != nil {
+		errlog.Println(err)
+		return nil, returnErr
 	}
 
 	defer rows.Close()
 
 	policies := []models.NewPolicy{}
+
+	// loop through the policies and append them to return policy list (slice)
 	for rows.Next() {
 		var policy models.NewPolicy
-		if err := rows.Scan(&policy.Id, &policy.PolicyTypeId, &policy.TransactionTypeId, &policy.PolicyEnforcingJurisdictionId, &policy.OriginatingJurisdictionId, &policy.Parameters); err != nil {
-			log.Fatal(err)
+		err = rows.Scan(&policy.Id,
+			&policy.PolicyTypeId,
+			&policy.TransactionTypeId,
+			&policy.Owner,
+			&policy.PolicyEnforcingJurisdictionId,
+			&policy.OriginatingJurisdictionId,
+			&policy.Parameters,
+			&policy.IsPrivate,
+			&policy.Latest)
+		if err != nil {
+			errlog.Println(err)
+			return nil, returnErr
 		}
 
 		policies = append(policies, policy)
 	}
 
-	return policies
+	return policies, nil
 }
 
-// GetPolicies returns all policies that apply to the passed jurisdiction for the given transaction type
-func (h *DBHandler) GetPolicies(jurisdictionId string, transactionTypeId int) ([]models.PolicyAndItsType, error) {
+// GetPolicies returns all policies that apply to the passed jurisdiction for the given transaction type.
+func (h *DBHandler) GetAppliedPolicies(jurisdictionId string, transactionTypeId int) ([]models.PolicyAndItsType, error) {
 	returnErr := errors.New("unsuccessful get of policies")
 
 	// query to obtain all policies
@@ -123,8 +174,8 @@ func (h *DBHandler) GetPolicies(jurisdictionId string, transactionTypeId int) ([
 	return policies, nil
 }
 
-// GetPolicesByOwner provides the same functionality as [GetPolicies], but with additional filter on owner
-func (h *DBHandler) GetPolicesByOwner(owner string, jurisdictionId string, transactionTypeId int) ([]models.PolicyAndItsType, error) {
+// GetPolicesByOwner provides the same functionality as [GetPolicies], but with additional filter on owner.
+func (h *DBHandler) GetAppliedPoliciesByOwner(owner string, jurisdictionId string, transactionTypeId int) ([]models.PolicyAndItsType, error) {
 	returnErr := errors.New("unsuccessful get of policies")
 
 	// query to obtain all policies
@@ -336,7 +387,7 @@ func (wrapper *DBHandler) UpdatePolicyChecklist(checklist string, policyId uint6
 // CreateOrGetPolicyType creates a new policy type and returns its id.
 // If policy type already exists, method only returns id.
 func (h *DBHandler) CreateOrGetPolicyType(code, name string) (int, error) {
-	returnErr := errors.New("unsuccessful creation/obtain of policy type")
+	returnErr := errors.New("unsuccessful creation/obtainance of policy type/its id")
 
 	// query to check if the policy type already exists in the system
 	query := `SELECT Id FROM PolicyType WHERE Code = @p1 AND Name = @p2`
@@ -452,7 +503,7 @@ func (h *DBHandler) GetPolicyParameters(policyId int) (string, error) {
 	err := h.db.QueryRow(query).Scan(&parameters)
 	if err != nil {
 		errlog.Println(err)
-		return "", errors.New("unsuccessful obtain of policy")
+		return "", errors.New("unsuccessful obtainance of policy parameters")
 	}
 
 	return parameters, nil

@@ -23,6 +23,8 @@ func (server *WebServer) Routes() http.Handler {
 		router.HandlerFunc(http.MethodGet, "/home", server.Home)
 	}
 
+	// TODO: delete everything related to transaction controller (transaction -> compilance check)
+
 	// Transaction controller
 	{
 		router.HandlerFunc(http.MethodPost, "/transactions", server.GetTransactions)
@@ -31,6 +33,12 @@ func (server *WebServer) Routes() http.Handler {
 		router.HandlerFunc(http.MethodGet, "/confirmtransaction", server.ConfirmTransaction)
 		router.HandlerFunc(http.MethodPost, "/confirmtransaction", server.ConfirmTransaction)
 		router.HandlerFunc(http.MethodGet, "/transactionhistory", server.TransactionHistory)
+	}
+
+	// Compliance check controller
+	{
+		router.HandlerFunc(http.MethodGet, "/addcompliancecheck", server.AddComplianceCheck)
+		router.HandlerFunc(http.MethodPost, "/addcompliancecheck", server.AddComplianceCheck)
 	}
 
 	// Policy controller
@@ -50,7 +58,6 @@ func (server *WebServer) Routes() http.Handler {
 	{
 		router.HandlerFunc(http.MethodPost, "/api/getbeneficiarybankpolicies", server.GetBeneficiaryBankPolicies)
 		router.HandlerFunc(http.MethodPost, "/api/getpolicy", server.GetPolicy)
-		router.HandlerFunc(http.MethodPost, "/api/create-transaction", server.CreateTx)
 	}
 
 	return DenyAccessToHTML(server.SessionManager.LoadAndSave(router))

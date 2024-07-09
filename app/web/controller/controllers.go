@@ -8,6 +8,10 @@ type HomeController struct {
 	*core.Core
 }
 
+type ComplianceCheckController struct {
+	*core.Core
+}
+
 type TransactionController struct {
 	*core.Core
 }
@@ -26,6 +30,10 @@ type CBController struct {
 
 func CreateHomeController(core *core.Core) *HomeController {
 	return &HomeController{core}
+}
+
+func CreateComplianceCheckController(core *core.Core) *ComplianceCheckController {
+	return &ComplianceCheckController{core}
 }
 
 func CreateTransactionController(core *core.Core) *TransactionController {

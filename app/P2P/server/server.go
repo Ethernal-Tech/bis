@@ -65,8 +65,8 @@ func (s *P2PServer) Mux() http.Handler {
 			messageTypeLog(r, message.Method)
 
 			switch message.Method {
-			case "create-transaction":
-				err = s.CreateTransaction(message.MessageID, payload)
+			case "new-compliance-check":
+				err = s.AddComplianceCheck(message.MessageID, payload)
 			case "get-policies":
 				err = s.GetPolicies(message.MessageID, payload)
 			case "policies":

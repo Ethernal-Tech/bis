@@ -111,21 +111,21 @@ func (controller *TransactionController) AddTransaction(w http.ResponseWriter, r
 			return
 		}
 
-		originatorBankId := controller.DB.GetBankId(controller.SessionManager.GetString(r.Context(), "bankName"))
+		originatorBankId, _ := controller.DB.GetBankIdByName(controller.SessionManager.GetString(r.Context(), "bankName"))
 
 		amount, _ := strconv.Atoi(strings.Replace(data.Amount, ",", "", -1))
 		transactionType, _ := strconv.Atoi(data.TransactionTypeID)
 		//loanId, _ := strconv.Atoi(data.PaymentTypeID)
 
 		// If client is not in the DB add it
-		senderID := controller.DB.GetOrCreateClient(data.SenderLei, data.SenderName, "", originatorBankId)
-		receiverID := controller.DB.GetOrCreateClient(data.BeneficiaryLei, data.BeneficiaryName, "", data.BeneficiaryBank)
+		senderID, _ := controller.DB.CreateOrGetBankClient(data.SenderLei, data.SenderName, "", originatorBankId)
+		receiverID, _ := controller.DB.CreateOrGetBankClient(data.BeneficiaryLei, data.BeneficiaryName, "", data.BeneficiaryBank)
 
 		transaction := models.NewTransaction{
 			OriginatorBankId:  originatorBankId,
 			BeneficiaryBankId: data.BeneficiaryBank,
-			SenderId:          senderID,
-			ReceiverId:        receiverID,
+			SenderId:          uint(senderID),
+			ReceiverId:        uint(receiverID),
 			Currency:          data.Currency,
 			Amount:            amount,
 			TransactionTypeId: transactionType,
@@ -285,9 +285,9 @@ func (controller *TransactionController) TransactionHistory(w http.ResponseWrite
 
 	transaction := controller.DB.GetTransactionHistory(r.Form.Get("transaction"))
 
-	bankId := controller.DB.GetBankId(transaction.BeneficiaryBank)
+	//bankId, _ := controller.DB.GetBankIdByName(transaction.BeneficiaryBank)
 
-	policies := controller.DB.GetPolices(bankId, transaction.TypeId)
+	//policies, _ := controller.DB.GetPolicies(bankId, transaction.TypeId)
 
 	policyStatuses := controller.DB.GetTransactionPolicyStatuses(transaction.Id)
 	fmt.Println(policyStatuses)
@@ -316,9 +316,9 @@ func (controller *TransactionController) TransactionHistory(w http.ResponseWrite
 	viewData["policies"] = policiesAndStatuses
 	viewData["policiesApplied"] = "false"
 
-	if len(policies) != 0 {
-		viewData["policiesApplied"] = "true"
-	}
+	// if len(policies) != 0 {
+	// 	viewData["policiesApplied"] = "true"
+	// }
 
 	ts, err := template.ParseFiles("./static/views/transactionhistory.html")
 	if err != nil {

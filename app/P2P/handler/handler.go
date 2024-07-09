@@ -26,41 +26,52 @@ func CreateP2PHandler(core *core.Core) *P2PHandler {
 
 // TODO: all or nothing - methods should be constructed as atomic blocks (transactions), if anything fails, all changes are rolled back
 
-func (h *P2PHandler) CreateTransaction(messageID int, payload []byte) error {
-	returnErr := errors.New("p2p handler method CreateTransaction failed to execute properly")
+// AddComplianceCheck p2p handler method, as the name suggests, adds a new compliance check obtained from
+// the p2p network. It is invoked when a "new-compliance-check" message arrives from a p2p network.
+func (h *P2PHandler) AddComplianceCheck(messageID int, payload []byte) error {
+	returnErr := errors.New("p2p handler method AddComplianceCheck failed to execute properly")
 
-	var messageData common.TransactionDTO
-	if err := json.Unmarshal(payload, &messageData); err != nil {
-		errlog.Println(err)
-		return returnErr
-	}
-
-	transactionType, err := strconv.Atoi(messageData.TransactionType)
+	var complianceCheck common.ComplianceCheckDTO
+	err := json.Unmarshal(payload, &complianceCheck)
 	if err != nil {
 		errlog.Println(err)
 		return returnErr
 	}
 
-	senderID := h.DB.GetOrCreateClient(messageData.SenderLei, messageData.SenderName, "", messageData.OriginatorBankGlobalIdentifier)
-	receiverID := h.DB.GetOrCreateClient(messageData.ReceiverLei, messageData.ReceiverName, "", messageData.BeneficiaryBankGlobalIdentifier)
-
-	transaction := models.NewTransaction{
-		Id:                messageData.TransactionID,
-		OriginatorBankId:  messageData.OriginatorBankGlobalIdentifier,
-		BeneficiaryBankId: messageData.BeneficiaryBankGlobalIdentifier,
-		SenderId:          senderID,
-		ReceiverId:        receiverID,
-		Currency:          messageData.Currency,
-		Amount:            int(messageData.Amount),
-		TransactionTypeId: transactionType,
-		LoanId:            int(messageData.LoanID),
+	transactionType, err := h.DB.GetTransactionTypeByCode(complianceCheck.TransactionType)
+	if err != nil {
+		errlog.Println(err)
+		return returnErr
 	}
 
-	transactionID := h.DB.InsertTransaction(transaction)
-	h.DB.UpdateTransactionState(transactionID, 1)
+	// create a new user (originator) if needed
+	originatorId, err := h.DB.CreateOrGetBankClient(complianceCheck.OriginatorGlobalIdentifier, complianceCheck.OriginatorName, "", complianceCheck.OriginatorBankGlobalIdentifier)
+	if err != nil {
+		errlog.Println(err)
+		return returnErr
+	}
 
-	if config.ResolveIsCentralBank() {
-		h.RulesEngine.Do(messageData.TransactionID, "interactive", nil)
+	// create a new user (beneficiary) if needed
+	beneficiaryId, err := h.DB.CreateOrGetBankClient(complianceCheck.BeneficiaryGlobalIdentifier, complianceCheck.BeneficiaryName, "", complianceCheck.BeneficiaryBankGlobalIdentifier)
+	if err != nil {
+		errlog.Println(err)
+		return returnErr
+	}
+
+	_, err = h.DB.AddComplianceCheck(models.ComplianceCheck{
+		Id:                complianceCheck.ComplianceCheckId,
+		OriginatorBankId:  complianceCheck.OriginatorBankGlobalIdentifier,
+		BeneficiaryBankId: complianceCheck.BeneficiaryBankGlobalIdentifier,
+		SenderId:          originatorId,
+		ReceiverId:        beneficiaryId,
+		Currency:          complianceCheck.Currency,
+		Amount:            complianceCheck.Amount,
+		TransactionTypeId: transactionType.Id,
+		LoanId:            complianceCheck.LoanId,
+	})
+	if err != nil {
+		errlog.Println(err)
+		return returnErr
 	}
 
 	return nil
@@ -125,9 +136,9 @@ func (h *P2PHandler) GetPolicies(messageID int, payload []byte) error {
 	// (if) in the case of a commercial bank, all (commerical bank + CB) policies are taken
 	// (else) otherwise, only policies owned by the CB are taken
 	if !config.ResolveIsCentralBank() {
-		policies, err = h.DB.GetPolicies(request.Jurisdiction, transactionTypeId)
+		policies, err = h.DB.GetAppliedPolicies(request.Jurisdiction, transactionTypeId)
 	} else {
-		policies, err = h.DB.GetPolicesByOwner(config.ResolveMyGlobalIdentifier(), request.Jurisdiction, transactionTypeId)
+		policies, err = h.DB.GetAppliedPoliciesByOwner(config.ResolveCBGlobalIdentifier(), request.Jurisdiction, transactionTypeId)
 	}
 
 	if err != nil {
@@ -162,7 +173,6 @@ func (h *P2PHandler) GetPolicies(messageID int, payload []byte) error {
 			Code:   "Other",
 			Name:   "Internal Checks",
 			Params: "",
-			Owner:  config.ResolveMyGlobalIdentifier(),
 		})
 	}
 
