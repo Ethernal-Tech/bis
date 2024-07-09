@@ -378,7 +378,7 @@ func (h *DBHandler) CreateOrUpdatePolicy(policyTypeId int, owner string, transac
 	returnErr := errors.New("unsuccessful creation/update of policy")
 
 	// query to check if the policy already exists in the system
-	query := `SELECT Id FROM Policy p, PolicyType pt WHERE p.PolicyTypeId = pt.Id 
+	query := `SELECT p.Id FROM Policy p, PolicyType pt WHERE p.PolicyTypeId = pt.Id 
 				AND p.PolicyTypeId = @p1
 				AND p.Owner = @p2
 				AND p.TransactionTypeId = @p3

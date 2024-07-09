@@ -146,6 +146,7 @@ services:
       - PEER_ID=12D3KooW9z8jijSnjH85ZwTLyGGhqPujfn15uRpzx24QQiPZcUAE
       - IS_CENTRAL_BANK=true
       - P2P_NODE_ADDRESS=http://bnm-p2p:80/passthrough
+      - MY_GLOBAL_IDENTIFIER=549300NROGNBV2T1GS07
     ports:
       - "4003:4000"
     depends_on:
