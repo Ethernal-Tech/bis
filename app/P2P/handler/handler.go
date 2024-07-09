@@ -138,7 +138,7 @@ func (h *P2PHandler) GetPolicies(messageID int, payload []byte) error {
 	if !config.ResolveIsCentralBank() {
 		policies, err = h.DB.GetAppliedPolicies(request.Jurisdiction, transactionTypeId)
 	} else {
-		policies, err = h.DB.GetAppliedPoliciesByOwner(config.ResolveCBGlobalIdentifier(), request.Jurisdiction, transactionTypeId)
+		policies, err = h.DB.GetAppliedPoliciesByOwner(config.ResolveMyGlobalIdentifier(), request.Jurisdiction, transactionTypeId)
 	}
 
 	if err != nil {
@@ -173,6 +173,7 @@ func (h *P2PHandler) GetPolicies(messageID int, payload []byte) error {
 			Code:   "Other",
 			Name:   "Internal Checks",
 			Params: "",
+			Owner:  config.ResolveMyGlobalIdentifier(),
 		})
 	}
 
