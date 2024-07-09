@@ -2,7 +2,9 @@ package DB
 
 import (
 	"bisgo/app/models"
+	"bisgo/errlog"
 	"database/sql"
+	"errors"
 	"log"
 )
 
@@ -60,25 +62,18 @@ func (wrapper *DBHandler) IsCentralBankEmployee(username string) bool {
 	return CentralBankEmployee
 }
 
-func (wrapper *DBHandler) GetBankId(bankName string) string {
-	query := `SELECT GlobalIdentifier FROM [Bank] WHERE name = @p1`
-
-	rows, err := wrapper.db.Query(query, sql.Named("p1", bankName))
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer rows.Close()
+// GetBankIdByName returns the id (global identifier) of the selected (bankName) bank.
+func (h *DBHandler) GetBankIdByName(bankName string) (string, error) {
+	query := `SELECT GlobalIdentifier FROM Bank WHERE Name = @p1`
 
 	var bankId string
-	for rows.Next() {
-		if err := rows.Scan(&bankId); err != nil {
-			log.Fatal(err)
-		}
+	err := h.db.QueryRow(query).Scan(&bankId)
+	if err != nil {
+		errlog.Println(err)
+		return "", errors.New("unsuccessful obtainance of bank id")
 	}
 
-	return bankId
+	return bankId, nil
 }
 
 func (wrapper *DBHandler) GetBankClientId(bankClientName string) string {
@@ -177,32 +172,39 @@ func (wrapper *DBHandler) GetClientByID(clientID uint) models.NewBankClient {
 	return client
 }
 
-// GetOrCreateClient method to get client Id by GlobalIdentifier and Name or create a new client if not exists
-func (wrapper *DBHandler) GetOrCreateClient(globalIdentifier, name, address, bankId string) uint {
-	// Check if client exists
+// CreateOrGetBankClient creates a new bank client and returns its id.
+// If bank client already exists, method only returns id.
+func (h *DBHandler) CreateOrGetBankClient(globalIdentifier, name, address, bankId string) (int, error) {
+	returnErr := errors.New("unsuccessful creation/obtainance of bank client/its id")
+
+	// query to check if the bank client already exists in the system
 	query := `SELECT Id FROM BankClient WHERE GlobalIdentifier = @p1 AND Name = @p2`
 
-	var clientId uint
-	err := wrapper.db.QueryRow(query,
+	var bankClientId int
+	err := h.db.QueryRow(query,
 		sql.Named("p1", globalIdentifier),
-		sql.Named("p2", name)).Scan(&clientId)
+		sql.Named("p2", name)).Scan(&bankClientId)
+
+	// if policy type (row) doesn't exist, error [sql.ErrNoRows] appears
 	if err != nil {
-		if err == sql.ErrNoRows {
-			// Client does not exist, insert new client
-			insertQuery := `INSERT INTO [dbo].[BankClient] OUTPUT INSERTED.Id VALUES (@p1, @p2, @p3, @p4)`
-			err = wrapper.db.QueryRow(insertQuery,
-				sql.Named("p1", globalIdentifier),
-				sql.Named("p2", name),
-				sql.Named("p3", address),
-				sql.Named("p4", bankId)).Scan(&clientId)
-			if err != nil {
-				log.Fatal(err)
-			}
-		} else {
-			// Other errors
-			log.Fatal(err)
+		// check for potentially some other type of error
+		if err != sql.ErrNoRows {
+			errlog.Println(err)
+			return -1, returnErr
+		}
+
+		// query to instert a new bank client and get its id
+		query := `INSERT INTO BankClient (GlobalIdentifier, Name, Adress, BankId) OUTPUT INSERTED.Id VALUES (@p1, @p2, @p3, @p4)`
+		err = h.db.QueryRow(query,
+			sql.Named("p1", globalIdentifier),
+			sql.Named("p2", name),
+			sql.Named("p3", address),
+			sql.Named("p4", bankId)).Scan(&bankClientId)
+		if err != nil {
+			errlog.Println(err)
+			return -1, returnErr
 		}
 	}
 
-	return clientId
+	return bankClientId, nil
 }

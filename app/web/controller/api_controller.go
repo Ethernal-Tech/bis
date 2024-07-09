@@ -1,12 +1,10 @@
 package controller
 
 import (
-	"bisgo/app/models"
 	"bisgo/common"
 	"bisgo/errlog"
 	"encoding/json"
 	"fmt"
-	"io"
 	"log"
 	"net/http"
 	"strconv"
@@ -88,7 +86,13 @@ func (c *APIController) GetBeneficiaryBankPolicies(w http.ResponseWriter, r *htt
 			return
 		}
 
-		c.DB.CreateOrUpdatePolicy(policyTypeId, policy.Owner, transactionTypeId, beneficiaryJurisdiction.Id, originatorJurisdiction.Id, policy.Params, 0)
+		_, _, err = c.DB.CreateOrUpdatePolicy(policyTypeId, policy.Owner, transactionTypeId, beneficiaryJurisdiction.Id, originatorJurisdiction.Id, policy.Params, 0)
+		if err != nil {
+			errlog.Println(err)
+
+			http.Error(w, "Internal Server Error", 500)
+			return
+		}
 	}
 
 	response, err := json.Marshal(responseData)
@@ -151,49 +155,5 @@ func (controller *APIController) GetPolicy(w http.ResponseWriter, r *http.Reques
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error", 500)
-	}
-}
-
-// ------------------------------------------------------------------------------------------
-func (controller *APIController) CreateTx(w http.ResponseWriter, r *http.Request) {
-	body, _ := io.ReadAll(r.Body)
-
-	var messageData common.TransactionDTO
-	if err := json.Unmarshal(body, &messageData); err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error 1", 500)
-		return
-	}
-
-	transactionType, err := strconv.Atoi(messageData.TransactionType)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error 1", 500)
-		return
-	}
-
-	senderID := controller.DB.GetOrCreateClient(messageData.SenderLei, messageData.SenderName, "", messageData.OriginatorBankGlobalIdentifier)
-	receiverID := controller.DB.GetOrCreateClient(messageData.ReceiverLei, messageData.ReceiverName, "", messageData.BeneficiaryBankGlobalIdentifier)
-
-	transaction := models.NewTransaction{
-		Id:                messageData.TransactionID,
-		OriginatorBankId:  messageData.OriginatorBankGlobalIdentifier,
-		BeneficiaryBankId: messageData.BeneficiaryBankGlobalIdentifier,
-		SenderId:          senderID,
-		ReceiverId:        receiverID,
-		Currency:          messageData.Currency,
-		Amount:            int(messageData.Amount),
-		TransactionTypeId: transactionType,
-		LoanId:            int(messageData.LoanID),
-	}
-
-	transactionID := controller.DB.InsertTransaction(transaction)
-	controller.DB.UpdateTransactionState(transactionID, 1)
-
-	err = json.NewEncoder(w).Encode("Ok")
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error 2", 500)
-		return
 	}
 }

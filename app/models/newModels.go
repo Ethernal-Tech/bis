@@ -50,6 +50,18 @@ type NewTransaction struct {
 	LoanId            int
 }
 
+type ComplianceCheck struct {
+	Id                string
+	OriginatorBankId  string
+	BeneficiaryBankId string
+	SenderId          int
+	ReceiverId        int
+	Currency          string
+	Amount            int
+	TransactionTypeId int
+	LoanId            int
+}
+
 type NewTransactionType struct {
 	Id   int
 	Code string
