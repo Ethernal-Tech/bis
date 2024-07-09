@@ -105,7 +105,7 @@ func ResolveServerPort() string {
 	return ":" + env_port
 }
 
-func ResovleIsCentralBank() bool {
+func ResolveIsCentralBank() bool {
 	return os.Getenv("IS_CENTRAL_BANK") != ""
 }
 

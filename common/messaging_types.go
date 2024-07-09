@@ -31,6 +31,7 @@ type TransactionDTO struct {
 	LoanID                          uint64 `json:"load_id"`
 }
 
+// TODO: describe properties
 type PolicyRequestDTO struct {
 	Jurisdiction              string `json:"jurisdiction"`
 	TransactionType           string `json:"tx_type"`
@@ -45,6 +46,7 @@ type PolicyDTO struct {
 	Code   string `json:"code"`
 	Name   string `json:"name"`
 	Params string `json:"params"`
+	Owner  string `json:"owner"`
 }
 
 type CheckConfirmedDTO struct {

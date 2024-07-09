@@ -59,62 +59,92 @@ func (h *P2PHandler) CreateTransaction(messageID int, payload []byte) error {
 	transactionID := h.DB.InsertTransaction(transaction)
 	h.DB.UpdateTransactionState(transactionID, 1)
 
-	if config.ResovleIsCentralBank() {
+	if config.ResolveIsCentralBank() {
 		h.RulesEngine.Do(messageData.TransactionID, "interactive", nil)
 	}
 
 	return nil
 }
 
+// GetPolicies p2p handler method handles a request for policies. It is invoked when a "get-policies" message
+// arrives from the p2p network. Requests for policies can be sent by commercial banks to each other, or by
+// a commercial bank to its central bank. The first case includes the second, so that the commercial bank
+// always return the union of its policies and the policies of its central bank. Applicable (and returned)
+// policies are determined based on the transaction type and the originating jurisdiction.
 func (h *P2PHandler) GetPolicies(messageID int, payload []byte) error {
 	returnErr := errors.New("p2p handler method GetPolicies failed to execute properly")
 
-	var messageData common.PolicyRequestDTO
-	if err := json.Unmarshal(payload, &messageData); err != nil {
+	var request common.PolicyRequestDTO
+	if err := json.Unmarshal(payload, &request); err != nil {
 		errlog.Println(err)
 		return returnErr
 	}
 
-	transactionType, err := strconv.Atoi(messageData.TransactionType)
+	transactionTypeId, err := strconv.Atoi(request.TransactionType)
 	if err != nil {
 		errlog.Println(err)
 		return returnErr
 	}
 
-	// Comercial bank has to update polices from the central bank first
-	// TODO: Add reference to this
-	if !config.ResovleIsCentralBank() {
-		centralBankRequest := common.PolicyRequestDTO{
-			Jurisdiction:              messageData.Jurisdiction,
-			TransactionType:           messageData.TransactionType,
-			RequesterGlobalIdentifier: config.ResolveMyGlobalIdentifier(), // TODO: Add reference to this
+	// in the case of a commercial bank, it is first necessary to send a request to the central bank to obtain its policies as well
+	if !config.ResolveIsCentralBank() {
+		requestToCB := common.PolicyRequestDTO{
+			Jurisdiction:              request.Jurisdiction,
+			TransactionType:           request.TransactionType,
+			RequesterGlobalIdentifier: config.ResolveMyGlobalIdentifier(),
 		}
 
-		// TODO: Add reference to this
-		channel, err := h.P2PClient.Send(config.ResolveCBGlobalIdentifier(), "get-policies", centralBankRequest, 0)
+		ch, err := h.P2PClient.Send(config.ResolveCBGlobalIdentifier(), "get-policies", requestToCB, 0)
 		if err != nil {
 			errlog.Println(err)
 			return returnErr
 		}
 
-		responseData := (<-channel).(common.PolicyResponseDTO)
+		responseData := (<-ch).(common.PolicyResponseDTO)
 
+		// loop through the CB policies and insert (policy type)/policy if necessary
 		for _, policy := range responseData.Policies {
-			policyTypeID := h.DB.GetOrCreatePolicyType(policy.Code, policy.Name)
-			h.DB.GetOrCreatePolicy(int(policyTypeID), transactionType, config.ResolveJurisdictionCode(), messageData.Jurisdiction, policy.Params)
+			policyTypeId, err := h.DB.CreateOrGetPolicyType(policy.Code, policy.Name)
+			if err != nil {
+				errlog.Println(err)
+				return returnErr
+			}
+
+			// isPrivate flag is always set to 0 regardless of the policy type
+			// private CB policies are always public for commercial banks in the sense that they know about their existence, but they are not familiar with the details
+			_, _, err = h.DB.CreateOrUpdatePolicy(policyTypeId, policy.Owner, transactionTypeId, config.ResolveJurisdictionCode(), request.Jurisdiction, policy.Params, 0)
+			if err != nil {
+				errlog.Println(err)
+				return returnErr
+			}
 		}
 	}
 
-	policies := h.DB.GetPolicesByJurisdictionCode(messageData.Jurisdiction, transactionType)
+	var policies []models.PolicyAndItsType
 
-	response := common.PolicyResponseDTO{
-		Policies: []common.PolicyDTO{},
+	// (if) in the case of a commercial bank, all (commerical bank + CB) policies are taken
+	// (else) otherwise, only policies owned by the CB are taken
+	if !config.ResolveIsCentralBank() {
+		policies, err = h.DB.GetPolicies(request.Jurisdiction, transactionTypeId)
+	} else {
+		policies, err = h.DB.GetPolicesByOwner(config.ResolveCBGlobalIdentifier(), request.Jurisdiction, transactionTypeId)
 	}
 
-	privateChecks := false
+	if err != nil {
+		errlog.Println(err)
+		return returnErr
+	}
+
+	var response common.PolicyResponseDTO
+
+	// a flag indicating whether a private policy exists
+	// private policies are never returned individually (nor are their details disclosed),
+	// but are grouped into one private policy
+	privatePolicy := false
+
 	for _, policy := range policies {
 		if policy.Policy.IsPrivate {
-			privateChecks = true
+			privatePolicy = true
 			continue
 		}
 
@@ -122,10 +152,12 @@ func (h *P2PHandler) GetPolicies(messageID int, payload []byte) error {
 			Code:   policy.PolicyType.Code,
 			Name:   policy.PolicyType.Name,
 			Params: policy.Policy.Parameters,
+			Owner:  policy.Policy.Owner,
 		})
 	}
 
-	if privateChecks {
+	// grouping private policies into one
+	if privatePolicy {
 		response.Policies = append(response.Policies, common.PolicyDTO{
 			Code:   "Other",
 			Name:   "Internal Checks",
@@ -133,7 +165,8 @@ func (h *P2PHandler) GetPolicies(messageID int, payload []byte) error {
 		})
 	}
 
-	_, err = h.P2PClient.Send(messageData.RequesterGlobalIdentifier, "send-policies", response, messageID)
+	// sending policies over a p2p network back to the requesting bank
+	_, err = h.P2PClient.Send(request.RequesterGlobalIdentifier, "policies", response, messageID)
 	if err != nil {
 		errlog.Println(err)
 		return returnErr
@@ -142,15 +175,18 @@ func (h *P2PHandler) GetPolicies(messageID int, payload []byte) error {
 	return nil
 }
 
-func (h *P2PHandler) SendPolicies(messageID int, payload []byte) error {
+// ReceivePolicies p2p handler method handles the response to the "get-policies" request. It is invoked
+// when a "policies" message arrives from a p2p network. Policies (that is, response on a "get-policies"
+// request) can be sent by commercial bank to another, or by a central bank to commercial one.
+func (h *P2PHandler) ReceivePolicies(messageID int, payload []byte) error {
 	returnErr := errors.New("p2p handler method SendPolicies failed to execute properly")
 
 	channel, _ := messages.LoadChannel(messageID)
-
 	defer messages.RemoveChannel(messageID)
 
 	var messageData common.PolicyResponseDTO
-	if err := json.Unmarshal(payload, &messageData); err != nil {
+	err := json.Unmarshal(payload, &messageData)
+	if err != nil {
 		errlog.Println(err)
 		return returnErr
 	}

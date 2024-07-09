@@ -46,6 +46,7 @@ func (c *P2PClient) Send(receivingBankID string, method string, data any, messag
 		return nil, errors.New("serialization failed due to malformed input data")
 	}
 
+	// TODO: describe why it is needed
 	messagePayload := make([]int, len(bytePayload))
 	for i, v := range bytePayload {
 		messagePayload[i] = int(v)

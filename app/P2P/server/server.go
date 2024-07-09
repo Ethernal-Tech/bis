@@ -53,6 +53,7 @@ func (s *P2PServer) Mux() http.Handler {
 			return
 		}
 
+		// TODO: describe why it is needed
 		payload := make([]byte, len(message.Payload))
 		for i, v := range message.Payload {
 			payload[i] = byte(v)
@@ -68,8 +69,8 @@ func (s *P2PServer) Mux() http.Handler {
 				err = s.CreateTransaction(message.MessageID, payload)
 			case "get-policies":
 				err = s.GetPolicies(message.MessageID, payload)
-			case "send-policies":
-				err = s.SendPolicies(message.MessageID, payload)
+			case "policies":
+				err = s.ReceivePolicies(message.MessageID, payload)
 			case "check-confirmed":
 				err = s.CheckConfirmed(message.MessageID, payload)
 			case "cfm-result-beneficiary":

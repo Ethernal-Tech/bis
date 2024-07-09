@@ -36,11 +36,11 @@ func (e *RulesEngine) Do(transactionID string, proofType string, data map[string
 	for _, policy := range policies {
 		switch policy.PolicyType.Code {
 		case "SCL":
-			if !config.ResovleIsCentralBank() {
+			if !config.ResolveIsCentralBank() {
 				go e.sanctionCheckList(proofType, policy.Policy.Parameters, transactionID, policy.Policy.Id, data["vm_address"].(string))
 			}
 		case "CFM":
-			if config.ResovleIsCentralBank() {
+			if config.ResolveIsCentralBank() {
 				go e.capitalFlowManagement(proofType, policy.Policy.Parameters, transactionID)
 			}
 		}

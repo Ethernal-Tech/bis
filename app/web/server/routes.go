@@ -48,7 +48,7 @@ func (server *WebServer) Routes() http.Handler {
 
 	// API controller
 	{
-		router.HandlerFunc(http.MethodPost, "/api/getpolicies", server.GetPolicies)
+		router.HandlerFunc(http.MethodPost, "/api/getbeneficiarybankpolicies", server.GetBeneficiaryBankPolicies)
 		router.HandlerFunc(http.MethodPost, "/api/getpolicy", server.GetPolicy)
 		router.HandlerFunc(http.MethodPost, "/api/create-transaction", server.CreateTx)
 	}

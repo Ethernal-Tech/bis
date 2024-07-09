@@ -23,7 +23,7 @@ function getPolicies() {
         TransactionTypeId: transactionTypeid
     }
 
-    fetch("/api/getpolicies", {
+    fetch("/api/getbeneficiarybankpolicies", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

@@ -76,6 +76,7 @@ type NewPolicyType struct {
 type NewPolicy struct {
 	Id                            int
 	PolicyTypeId                  int
+	Owner                         string
 	TransactionTypeId             int
 	PolicyEnforcingJurisdictionId string
 	OriginatingJurisdictionId     string
@@ -84,7 +85,7 @@ type NewPolicy struct {
 	Latest                        bool
 }
 
-type NewPolicyModel struct {
+type PolicyAndItsType struct {
 	Policy     NewPolicy
 	PolicyType NewPolicyType
 }

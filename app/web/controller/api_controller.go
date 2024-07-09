@@ -3,6 +3,7 @@ package controller
 import (
 	"bisgo/app/models"
 	"bisgo/common"
+	"bisgo/errlog"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -11,72 +12,103 @@ import (
 	"strconv"
 )
 
-func (controller *APIController) GetPolicies(w http.ResponseWriter, r *http.Request) {
-	if controller.SessionManager.GetString(r.Context(), "inside") != "yes" {
+// GetBeneficiaryBankPolicies handles web API call ("/api/getbeneficiarybankpolicies") for obtaining the
+// policies for the beneficiary bank. As input it expects a JSON object of the form (beneficiary bank
+// global id, transaction type) and as a result it responds with a JSON object containing the policies.
+// It internally sends a request over a p2p network to the benefiricary bank to get its policies.
+func (c *APIController) GetBeneficiaryBankPolicies(w http.ResponseWriter, r *http.Request) {
+	if c.SessionManager.GetString(r.Context(), "inside") != "yes" {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
-
 		return
 	}
 
 	//time.Sleep(2 * time.Second)
 
 	data := struct {
-		BeneficiaryBankId string
-		TransactionTypeId string
+		BeneficiaryBankGlobalIdentifier string
+		TransactionTypeId               string
 	}{}
 
 	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&data)
+	if err != nil {
+		errlog.Println(err)
 
-	if err := decoder.Decode(&data); err != nil {
 		http.Error(w, "Invalid JSON data", http.StatusBadRequest)
 		return
 	}
 
-	senderBankId := controller.SessionManager.GetString(r.Context(), "bankId") //get logged user's bank ID
-	senderBankJurisdiction := controller.DB.GetJurisdictionOfBank(senderBankId)
+	originatorBankGlobalIdentifier := c.SessionManager.GetString(r.Context(), "bankId")
+	originatorJurisdiction, err := c.DB.GetBankJurisdiction(originatorBankGlobalIdentifier)
+	if err != nil {
+		errlog.Println(err)
 
-	policyRequestDto := common.PolicyRequestDTO{
-		Jurisdiction:              senderBankJurisdiction.Id,
-		TransactionType:           data.TransactionTypeId,
-		RequesterGlobalIdentifier: senderBankId, //the bank that requests policies
+		http.Error(w, "Invalid JSON data", http.StatusBadRequest)
+		return
 	}
 
-	ch, err := controller.P2PClient.Send(data.BeneficiaryBankId, "get-policies", policyRequestDto, 0)
+	policyRequestDTO := common.PolicyRequestDTO{
+		Jurisdiction:              originatorJurisdiction.Id,
+		TransactionType:           data.TransactionTypeId,
+		RequesterGlobalIdentifier: originatorBankGlobalIdentifier,
+	}
+
+	ch, err := c.P2PClient.Send(data.BeneficiaryBankGlobalIdentifier, "get-policies", policyRequestDTO, 0)
 	if err != nil {
-		log.Println(err.Error())
+		errlog.Println(err)
+
 		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 
 	responseData := (<-ch).(common.PolicyResponseDTO)
 
-	// Add policies to the DB if not exist
-	for _, policy := range responseData.Policies {
-		// 1. Insert policy type if not exists
-		policyTypeID := controller.DB.GetOrCreatePolicyType(policy.Code, policy.Name)
-		// 2. Insert Policy if not exists
-		transactionTypeID, err := strconv.Atoi(data.TransactionTypeId)
-		if err != nil {
-			http.Error(w, fmt.Sprint("Internal Server Error %w", err), 500)
-		}
+	beneficiaryJurisdiction, err := c.DB.GetBankJurisdiction(data.BeneficiaryBankGlobalIdentifier)
+	if err != nil {
+		errlog.Println(err)
 
-		policyEnforcingJurisdictionId := controller.DB.GetJurisdictionOfBank(data.BeneficiaryBankId).Id
-		controller.DB.GetOrCreatePolicy(int(policyTypeID), transactionTypeID, policyEnforcingJurisdictionId, senderBankJurisdiction.Id, policy.Params)
+		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 
-	jsonData, err := json.Marshal(responseData)
-
+	transactionTypeId, err := strconv.Atoi(data.TransactionTypeId)
 	if err != nil {
-		http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)
+		errlog.Println(err)
+
+		http.Error(w, "Internal Server Error", 500)
+		return
+	}
+
+	for _, policy := range responseData.Policies {
+		policyTypeId, err := c.DB.CreateOrGetPolicyType(policy.Code, policy.Name)
+		if err != nil {
+			errlog.Println(err)
+
+			http.Error(w, "Internal Server Error", 500)
+			return
+		}
+
+		c.DB.CreateOrUpdatePolicy(policyTypeId, policy.Owner, transactionTypeId, beneficiaryJurisdiction.Id, originatorJurisdiction.Id, policy.Params, 0)
+	}
+
+	response, err := json.Marshal(responseData)
+	if err != nil {
+		errlog.Println(fmt.Errorf("%v %w", responseData, err))
+
+		http.Error(w, "Internal Server Error", 500)
+		return
+	}
+
+	_, err = w.Write(response)
+	if err != nil {
+		errlog.Println(err)
+
+		http.Error(w, "Internal Server Error", 500)
 		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	_, err = w.Write(jsonData)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error", 500)
-	}
 }
 
 func (controller *APIController) GetPolicy(w http.ResponseWriter, r *http.Request) {
