@@ -98,7 +98,7 @@ func (h *DBHandler) GetComplianceCheckById(id string) (models.ComplianceCheck, e
 
 // UpdateComplianceCheckStatus updates the status of compliance check with the given id.
 func (h *DBHandler) UpdateComplianceCheckStatus(id string, status int) error {
-	query := `INSERT INTO (TransactionId, StatusId, Date) TransactionHistory VALUES (@p1, @p2, @p3)`
+	query := `INSERT INTO TransactionHistory (TransactionId, StatusId, Date) VALUES (@p1, @p2, @p3)`
 
 	_, err := h.db.Exec(query,
 		sql.Named("p1", id),
