@@ -74,6 +74,14 @@ func (h *P2PHandler) AddComplianceCheck(messageID int, payload []byte) error {
 		return returnErr
 	}
 
+	err = h.DB.UpdateComplianceCheckState(complianceCheck.ComplianceCheckId, 1)
+	if err != nil {
+		errlog.Println(err)
+
+		errlog.Println(err)
+		return returnErr
+	}
+
 	return nil
 }
 
