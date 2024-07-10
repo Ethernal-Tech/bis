@@ -96,17 +96,18 @@ func (h *DBHandler) GetComplianceCheckById(id string) (models.ComplianceCheck, e
 	return complianceCheck, nil
 }
 
-func (h *DBHandler) UpdateComplianceCheckState(id string, state int) error {
-	returnErr := errors.New("unsuccessful update compliance check state")
-	query := `INSERT INTO [dbo].[TransactionHistory] VALUES (@p1, @p2, @p3)`
+// UpdateComplianceCheckStatus updates the status of compliance check with the given id.
+func (h *DBHandler) UpdateComplianceCheckStatus(id string, status int) error {
+	query := `INSERT INTO (TransactionId, StatusId, Date) TransactionHistory VALUES (@p1, @p2, @p3)`
 
 	_, err := h.db.Exec(query,
 		sql.Named("p1", id),
-		sql.Named("p2", state),
+		sql.Named("p2", status),
 		sql.Named("p3", time.Now()))
 	if err != nil {
 		errlog.Println(err)
-		return returnErr
+		return errors.New("unsuccessful update of compliance check state")
 	}
+
 	return nil
 }

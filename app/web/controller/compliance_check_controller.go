@@ -110,7 +110,8 @@ func (c *ComplianceCheckController) AddComplianceCheck(w http.ResponseWriter, r 
 			return
 		}
 
-		err = c.DB.UpdateComplianceCheckState(complianceCheckId, 1)
+		// TODO: a compliance check status manager call instead of a direct state change
+		err = c.DB.UpdateComplianceCheckStatus(complianceCheckId, 1)
 		if err != nil {
 			errlog.Println(err)
 
