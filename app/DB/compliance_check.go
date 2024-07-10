@@ -28,7 +28,7 @@ func (h *DBHandler) AddComplianceCheck(complianceCheck models.ComplianceCheck) (
 	}
 
 	// query to instert a new compliance check
-	query := `INSERT INTO Transaction (Id, OriginatorBankId, BeneficiaryBankId, SenderId, ReceiverId, Currency, Amount, TransactionTypeId, LoanId)
+	query := `INSERT INTO [Transaction] (Id, OriginatorBankId, BeneficiaryBankId, SenderId, ReceiverId, Currency, Amount, TransactionTypeId, LoanId)
 				  VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9)`
 	row := h.db.QueryRow(query,
 		sql.Named("p1", complianceCheck.Id),
@@ -41,7 +41,7 @@ func (h *DBHandler) AddComplianceCheck(complianceCheck models.ComplianceCheck) (
 		sql.Named("p8", complianceCheck.TransactionTypeId),
 		sql.Named("p9", complianceCheck.LoanId))
 	if row.Err() != nil {
-		errlog.Println(err)
+		errlog.Println(row.Err())
 
 		return "", returnErr
 	}
@@ -68,4 +68,29 @@ func (h *DBHandler) AddComplianceCheck(complianceCheck models.ComplianceCheck) (
 	}
 
 	return complianceCheck.Id, nil
+}
+
+// GetComplianceCheckById returns the compliance check with the given id.
+func (h *DBHandler) GetComplianceCheckById(id string) (models.ComplianceCheck, error) {
+	query := `SELECT Id, OriginatorBankId, BeneficiaryBankId, SenderId, ReceiverId, Currency, Amount, TransactionTypeId, LoanId
+              FROM [Transaction]
+              WHERE Id = @p1`
+
+	var complianceCheck models.ComplianceCheck
+	err := h.db.QueryRow(query,
+		sql.Named("p1", id)).Scan(&complianceCheck.Id,
+		complianceCheck.OriginatorBankId,
+		complianceCheck.BeneficiaryBankId,
+		complianceCheck.SenderId,
+		complianceCheck.ReceiverId,
+		complianceCheck.Currency,
+		complianceCheck.Amount,
+		complianceCheck.TransactionTypeId,
+		complianceCheck.LoanId)
+	if err != nil {
+		errlog.Println(err)
+		return models.ComplianceCheck{}, errors.New("unsuccessful obtainance of compliance check")
+	}
+
+	return complianceCheck, nil
 }

@@ -67,7 +67,7 @@ func (h *DBHandler) GetBankIdByName(bankName string) (string, error) {
 	query := `SELECT GlobalIdentifier FROM Bank WHERE Name = @p1`
 
 	var bankId string
-	err := h.db.QueryRow(query).Scan(&bankId)
+	err := h.db.QueryRow(query, sql.Named("p1", bankName)).Scan(&bankId)
 	if err != nil {
 		errlog.Println(err)
 		return "", errors.New("unsuccessful obtainance of bank id")
@@ -194,7 +194,7 @@ func (h *DBHandler) CreateOrGetBankClient(globalIdentifier, name, address, bankI
 		}
 
 		// query to instert a new bank client and get its id
-		query := `INSERT INTO BankClient (GlobalIdentifier, Name, Adress, BankId) OUTPUT INSERTED.Id VALUES (@p1, @p2, @p3, @p4)`
+		query := `INSERT INTO BankClient (GlobalIdentifier, Name, Address, BankId) OUTPUT INSERTED.Id VALUES (@p1, @p2, @p3, @p4)`
 		err = h.db.QueryRow(query,
 			sql.Named("p1", globalIdentifier),
 			sql.Named("p2", name),

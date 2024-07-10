@@ -71,7 +71,7 @@ func (s *P2PServer) Mux() http.Handler {
 				err = s.GetPolicies(message.MessageID, payload)
 			case "policies":
 				err = s.ReceivePolicies(message.MessageID, payload)
-			case "check-confirmed":
+			case "compliance-check-confirmation":
 				err = s.CheckConfirmed(message.MessageID, payload)
 			case "cfm-result-beneficiary":
 				err = s.CFMResultBeneficiary(message.MessageID, payload)

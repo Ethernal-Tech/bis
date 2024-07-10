@@ -232,15 +232,15 @@ func (controller *TransactionController) ConfirmTransaction(w http.ResponseWrite
 		//		 and their states
 		controller.DB.UpdateTransactionState(check.Id, 3)
 
-		checkConfirmedData := common.CheckConfirmedDTO{
-			CheckID:   complianceCheckId,
-			VMAddress: controller.RulesEngine.GetVMAddress(),
-		}
+		// checkConfirmedData := common.CheckConfirmedDTO{
+		// 	CheckID:   complianceCheckId,
+		// 	VMAddress: controller.RulesEngine.GetVMAddress(),
+		// }
 
-		_, err = controller.P2PClient.Send(check.OriginatorBankId, "check-confirmed", checkConfirmedData, 0)
-		if err != nil {
-			http.Error(w, fmt.Sprint("Internal Server Error %w", err), 500)
-		}
+		// _, err = controller.P2PClient.Send(check.OriginatorBankId, "check-confirmed", checkConfirmedData, 0)
+		// if err != nil {
+		// 	http.Error(w, fmt.Sprint("Internal Server Error %w", err), 500)
+		// }
 
 		sender := controller.DB.GetClientByID(check.SenderId)
 		receiver := controller.DB.GetClientByID(check.ReceiverId)

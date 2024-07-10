@@ -47,7 +47,6 @@ type ComplianceCheckDTO struct {
 	LoanId                          int    `json:"loan_id"`
 }
 
-// TODO: describe properties
 type PolicyRequestDTO struct {
 	Jurisdiction              string `json:"jurisdiction"`
 	TransactionType           string `json:"tx_type"`
@@ -65,9 +64,14 @@ type PolicyDTO struct {
 	Owner  string `json:"owner"`
 }
 
-type CheckConfirmedDTO struct {
-	CheckID   string `json:"tx_id"`
-	VMAddress string `json:"vm_address"`
+type ComplianceCheckConfirmationDTO struct {
+	ComplianceCheckId string                          `json:"compliance_check_id"`
+	Data              ComplianceCheckConfirmationData `json:"data"`
+}
+
+type ComplianceCheckConfirmationData struct {
+	ComplianceCheck ComplianceCheckDTO `json:"compliance_check"`
+	Policies        []PolicyDTO        `json:"policies"`
 }
 
 type CFMCheckDTO struct {

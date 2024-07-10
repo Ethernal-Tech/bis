@@ -131,7 +131,7 @@ func (h *DBHandler) GetPolicies(originatorBankId string, beneficiaryBankId strin
 
 // GetPolicies returns all policies that apply to the passed jurisdiction for the given transaction type.
 func (h *DBHandler) GetAppliedPolicies(jurisdictionId string, transactionTypeId int) ([]models.PolicyAndItsType, error) {
-	returnErr := errors.New("unsuccessful get of policies")
+	returnErr := errors.New("unsuccessful obtainance of policies")
 
 	// query to obtain all policies
 	query := `SELECT p.Id, p.PolicyTypeId, p.Owner, pt.Code, pt.Name, p.TransactionTypeId, p.PolicyEnforcingJurisdictionId, p.OriginatingJurisdictionId, p.Parameters, p.IsPrivate, p.Latest
@@ -186,6 +186,49 @@ func (h *DBHandler) GetAppliedPoliciesByOwner(owner string, jurisdictionId strin
 		sql.Named("p1", owner),
 		sql.Named("p2", jurisdictionId),
 		sql.Named("p3", transactionTypeId))
+	if err != nil {
+		errlog.Println(err)
+		return nil, returnErr
+	}
+
+	defer rows.Close()
+
+	policies := []models.PolicyAndItsType{}
+
+	// loop through the policies and append them to return policy list (slice)
+	for rows.Next() {
+		var policy models.PolicyAndItsType
+		err := rows.Scan(&policy.Policy.Id,
+			&policy.Policy.PolicyTypeId,
+			&policy.Policy.Owner,
+			&policy.PolicyType.Code,
+			&policy.PolicyType.Name,
+			&policy.Policy.TransactionTypeId,
+			&policy.Policy.PolicyEnforcingJurisdictionId,
+			&policy.Policy.OriginatingJurisdictionId,
+			&policy.Policy.Parameters,
+			&policy.Policy.IsPrivate,
+			&policy.Policy.Latest)
+		if err != nil {
+			errlog.Println(err)
+			return nil, returnErr
+		}
+
+		policies = append(policies, policy)
+	}
+
+	return policies, nil
+}
+
+// GetPoliciesByComplianceCheckId returns all policies that apply to the given compliance check.
+func (h *DBHandler) GetPoliciesByComplianceCheckId(complianceCheckId string) ([]models.PolicyAndItsType, error) {
+	returnErr := errors.New("unsuccessful obtainance of policies")
+
+	// query to obtain all policies
+	query := `SELECT p.Id, p.PolicyTypeId, p.Owner, pt.Code, pt.Name, p.TransactionTypeId, p.PolicyEnforcingJurisdictionId, p.OriginatingJurisdictionId, p.Parameters, p.IsPrivate, p.Latest 
+				FROM TransactionPolicy tp, Policy p, PolicyType pt 
+				WHERE tp.PolicyId = p.Id AND p.PolicyTypeId = pt.Id AND tp.TransactionId = @p1`
+	rows, err := h.db.Query(query, sql.Named("p1", complianceCheckId))
 	if err != nil {
 		errlog.Println(err)
 		return nil, returnErr

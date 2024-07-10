@@ -39,6 +39,8 @@ func (server *WebServer) Routes() http.Handler {
 	{
 		router.HandlerFunc(http.MethodGet, "/addcompliancecheck", server.AddComplianceCheck)
 		router.HandlerFunc(http.MethodPost, "/addcompliancecheck", server.AddComplianceCheck)
+		router.HandlerFunc(http.MethodGet, "/confirmcompliancecheck", server.ConfirmComplianceCheck)
+		router.HandlerFunc(http.MethodPost, "/confirmcompliancecheck", server.ConfirmComplianceCheck)
 	}
 
 	// Policy controller

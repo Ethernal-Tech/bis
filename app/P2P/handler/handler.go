@@ -191,7 +191,7 @@ func (h *P2PHandler) GetPolicies(messageID int, payload []byte) error {
 // when a "policies" message arrives from a p2p network. Policies (that is, response on a "get-policies"
 // request) can be sent by commercial bank to another, or by a central bank to commercial one.
 func (h *P2PHandler) ReceivePolicies(messageID int, payload []byte) error {
-	returnErr := errors.New("p2p handler method SendPolicies failed to execute properly")
+	returnErr := errors.New("p2p handler method ReceivePolicies failed to execute properly")
 
 	channel, _ := messages.LoadChannel(messageID)
 	defer messages.RemoveChannel(messageID)
@@ -208,21 +208,28 @@ func (h *P2PHandler) ReceivePolicies(messageID int, payload []byte) error {
 	return nil
 }
 
-func (h *P2PHandler) CheckConfirmed(messageID int, payload []byte) error {
-	returnErr := errors.New("p2p handler method CheckConfirmed failed to execute properly")
+// TODO: describe
+func (h *P2PHandler) ConfirmComplianceCheck(messageID int, payload []byte) error {
+	returnErr := errors.New("p2p handler method ConfirmComplianceCheck failed to execute properly")
 
-	var messageData common.CheckConfirmedDTO
-	if err := json.Unmarshal(payload, &messageData); err != nil {
+	var messageData common.ComplianceCheckConfirmationDTO
+
+	err := json.Unmarshal(payload, &messageData)
+	if err != nil {
 		errlog.Println(err)
 		return returnErr
 	}
 
-	h.DB.UpdateTransactionState(messageData.CheckID, 2)
-
-	data := map[string]any{
-		"vm_address": messageData.VMAddress,
+	if config.ResolveIsCentralBank() {
+		// TODO: add logic to instert:
+		// 1. originator (sender)
+		// 2. beneficiary (receiver)
+		// 3. policy type
+		// 4. policy
+		// 5. compliance check
 	}
-	h.RulesEngine.Do(messageData.CheckID, "interactive", data)
+
+	// TODO: start rule engine
 
 	return nil
 }
