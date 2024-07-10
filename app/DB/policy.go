@@ -543,7 +543,8 @@ func (h *DBHandler) GetPolicyParameters(policyId int) (string, error) {
 	query := `SELECT Parameters FROM Policy WHERE Id = @p1`
 
 	var parameters string
-	err := h.db.QueryRow(query).Scan(&parameters)
+	err := h.db.QueryRow(query,
+		sql.Named("p1", policyId)).Scan(&parameters)
 	if err != nil {
 		errlog.Println(err)
 		return "", errors.New("unsuccessful obtainance of policy parameters")
