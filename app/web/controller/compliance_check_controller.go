@@ -6,6 +6,7 @@ import (
 	"bisgo/config"
 	"bisgo/errlog"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -235,14 +236,34 @@ func (c *ComplianceCheckController) ConfirmComplianceCheck(w http.ResponseWriter
 			return
 		}
 
+		// a flag indicating whether a private policy exists
+		// private policies are never returned individually (nor are their details disclosed),
+		// but are grouped into one private policy
+		privatePolicy := false
+
 		// convert policies into their transfer form (DTO)
 		var policiesDTO []common.PolicyDTO
 		for _, policy := range policies {
+			if policy.Policy.IsPrivate {
+				privatePolicy = true
+				continue
+			}
+
 			policiesDTO = append(policiesDTO, common.PolicyDTO{
 				Code:   policy.PolicyType.Code,
 				Name:   policy.PolicyType.Name,
 				Params: policy.Policy.Parameters,
 				Owner:  policy.Policy.Owner,
+			})
+		}
+
+		// grouping private policies into one
+		if privatePolicy {
+			policiesDTO = append(policiesDTO, common.PolicyDTO{
+				Code:   "Other",
+				Name:   "Internal Checks",
+				Params: "",
+				Owner:  config.ResolveMyGlobalIdentifier(),
 			})
 		}
 
@@ -274,6 +295,8 @@ func (c *ComplianceCheckController) ConfirmComplianceCheck(w http.ResponseWriter
 			http.Error(w, "Internal Server Error", 500)
 			return
 		}
+
+		fmt.Println("START RULES ENGINE FOR", complianceCheck.Id)
 
 		http.Redirect(w, r, "/home", http.StatusSeeOther)
 	}

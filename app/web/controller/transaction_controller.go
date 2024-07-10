@@ -188,6 +188,7 @@ func (controller *TransactionController) ConfirmTransaction(w http.ResponseWrite
 
 		viewData["username"] = controller.SessionManager.GetString(r.Context(), "username")
 		viewData["transaction"] = transaction
+		viewData["transactionId"] = r.Form.Get("transaction")
 		viewData["bankName"] = controller.SessionManager.GetString(r.Context(), "bankName")
 		viewData["country"] = controller.SessionManager.GetString(r.Context(), "country")
 

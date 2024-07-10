@@ -20,8 +20,8 @@
 
     <div class="confirm-transaction">
         <div class="title">CONFIRMATION</div>
-        <form action="/confirmtransaction" method="POST">
-            <input style="display: none;" name="transactionid" value="{{.transaction.Id}}">
+        <form action="/confirmcompliancecheck" method="POST">
+            <input style="display: none;" name="id" value="{{.transactionId}}">
             <div class="confirmation-row">
                 <div class="type">Originator:</div>
                 <div class="value">{{.transaction.SenderName}}</div>

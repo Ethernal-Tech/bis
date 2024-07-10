@@ -80,14 +80,14 @@ func (h *DBHandler) GetComplianceCheckById(id string) (models.ComplianceCheck, e
 	var complianceCheck models.ComplianceCheck
 	err := h.db.QueryRow(query,
 		sql.Named("p1", id)).Scan(&complianceCheck.Id,
-		complianceCheck.OriginatorBankId,
-		complianceCheck.BeneficiaryBankId,
-		complianceCheck.SenderId,
-		complianceCheck.ReceiverId,
-		complianceCheck.Currency,
-		complianceCheck.Amount,
-		complianceCheck.TransactionTypeId,
-		complianceCheck.LoanId)
+		&complianceCheck.OriginatorBankId,
+		&complianceCheck.BeneficiaryBankId,
+		&complianceCheck.SenderId,
+		&complianceCheck.ReceiverId,
+		&complianceCheck.Currency,
+		&complianceCheck.Amount,
+		&complianceCheck.TransactionTypeId,
+		&complianceCheck.LoanId)
 	if err != nil {
 		errlog.Println(err)
 		return models.ComplianceCheck{}, errors.New("unsuccessful obtainance of compliance check")

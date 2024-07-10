@@ -50,7 +50,7 @@ func (wrapper *DBHandler) GetPolicyById(policyID int) models.Policy {
 	return policy
 }
 
-// GetPolicies returns all policies that beneficiary bank (and its central bank) imposes to originator bank for the given transaction type.
+// GetPolicies returns all policies that beneficiary bank and/or its/the central bank imposes to originator bank for the given transaction type.
 func (h *DBHandler) GetPolicies(originatorBankId string, beneficiaryBankId string, transactionTypeId int) ([]models.NewPolicy, error) {
 	returnErr := errors.New("unsuccessful obtainance of policies")
 

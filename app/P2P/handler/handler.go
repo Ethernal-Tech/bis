@@ -10,6 +10,7 @@ import (
 	"bisgo/errlog"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strconv"
 )
 
@@ -215,28 +216,98 @@ func (h *P2PHandler) ReceivePolicies(messageID int, payload []byte) error {
 	return nil
 }
 
-// TODO: describe
+// ConfirmComplianceCheck p2p handler method, as the name suggests, confirms a selected compliance check and starts the
+// rules engige for an originator bank and beneficiary central bank. It is invoked when a "compliance-check-confirmation"
+// message arrives from a p2p network. Additionally, it also aligns the central bank with the rest of the system.
 func (h *P2PHandler) ConfirmComplianceCheck(messageID int, payload []byte) error {
 	returnErr := errors.New("p2p handler method ConfirmComplianceCheck failed to execute properly")
 
-	var messageData common.ComplianceCheckConfirmationDTO
+	var complianceCheckConfirmation common.ComplianceCheckConfirmationDTO
 
-	err := json.Unmarshal(payload, &messageData)
+	err := json.Unmarshal(payload, &complianceCheckConfirmation)
 	if err != nil {
 		errlog.Println(err)
 		return returnErr
 	}
 
+	complianceCheck := complianceCheckConfirmation.Data.ComplianceCheck
+	policies := complianceCheckConfirmation.Data.Policies
+
+	// since the central bank may not be aware of the compliance check and the information about it, it is necessary to carry
+	// out its alignment with the rest of the system (commercial banks), the following needs to be done:
+	// 1. potentially create (if needed) originator (sender)
+	// 2. potentially create (if needed) beneficiary (receiver)
+	// 3. potentially create (if needed) policy types
+	// 4. potentially create (if needed) applicable policies
+	// 5. create compliance check
 	if config.ResolveIsCentralBank() {
-		// TODO: add logic to instert:
-		// 1. originator (sender)
-		// 2. beneficiary (receiver)
-		// 3. policy type
-		// 4. policy
-		// 5. compliance check
+
+		originatorId, err := h.DB.CreateOrGetBankClient(complianceCheck.OriginatorGlobalIdentifier, complianceCheck.OriginatorName, "", complianceCheck.OriginatorBankGlobalIdentifier)
+		if err != nil {
+			errlog.Println(err)
+			return returnErr
+		}
+
+		beneficiaryId, err := h.DB.CreateOrGetBankClient(complianceCheck.BeneficiaryGlobalIdentifier, complianceCheck.BeneficiaryName, "", complianceCheck.BeneficiaryBankGlobalIdentifier)
+		if err != nil {
+			errlog.Println(err)
+			return returnErr
+		}
+
+		originatorJurisdiction, err := h.DB.GetBankJurisdiction(complianceCheck.OriginatorBankGlobalIdentifier)
+		if err != nil {
+			errlog.Println(err)
+			return returnErr
+		}
+
+		beneficiaryJurisdiction, err := h.DB.GetBankJurisdiction(complianceCheck.BeneficiaryBankGlobalIdentifier)
+		if err != nil {
+			errlog.Println(err)
+			return returnErr
+		}
+
+		transactionType, err := h.DB.GetTransactionTypeByCode(complianceCheck.TransactionType)
+		if err != nil {
+			errlog.Println(err)
+			return returnErr
+		}
+
+		for _, policy := range policies {
+			if policy.Owner == config.ResolveMyGlobalIdentifier() {
+				continue
+			}
+
+			policyTypeId, err := h.DB.CreateOrGetPolicyType(policy.Code, policy.Name)
+			if err != nil {
+				errlog.Println(err)
+				return returnErr
+			}
+
+			_, _, err = h.DB.CreateOrUpdatePolicy(policyTypeId, policy.Owner, transactionType.Id, beneficiaryJurisdiction.Id, originatorJurisdiction.Id, policy.Params, 0)
+			if err != nil {
+				errlog.Println(err)
+				return returnErr
+			}
+		}
+
+		_, err = h.DB.AddComplianceCheck(models.ComplianceCheck{
+			Id:                complianceCheck.ComplianceCheckId,
+			OriginatorBankId:  complianceCheck.OriginatorBankGlobalIdentifier,
+			BeneficiaryBankId: complianceCheck.BeneficiaryBankGlobalIdentifier,
+			SenderId:          originatorId,
+			ReceiverId:        beneficiaryId,
+			Currency:          complianceCheck.Currency,
+			Amount:            complianceCheck.Amount,
+			TransactionTypeId: transactionType.Id,
+			LoanId:            complianceCheck.LoanId,
+		})
+		if err != nil {
+			errlog.Println(err)
+			return returnErr
+		}
 	}
 
-	// TODO: start rule engine
+	fmt.Println("START RULES ENGINE FOR", complianceCheckConfirmation.ComplianceCheckId)
 
 	return nil
 }
