@@ -6,6 +6,7 @@ import (
 	"bisgo/errlog"
 	"database/sql"
 	"errors"
+	"time"
 )
 
 // TODO: currently it works with the "transaction" table, modify it to work with the "compliance check" table when that change is made in the database
@@ -93,4 +94,19 @@ func (h *DBHandler) GetComplianceCheckById(id string) (models.ComplianceCheck, e
 	}
 
 	return complianceCheck, nil
+}
+
+func (h *DBHandler) UpdateComplianceCheckState(id string, state int) error {
+	returnErr := errors.New("unsuccessful update compliance check state")
+	query := `INSERT INTO [dbo].[TransactionHistory] VALUES (@p1, @p2, @p3)`
+
+	_, err := h.db.Exec(query,
+		sql.Named("p1", id),
+		sql.Named("p2", state),
+		sql.Named("p3", time.Now()))
+	if err != nil {
+		errlog.Println(err)
+		return returnErr
+	}
+	return nil
 }
