@@ -1,5 +1,5 @@
 GPJC_RELEASE_URL := https://github.com/Ethernal-Tech/private-join-and-compute/releases/download/v0.1.0/bazel-bin.tar.gz
-GPJC_MULTIPLE_RELEASE_URL := https://github.com/Ethernal-Tech/private-join-and-compute/releases/download/v0.1.0/bazel-bin-multiple.tar.gz
+GPJC_MULTIPLE_RELEASE_URL := https://github.com/Ethernal-Tech/private-join-and-compute/releases/download/v0.3.0/bazel-bin-multiple.tar.gz
 GPJC_RELEASE_FOLDER := private-join-and-compute
 
 GPJC_API_RELEASE_ULR := https://github.com/Ethernal-Tech/gpjc-api/releases/download/v0.1.1/gpjc-api

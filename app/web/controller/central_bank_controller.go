@@ -41,17 +41,17 @@ func (controller *CBController) ShowAnalytics(w http.ResponseWriter, r *http.Req
 				receivedAmount += tx.Amount
 			}
 		} else if tx.Status == "CANCELED" {
-			policyStatuses := controller.DB.GetTransactionPolicyStatuses(tx.Id)
+			//policyStatuses := controller.DB.GetTransactionPolicyStatuses(tx.Id)
 
-			for _, policyStatus := range policyStatuses {
-				policy := controller.DB.GetPolicyById(policyStatus.PolicyId)
-				if policy.Code == "CFM" && policyStatus.Status == 2 {
-					failedBecauseOfCFMCheck += 1
-				}
-				if policy.Code == "SCL" && policyStatus.Status == 2 {
-					failedBecauseOfSanctionsCheck += 1
-				}
-			}
+			// for _, policyStatus := range policyStatuses {
+			// 	policy := controller.DB.GetPolicyById(policyStatus.PolicyId)
+			// 	if policy.Code == "CFM" && policyStatus.Status == 2 {
+			// 		failedBecauseOfCFMCheck += 1
+			// 	}
+			// 	if policy.Code == "SCL" && policyStatus.Status == 2 {
+			// 		failedBecauseOfSanctionsCheck += 1
+			// 	}
+			// }
 		}
 	}
 

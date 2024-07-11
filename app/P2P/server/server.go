@@ -75,6 +75,8 @@ func (s *P2PServer) Mux() http.Handler {
 				err = s.ConfirmComplianceCheck(message.MessageID, payload)
 			case "policy-check-result":
 				err = s.ProcessPolicyCheckResult(message.MessageID, payload)
+			case "mpc-server-start-signal":
+				err = s.MpcServerStartSignal(message.MessageID, payload)
 			default:
 				err = errors.New("invalid p2p method received")
 			}

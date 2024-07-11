@@ -29,25 +29,30 @@ func (wrapper *DBHandler) GetPolicyId(code string, jurisdictionId string) int {
 	return id
 }
 
-func (wrapper *DBHandler) GetPolicyById(policyID int) models.Policy {
-	query := `SELECT Id, Code, Name FROM [Policy] WHERE Id = @p1`
+// GetPolicyById comment
+func (h *DBHandler) GetPolicyById(policyID int) (models.PolicyAndItsType, error) {
+	query := `SELECT p.Id, p.PolicyTypeId, p.Owner, pt.Code, pt.Name, p.TransactionTypeId, p.PolicyEnforcingJurisdictionId, p.OriginatingJurisdictionId, p.Parameters, p.IsPrivate, p.Latest 
+				FROM Policy p, PolicyType pt 
+				WHERE p.PolicyTypeId = pt.Id AND p.Id = @p1`
 
-	rows, err := wrapper.db.Query(query, sql.Named("p1", policyID))
+	var policy models.PolicyAndItsType
+	err := h.db.QueryRow(query, sql.Named("p1", policyID)).Scan(&policy.Policy.Id,
+		&policy.Policy.PolicyTypeId,
+		&policy.Policy.Owner,
+		&policy.PolicyType.Code,
+		&policy.PolicyType.Name,
+		&policy.Policy.TransactionTypeId,
+		&policy.Policy.PolicyEnforcingJurisdictionId,
+		&policy.Policy.OriginatingJurisdictionId,
+		&policy.Policy.Parameters,
+		&policy.Policy.IsPrivate,
+		&policy.Policy.Latest)
 	if err != nil {
-		log.Fatal(err)
+		errlog.Println(err)
+		return models.PolicyAndItsType{}, err
 	}
 
-	defer rows.Close()
-
-	var policy models.Policy
-
-	for rows.Next() {
-		if err := rows.Scan(&policy.Id, &policy.Code, &policy.Name); err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	return policy
+	return policy, nil
 }
 
 // GetPolicies returns all policies that beneficiary bank and/or its/the central bank imposes to originator bank for the given transaction type.

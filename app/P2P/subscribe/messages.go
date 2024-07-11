@@ -21,6 +21,10 @@ const (
 var messages map[MessageType][]any
 var mutMess sync.Mutex
 
+func init() {
+	messages = make(map[MessageType][]any)
+}
+
 // messageTypeExists, as its name suggests, returns whether the specified message type exists or not
 func messageTypeExists(messageType MessageType) bool {
 	if messageType != SCLServerStarted {

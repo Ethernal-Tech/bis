@@ -3,6 +3,7 @@ package handler
 import (
 	"bisgo/app/P2P/core"
 	"bisgo/app/P2P/messages"
+	"bisgo/app/P2P/subscribe"
 	"bisgo/app/models"
 	"bisgo/app/web/manager"
 	"bisgo/common"
@@ -105,7 +106,7 @@ func (h *P2PHandler) GetPolicies(messageID int, payload []byte) error {
 	}
 
 	// in the case of a commercial bank, it is first necessary to send a request to the central bank to obtain its policies as well
-	if !config.ResolveIsCentralBank() {
+	if !config.ResolveIsCentralBank() /*&& config.ResolveCBGlobalIdentifier() != ""*/ {
 		requestToCB := common.PolicyRequestDTO{
 			Jurisdiction:              request.Jurisdiction,
 			TransactionType:           request.TransactionType,
@@ -316,7 +317,7 @@ func (h *P2PHandler) ConfirmComplianceCheck(messageID int, payload []byte) error
 func (h *P2PHandler) ProcessPolicyCheckResult(messageID int, payload []byte) error {
 	returnErr := errors.New("p2p handler method ProcessPolicyCheckResult failed to execute properly")
 
-	var policyCheckResult common.PolicyCheckResult
+	var policyCheckResult common.PolicyCheckResultDTO
 	err := json.Unmarshal(payload, &policyCheckResult)
 	if err != nil {
 		errlog.Println(err)
@@ -348,6 +349,25 @@ func (h *P2PHandler) ProcessPolicyCheckResult(messageID int, payload []byte) err
 	}
 
 	err = h.DB.UpdatePolicyStatus(complianceCheck.Id, policy.Id, policyCheckResult.Result)
+	if err != nil {
+		errlog.Println(err)
+		return returnErr
+	}
+
+	return nil
+}
+
+func (h *P2PHandler) MpcServerStartSignal(messageID int, payload []byte) error {
+	returnErr := errors.New("p2p handler method MpcServerStartSignal failed to execute properly")
+
+	var sclServerStartedData common.SCLServerStartedDTO
+	err := json.Unmarshal(payload, &sclServerStartedData)
+	if err != nil {
+		errlog.Println(err)
+		return returnErr
+	}
+
+	err = subscribe.StoreAndNotify(subscribe.SCLServerStarted, sclServerStartedData)
 	if err != nil {
 		errlog.Println(err)
 		return returnErr

@@ -3,6 +3,7 @@ package engine
 import (
 	"bisgo/app/DB"
 	p2pclient "bisgo/app/P2P/client"
+	"bisgo/app/P2P/subscribe"
 	"bisgo/app/models"
 	provingclient "bisgo/app/proving/client"
 	"bisgo/common"
@@ -113,7 +114,7 @@ func (e *RulesEngine) interactivePrivatePolicy(complianceCheck models.Compliance
 		}
 	}
 
-	policyCheckResult := common.PolicyCheckResult{
+	policyCheckResult := common.PolicyCheckResultDTO{
 		ComplianceCheckId: complianceCheck.Id,
 		Code:              "Other",
 		Name:              "Internal Checks",
@@ -155,7 +156,61 @@ func (e *RulesEngine) interactivePrivatePolicy(complianceCheck models.Compliance
 }
 
 func (e *RulesEngine) interactiveSanctionCheckList(complianceCheck models.ComplianceCheck, policy models.PolicyAndItsType) {
+	// check whether the current bank is originator or beneficiary
+	if complianceCheck.OriginatorBankId == config.ResolveMyGlobalIdentifier() {
+		// originator
+		ch, subID, err := subscribe.Subscribe(subscribe.SCLServerStarted, func(sclServerStartedMessages []any) (any, bool) {
+			for _, message := range sclServerStartedMessages {
+				sclMessage := message.(common.SCLServerStartedDTO)
+				if sclMessage.ComplianceCheckId == complianceCheck.Id {
+					return message, true
+				}
+			}
 
+			return nil, false
+		})
+		if err != nil {
+			errlog.Println(err)
+			return
+		}
+
+		var sclMessage common.SCLServerStartedDTO
+		for {
+			sclMessage = (<-ch).(common.SCLServerStartedDTO)
+
+			if sclMessage.ComplianceCheckId == complianceCheck.Id {
+				break
+			}
+		}
+
+		err = subscribe.Unsubscribe(subscribe.SCLServerStarted, subID)
+		if err != nil {
+			errlog.Println(err)
+			return
+		}
+
+		err = e.provingClient.SendProofRequest("interactive", complianceCheck.Id, policy.Policy.Id, sclMessage.VMAddress)
+		if err != nil {
+			errlog.Println(err)
+			return
+		}
+	} else {
+		// beneficiary
+		err := e.provingClient.SendProofRequest("interactive", complianceCheck.Id, policy.Policy.Id, "")
+		if err != nil {
+			errlog.Println(err)
+			return
+		}
+
+		_, err = e.p2pClient.Send(complianceCheck.OriginatorBankId, "mpc-server-start-signal", common.SCLServerStartedDTO{
+			ComplianceCheckId: complianceCheck.Id,
+			VMAddress:         e.provingClient.GetVMAddress(),
+		}, 0)
+		if err != nil {
+			errlog.Println(err)
+			return
+		}
+	}
 }
 
 func (e *RulesEngine) interactiveCapitalFlowManagement(complianceCheck models.ComplianceCheck, policy models.PolicyAndItsType) {
@@ -224,7 +279,7 @@ func (e *RulesEngine) interactiveCapitalFlowManagement(complianceCheck models.Co
 		return
 	}
 
-	var policyCheckResult common.PolicyCheckResult
+	var policyCheckResult common.PolicyCheckResultDTO
 
 	// (if) CFM policy check successful
 	// (else) otherwise, unsuccessful
@@ -235,7 +290,7 @@ func (e *RulesEngine) interactiveCapitalFlowManagement(complianceCheck models.Co
 			return
 		}
 
-		policyCheckResult = common.PolicyCheckResult{
+		policyCheckResult = common.PolicyCheckResultDTO{
 			ComplianceCheckId: complianceCheck.Id,
 			Code:              "CFM",
 			Name:              "Capital Flow Management",
@@ -249,7 +304,7 @@ func (e *RulesEngine) interactiveCapitalFlowManagement(complianceCheck models.Co
 			return
 		}
 
-		policyCheckResult = common.PolicyCheckResult{
+		policyCheckResult = common.PolicyCheckResultDTO{
 			ComplianceCheckId: complianceCheck.Id,
 			Code:              "CFM",
 			Name:              "Capital Flow Management",
@@ -276,17 +331,3 @@ func (e *RulesEngine) interactiveCapitalFlowManagement(complianceCheck models.Co
 func (e *RulesEngine) doNonInteractive(complianceCheck models.ComplianceCheck, policies []models.PolicyAndItsType) {
 
 }
-
-// func (e *RulesEngine) sanctionCheckList(proofType string, parameters string, transactionID string, policyId int, vmAdress string) {
-// 	if proofType == "interactive" {
-// 		check := e.db.GetComplianceCheckByID(transactionID)
-// 		sender := e.db.GetClientNameByID(check.SenderId)
-// 		err := e.provingClient.SendProofRequest("interactive", transactionID, policyId, sender, vmAdress)
-// 		if err != nil {
-// 			log.Println(err.Error())
-// 			return
-// 		}
-// 	} else if proofType == "noninteractive" {
-
-// 	}
-// }

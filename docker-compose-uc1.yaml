@@ -46,6 +46,7 @@ services:
       - MY_GLOBAL_IDENTIFIER=984500653R409CC5AB28
     ports:
       - "4001:4000"
+      - "9091:9090"
     depends_on:
       sql-database-jpm:
         condition: service_healthy
@@ -99,6 +100,7 @@ services:
       - GPJC_PUBLISH_ADDR=0.0.0.0:4000
     ports:
       - "4002:4000"
+      - "9092:9090"
     depends_on:
       sql-database-hlb:
         condition: service_healthy

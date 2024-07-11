@@ -9,7 +9,11 @@ import (
 var subscriptions map[MessageType][]chan<- any
 var mutSub sync.Mutex
 
-func Subscribe(messageType MessageType, hitFunc func([]any) (any, bool)) (chan<- any, int, error) {
+func init() {
+	subscriptions = make(map[MessageType][]chan<- any)
+}
+
+func Subscribe(messageType MessageType, hitFunc func([]any) (any, bool)) (<-chan any, int, error) {
 	subCh, subID, err := subscribe(messageType)
 	if err != nil {
 		errlog.Println(err)
@@ -29,12 +33,12 @@ func Subscribe(messageType MessageType, hitFunc func([]any) (any, bool)) (chan<-
 	return subCh, subID, nil
 }
 
-func subscribe(messageType MessageType) (chan<- any, int, error) {
+func subscribe(messageType MessageType) (chan any, int, error) {
 	if !messageTypeExists(messageType) {
 		return nil, -1, errors.New("unknown message type")
 	}
 
-	subCh := make(chan<- any, 1)
+	subCh := make(chan any, 1)
 
 	defer mutSub.Unlock()
 	mutSub.Lock()

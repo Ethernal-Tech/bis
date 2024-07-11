@@ -4,6 +4,8 @@ import (
 	"bisgo/app/models"
 	"bisgo/app/proving/core"
 	"bisgo/app/web/manager"
+	"bisgo/common"
+	"bisgo/config"
 	"bisgo/errlog"
 	"encoding/json"
 	"fmt"
@@ -35,11 +37,44 @@ func (h *ProvingHandler) HandleInteractiveProof(body []byte) {
 		return
 	}
 
+	var result int
 	values := strings.Split(messageData.Value, ";")
 	if strings.Split(values[0], ",")[0] == "0" {
+		result = 1
 		h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.ComplianceCheckID, policyID, false)
 	} else {
+		result = 2
 		h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.ComplianceCheckID, policyID, true)
+	}
+
+	// originator does't need to notify its central bank about the result
+	check, err := h.DB.GetComplianceCheckById(messageData.ComplianceCheckID)
+	if err != nil {
+		errlog.Println(err)
+		return
+	}
+
+	if check.BeneficiaryBankId == config.ResolveMyGlobalIdentifier() {
+		// notify cetntra bank
+		policy, err := h.DB.GetPolicyById(policyID)
+		if err != nil {
+			errlog.Println(err)
+			return
+		}
+
+		policyCheckResult := common.PolicyCheckResultDTO{
+			ComplianceCheckId: check.Id,
+			Code:              policy.PolicyType.Code,
+			Name:              policy.PolicyType.Name,
+			Owner:             policy.Policy.Owner,
+			Result:            result,
+		}
+
+		_, err = h.P2PClient.Send(config.ResolveCBGlobalIdentifier(), "policy-check-result", policyCheckResult, 0)
+		if err != nil {
+			errlog.Println(err)
+			return
+		}
 	}
 }
 
