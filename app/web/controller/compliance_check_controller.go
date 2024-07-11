@@ -6,7 +6,6 @@ import (
 	"bisgo/config"
 	"bisgo/errlog"
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -296,7 +295,7 @@ func (c *ComplianceCheckController) ConfirmComplianceCheck(w http.ResponseWriter
 			return
 		}
 
-		fmt.Println("START RULES ENGINE FOR", complianceCheck.Id)
+		go c.RulesEngine.Do(complianceCheck.Id, "interactive")
 
 		http.Redirect(w, r, "/home", http.StatusSeeOther)
 	}

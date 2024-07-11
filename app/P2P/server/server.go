@@ -73,10 +73,8 @@ func (s *P2PServer) Mux() http.Handler {
 				err = s.ReceivePolicies(message.MessageID, payload)
 			case "compliance-check-confirmation":
 				err = s.ConfirmComplianceCheck(message.MessageID, payload)
-			case "cfm-result-beneficiary":
-				err = s.CFMResultBeneficiary(message.MessageID, payload)
-			case "cfm-result-originator":
-				err = s.CFMResultOriginator(message.MessageID, payload)
+			case "policy-check-result":
+				err = s.ProcessPolicyCheckResult(message.MessageID, payload)
 			default:
 				err = errors.New("invalid p2p method received")
 			}

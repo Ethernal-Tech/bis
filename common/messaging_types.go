@@ -74,7 +74,10 @@ type ComplianceCheckConfirmationData struct {
 	Policies        []PolicyDTO        `json:"policies"`
 }
 
-type CFMCheckDTO struct {
-	TransctionID string `json:"tx_id"`
-	Result       int    `json:"result"`
+type PolicyCheckResult struct {
+	ComplianceCheckId string `json:"compliance_check_id"`
+	Code              string `json:"policy_code"`
+	Name              string `json:"policy_name"`
+	Owner             string `json:"policy_owner"`
+	Result            int    `json:"policy_check_result"`
 }

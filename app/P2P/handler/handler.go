@@ -10,7 +10,6 @@ import (
 	"bisgo/errlog"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"strconv"
 )
 
@@ -307,52 +306,51 @@ func (h *P2PHandler) ConfirmComplianceCheck(messageID int, payload []byte) error
 		}
 	}
 
-	fmt.Println("START RULES ENGINE FOR", complianceCheckConfirmation.ComplianceCheckId)
+	go h.RulesEngine.Do(complianceCheckConfirmation.ComplianceCheckId, "interactive")
 
 	return nil
 }
 
-func (h *P2PHandler) CFMResultBeneficiary(messageID int, payload []byte) error {
-	returnErr := errors.New("p2p handler method CFMResultBeneficiary failed to execute properly")
+// ProcessPolicyCheckResult p2p handler method processes the result of the policy check. It is invoked
+// when a "policy-check-result" message arrives from a p2p network.
+func (h *P2PHandler) ProcessPolicyCheckResult(messageID int, payload []byte) error {
+	returnErr := errors.New("p2p handler method ProcessPolicyCheckResult failed to execute properly")
 
-	var messageData common.CFMCheckDTO
-	if err := json.Unmarshal(payload, &messageData); err != nil {
-		errlog.Println(err)
-		return returnErr
-	}
-
-	applicablePolicies := h.DB.GetPoliciesForTransaction(messageData.TransctionID)
-	for _, policy := range applicablePolicies {
-		if policy.PolicyType.Code == "CFM" {
-			h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.TransctionID, policy.Policy.Id, messageData.Result == 2)
-		}
-	}
-
-	check := h.DB.GetComplianceCheckByID(messageData.TransctionID)
-
-	_, err := h.P2PClient.Send(check.OriginatorBankId, "cfm-result-originator", any(messageData), 0)
+	var policyCheckResult common.PolicyCheckResult
+	err := json.Unmarshal(payload, &policyCheckResult)
 	if err != nil {
 		errlog.Println(err)
 		return returnErr
 	}
 
-	return nil
-}
-
-func (h *P2PHandler) CFMResultOriginator(messageID int, payload []byte) error {
-	returnErr := errors.New("p2p handler method CFMResultOriginator failed to execute properly")
-
-	var messageData common.CFMCheckDTO
-	if err := json.Unmarshal(payload, &messageData); err != nil {
+	complianceCheck, err := h.DB.GetComplianceCheckById(policyCheckResult.ComplianceCheckId)
+	if err != nil {
 		errlog.Println(err)
 		return returnErr
 	}
 
-	applicablePolicies := h.DB.GetPoliciesForTransaction(messageData.TransctionID)
-	for _, policy := range applicablePolicies {
-		if policy.PolicyType.Code == "CFM" {
-			h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.TransctionID, policy.Policy.Id, messageData.Result == 2)
-		}
+	policyType, err := h.DB.GetPolicyTypeByCode(policyCheckResult.Code)
+	if err != nil {
+		errlog.Println(err)
+		return returnErr
+	}
+
+	originatorJurisdiction, err := h.DB.GetBankJurisdiction(complianceCheck.OriginatorBankId)
+	if err != nil {
+		errlog.Println(err)
+		return returnErr
+	}
+
+	policy, err := h.DB.GetPolicyToProcessItsCheckResult(policyType.Id, policyCheckResult.Owner, complianceCheck.TransactionTypeId, originatorJurisdiction.Id, 0)
+	if err != nil {
+		errlog.Println(err)
+		return returnErr
+	}
+
+	err = h.DB.UpdatePolicyStatus(complianceCheck.Id, policy.Id, policyCheckResult.Result)
+	if err != nil {
+		errlog.Println(err)
+		return returnErr
 	}
 
 	return nil

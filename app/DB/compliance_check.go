@@ -111,3 +111,97 @@ func (h *DBHandler) UpdateComplianceCheckStatus(id string, status int) error {
 
 	return nil
 }
+
+// GetAllSuccessfulComplianceChecks returns all successful compliance checks that the given entity has with entities from the given jurisdiction.
+// Method works in two modes:
+//
+// 1. mode = 1
+//   - entityId - denotes the id of the beneficiary
+//   - jurisdictionId - denotes the id of the originator jurisdiction
+//
+// 2. mode = 2
+//   - entityId - denotes the id of the originator
+//   - jurisdictionId - denotes the id of the beneficiary jurisdiction
+func (h *DBHandler) GetAllSuccessfulComplianceChecks(entityId int, jurisdictionId string, mode int) ([]models.ComplianceCheck, error) {
+	returnErr := errors.New("unsuccessful obtainance of compliance checks")
+
+	var query string
+
+	if mode == 1 {
+		// query to get all compliance checks in mode 1
+		query = `SELECT Id, OriginatorBankId, BeneficiaryBankId, SenderId, ReceiverId, Currency, Amount, TransactionTypeId, LoanId 
+					FROM [Transaction] t, Bank b WHERE t.OriginatorBankId = b.GlobalIdentifier
+					AND JurisdictionId = @p1
+					AND ReceiverId = @p2`
+	} else if mode == 2 {
+		// query to get all compliance checks in mode 2
+		query = `SELECT Id, OriginatorBankId, BeneficiaryBankId, SenderId, ReceiverId, Currency, Amount, TransactionTypeId, LoanId 
+					FROM [Transaction] t, Bank b WHERE t.BeneficiaryBankId = b.GlobalIdentifier
+					AND JurisdictionId = @p1
+					AND SenderId = @p2`
+	} else {
+		return nil, returnErr
+	}
+
+	rows, err := h.db.Query(query, sql.Named("p1", jurisdictionId), sql.Named("p2", entityId))
+	if err != nil {
+		errlog.Println(err)
+		return nil, returnErr
+	}
+
+	defer rows.Close()
+
+	allComplianceChecks := []models.ComplianceCheck{}
+
+	// loop through the compliance checks and append them to the compliance check list (slice)
+	for rows.Next() {
+		var complianceCheck models.ComplianceCheck
+		err := rows.Scan(&complianceCheck.Id,
+			&complianceCheck.OriginatorBankId,
+			&complianceCheck.BeneficiaryBankId,
+			&complianceCheck.SenderId,
+			&complianceCheck.ReceiverId,
+			&complianceCheck.Currency,
+			&complianceCheck.Amount,
+			&complianceCheck.TransactionTypeId,
+			&complianceCheck.LoanId)
+		if err != nil {
+			errlog.Println(err)
+			return nil, returnErr
+		}
+
+		allComplianceChecks = append(allComplianceChecks, complianceCheck)
+	}
+
+	// compliance checks for which all policy checks were successful
+	successfulComplianceChecks := []models.ComplianceCheck{}
+
+complianceCheck:
+	// loop through all compliance checks
+	for _, compliancomplianceCheck := range allComplianceChecks {
+		// get all policies for the given compliance check
+		policies, err := h.GetPoliciesByComplianceCheckId(compliancomplianceCheck.Id)
+		if err != nil {
+			errlog.Println(err)
+			return nil, returnErr
+		}
+
+		// loop through the policies
+		for _, policy := range policies {
+			policyStatus, err := h.GetPolicyStatus(compliancomplianceCheck.Id, policy.Policy.Id)
+			if err != nil {
+				errlog.Println(err)
+				return nil, returnErr
+			}
+
+			// if any policy has non-successful status, dismiss compliance check
+			if policyStatus != 1 {
+				continue complianceCheck
+			}
+		}
+
+		successfulComplianceChecks = append(successfulComplianceChecks, compliancomplianceCheck)
+	}
+
+	return successfulComplianceChecks, nil
+}

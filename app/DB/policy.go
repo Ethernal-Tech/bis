@@ -263,6 +263,97 @@ func (h *DBHandler) GetPoliciesByComplianceCheckId(complianceCheckId string) ([]
 	return policies, nil
 }
 
+// UpdatePolicyStatus updates status of the policy for the given compliance check. Allowed values ​​for status are:
+// 1. 0 - pending
+// 2. 1 - passed
+// 3. 2 - failed
+func (h *DBHandler) UpdatePolicyStatus(complianceCheckId string, policyId int, status int) error {
+	query := `UPDATE TransactionPolicy SET Status = @p1 WHERE TransactionId = @p2 AND PolicyId = @p3`
+
+	_, err := h.db.Exec(query,
+		sql.Named("p1", status),
+		sql.Named("p2", complianceCheckId),
+		sql.Named("p2", policyId))
+	if err != nil {
+		errlog.Println(err)
+		return errors.New("unsuccessful update of policy status")
+	}
+
+	return nil
+}
+
+// GetPolicyStatus returns status of the policy for the given compliance check.
+func (h *DBHandler) GetPolicyStatus(complianceCheckId string, policyId int) (int, error) {
+	query := `SELECT Status FROM TransactionPolicy WHERE TransactionId = @p1 AND PolicyId = @p2`
+
+	var status int
+	err := h.db.QueryRow(query,
+		sql.Named("p1", complianceCheckId),
+		sql.Named("p2", policyId)).Scan(&status)
+	if err != nil {
+		errlog.Println(err)
+		return -1, errors.New("unsuccessful obtainance of policy status")
+	}
+
+	return status, nil
+}
+
+// GetPolicyTypeByCode returns policy type with the given code.
+func (h *DBHandler) GetPolicyTypeByCode(code string) (models.NewPolicyType, error) {
+	query := `SELECT Id, Code, Name FROM PolicyType WHERE Code = @p1`
+
+	var policyType models.NewPolicyType
+	err := h.db.QueryRow(query,
+		sql.Named("p1", code)).Scan(&policyType.Id,
+		&policyType.Code,
+		&policyType.Name)
+	if err != nil {
+		errlog.Println(err)
+		return models.NewPolicyType{}, errors.New("unsuccessful obtainance of policy type")
+	}
+
+	return policyType, nil
+}
+
+// GetPolicyToProcessItsCheckResult is a special method to get the policy to process the result of its check.
+// Due to its specificity, the given method is not intended to be used in any other case. Each policy can be
+// uniquely identified by its id. However, unique identification can also be based on the following parameters:
+// 1. policy type (id)
+// 2. owner
+// 3. transaction type (id)
+// 4. originating jurisdiction (id)
+// 5. isPrivate flag
+func (h *DBHandler) GetPolicyToProcessItsCheckResult(policyTypeId int, owner string, transactionTypeId int, originatingJurisditionId string, isPrivate int) (models.NewPolicy, error) {
+	query := `SELECT Id, PolicyTypeId, Owner, TransactionTypeId, PolicyEnforcingJurisdictionId, OriginatingJurisdictionId, Parameters, IsPrivate, Latest 
+				FROM Policy WHERE PolicyTypeId = @p1 
+				AND Owner = @p2 
+				AND TransactionTypeId = @p3
+				AND OriginatingJurisdictionId = @p4
+				AND IsPrivate = @p5`
+
+	var policy models.NewPolicy
+	err := h.db.QueryRow(query,
+		sql.Named("p1", policyTypeId),
+		sql.Named("p2", owner),
+		sql.Named("p3", transactionTypeId),
+		sql.Named("p4", originatingJurisditionId),
+		sql.Named("p5", isPrivate)).Scan(&policy.Id,
+		&policy.PolicyTypeId,
+		&policy.Owner,
+		&policy.TransactionTypeId,
+		&policy.PolicyEnforcingJurisdictionId,
+		&policy.OriginatingJurisdictionId,
+		&policy.Parameters,
+		&policy.IsPrivate,
+		&policy.Latest)
+	if err != nil {
+		errlog.Println(err)
+		return models.NewPolicy{}, errors.New("unsuccessful obtainance of policy")
+	}
+
+	return policy, nil
+}
+
 func (wrapper *DBHandler) PoliciesFromJurisdiction(bankId string) []models.PolicyModel {
 	query := `SELECT p.Id, pt.Code, pt.Name, tt.Name, p.Parameters 
 					FROM Policy as p
