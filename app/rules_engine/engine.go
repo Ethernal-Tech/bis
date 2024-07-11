@@ -93,7 +93,9 @@ func (e *RulesEngine) doInteractive(complianceCheck models.ComplianceCheck, poli
 		}
 	}
 
-	go e.interactivePrivatePolicy(complianceCheck, privatePolicies)
+	if len(privatePolicies) != 0 {
+		go e.interactivePrivatePolicy(complianceCheck, privatePolicies)
+	}
 }
 
 func (e *RulesEngine) interactivePrivatePolicy(complianceCheck models.ComplianceCheck, policies []models.PolicyAndItsType) {
