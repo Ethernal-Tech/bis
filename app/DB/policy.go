@@ -273,7 +273,7 @@ func (h *DBHandler) UpdatePolicyStatus(complianceCheckId string, policyId int, s
 	_, err := h.db.Exec(query,
 		sql.Named("p1", status),
 		sql.Named("p2", complianceCheckId),
-		sql.Named("p2", policyId))
+		sql.Named("p3", policyId))
 	if err != nil {
 		errlog.Println(err)
 		return errors.New("unsuccessful update of policy status")
