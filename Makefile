@@ -47,6 +47,10 @@ run-docker: create-certs
 stop-docker: 
 	docker compose -f docker-compose-uc1.yaml down --rmi local -v
 
+restart-docker:
+	docker compose -f docker-compose-uc1.yaml down --rmi local jpm hlb bnm
+	docker compose -f docker-compose-uc1.yaml up --build jpm hlb bnm -d
+
 test: run-docker
 	sleep 90
 	$(MAKE) -C playwright-tests test

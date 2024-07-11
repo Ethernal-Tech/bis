@@ -41,6 +41,10 @@ func rulesEngineStartLog(complianceCheckId string) {
 }
 
 func (e *RulesEngine) Do(complianceCheckId string, proofType string) {
+	// due to the system running locally there is almost no delay so we
+	// need to introduce it somehow thus it feels like a distributed system
+	time.Sleep(2 * time.Second)
+
 	rulesEngineStartLog(complianceCheckId)
 
 	complianceCheck, err := e.db.GetComplianceCheckById(complianceCheckId)

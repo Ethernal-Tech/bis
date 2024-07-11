@@ -43,6 +43,7 @@ services:
       - GPJC_API_ADDRESS=jpm
       - GPJC_PORT=10501
       - GPJC_PUBLISH_ADDR=0.0.0.0:4000
+      - MY_GLOBAL_IDENTIFIER=984500653R409CC5AB28
     ports:
       - "4001:4000"
     depends_on:
