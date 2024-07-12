@@ -39,7 +39,7 @@ func (h *ProvingHandler) HandleInteractiveProof(body []byte) {
 
 	var result int
 	values := strings.Split(messageData.Value, ";")
-	if strings.Split(values[0], ",")[0] == "0" {
+	if strings.Split(values[0], ",")[1] == "0" {
 		result = 1
 		h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.ComplianceCheckID, policyID, false)
 	} else {
