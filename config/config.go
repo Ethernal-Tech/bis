@@ -15,15 +15,6 @@ func ResolveP2PNodeAPIAddress() string {
 	return env_address
 }
 
-func ResolvePeerID() string {
-	env_val := os.Getenv("PEER_ID")
-	if env_val == "" {
-		errlog.Println(errors.New("environment variable PEER_ID must be set"))
-	}
-
-	return env_val
-}
-
 func ResolveGpjcApiAddress() string {
 	env_address := os.Getenv("GPJC_API_ADDRESS")
 	if env_address == "" {
@@ -49,15 +40,6 @@ func ResolveGpjcPort() string {
 	}
 
 	return env_address
-}
-
-func ResolveGpjcClientUrl() string {
-	env_url := os.Getenv("GPJC")
-	if env_url == "" {
-		return "0.0.0.0"
-	}
-
-	return env_url
 }
 
 func ResolveDBAddress() string {

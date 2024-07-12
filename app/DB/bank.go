@@ -76,49 +76,6 @@ func (h *DBHandler) GetBankIdByName(bankName string) (string, error) {
 	return bankId, nil
 }
 
-func (wrapper *DBHandler) GetBankClientId(bankClientName string) string {
-	query := `SELECT GlobalIdentifier FROM [BankClient] WHERE Name = @p1`
-
-	rows, err := wrapper.db.Query(query, sql.Named("p1", bankClientName))
-
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer rows.Close()
-
-	var bankClientId string
-	for rows.Next() {
-		if err := rows.Scan(&bankClientId); err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	return bankClientId
-}
-
-func (wrapper *DBHandler) GetBank(bankId string) models.NewBank {
-	query := `SELECT b.GlobalIdentifier, b.Name, b.JurisdictionId
-          FROM Bank b
-          WHERE b.GlobalIdentifier = @p1`
-
-	rows, err := wrapper.db.Query(query, sql.Named("p1", bankId))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer rows.Close()
-
-	var bank models.NewBank
-
-	for rows.Next() {
-		if err := rows.Scan(&bank.GlobalIdentifier, &bank.Name, &bank.JurisdictionId); err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	return bank
-}
-
 func (wrapper *DBHandler) GetBanks() []models.BankModel {
 	query := `SELECT b.GlobalIdentifier, b.Name, j.Name JurisdictionName
           FROM Bank b
@@ -140,21 +97,6 @@ func (wrapper *DBHandler) GetBanks() []models.BankModel {
 		banks = append(banks, bank)
 	}
 	return banks
-}
-
-func (wrapper *DBHandler) GetClientNameByID(clientID int) string {
-	query := `SELECT Name FROM BankClient WHERE Id = @p1`
-
-	var clientName string
-	err := wrapper.db.QueryRow(query, sql.Named("p1", clientID)).Scan(&clientName)
-	if err != nil {
-		if err == sql.ErrNoRows {
-			return ""
-		}
-		log.Fatal(err)
-	}
-
-	return clientName
 }
 
 func (wrapper *DBHandler) GetClientByID(clientID uint) models.NewBankClient {

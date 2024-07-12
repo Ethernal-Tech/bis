@@ -29,27 +29,6 @@ func (wrapper *DBHandler) GetTransactionPolicyStatuses(transactionId string) []m
 	return statuses
 }
 
-func (wrapper *DBHandler) GetTransactionPolicyStatus(transactionId uint64, policyId int) int {
-	query := `SELECT Status FROM [TransactionPolicyStatus] WHERE TransactionId = @p1 and PolicyId = @p2`
-
-	rows, err := wrapper.db.Query(query, sql.Named("p1", transactionId), sql.Named("p2", policyId))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer rows.Close()
-
-	var status int
-
-	for rows.Next() {
-		if err := rows.Scan(&status); err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	return status
-}
-
 func (wrapper *DBHandler) UpdateTransactionPolicyStatus(transactionId string, policyId int, status int) {
 	query := `UPDATE [TransactionPolicy] Set Status = @p3 Where TransactionId = @p1 and PolicyId = @p2`
 

@@ -79,27 +79,6 @@ func (wrapper *DBHandler) UpdateTransactionState(transactionId string, state int
 	}
 }
 
-func (wrapper *DBHandler) GetTransactionTypeId(transactionType string) int {
-	query := `SELECT Id FROM [TransactionType] WHERE Code = @p1`
-
-	rows, err := wrapper.db.Query(query, sql.Named("p1", transactionType))
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer rows.Close()
-
-	var transactionTypeId int
-	for rows.Next() {
-		if err := rows.Scan(&transactionTypeId); err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	return transactionTypeId
-}
-
 func (wrapper *DBHandler) GetTransactionTypes() []models.NewTransactionType {
 	query := `SELECT Id, Code, Name From TransactionType`
 

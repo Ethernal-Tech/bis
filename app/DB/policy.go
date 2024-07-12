@@ -8,27 +8,6 @@ import (
 	"log"
 )
 
-func (wrapper *DBHandler) GetPolicyId(code string, jurisdictionId string) int {
-	query := `SELECT Id FROM [Policy] WHERE Code = @p1 and JurisdictionId = @p2`
-
-	rows, err := wrapper.db.Query(query, sql.Named("p1", code), sql.Named("p2", jurisdictionId))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer rows.Close()
-
-	var id int
-
-	for rows.Next() {
-		if err := rows.Scan(&id); err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	return id
-}
-
 // GetPolicyById comment
 func (h *DBHandler) GetPolicyById(policyID int) (models.PolicyAndItsType, error) {
 	query := `SELECT p.Id, p.PolicyTypeId, p.Owner, pt.Code, pt.Name, p.TransactionTypeId, p.PolicyEnforcingJurisdictionId, p.OriginatingJurisdictionId, p.Parameters, p.IsPrivate, p.Latest 
@@ -359,32 +338,6 @@ func (h *DBHandler) GetPolicyToProcessItsCheckResult(policyTypeId int, owner str
 	return policy, nil
 }
 
-func (wrapper *DBHandler) PoliciesFromJurisdiction(bankId string) []models.PolicyModel {
-	query := `SELECT p.Id, pt.Code, pt.Name, tt.Name, p.Parameters 
-					FROM Policy as p
-					LEFT JOIN PolicyType as pt on p.PolicyTypeId = pt.Id
-					LEFT JOIN TransactionType as tt on p.TransactionTypeId = tt.Id
-					Where p.PolicyEnforcingJurisdictionId = (SELECT JurisdictionId FROM [Bank] Where GlobalIdentifier = @p1)`
-
-	rows, err := wrapper.db.Query(query,
-		sql.Named("p1", bankId))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer rows.Close()
-
-	policies := []models.PolicyModel{}
-	for rows.Next() {
-		var policy models.PolicyModel
-		if err := rows.Scan(&policy.Id, &policy.Code, &policy.Name, &policy.TransactionType, &policy.Parameter); err != nil {
-			log.Fatal(err)
-		}
-		policies = append(policies, policy)
-	}
-	return policies
-}
-
 func (wrapper *DBHandler) GetPolicy(policyId uint64) models.PolicyModel {
 	query := `SELECT p.Id, pt.Code, pt.Name, p.Parameters 
 					FROM Policy as p
@@ -712,6 +665,7 @@ func (h *DBHandler) UpdatePolicyParameters(policyId int, parameters string) (int
 	return policyId, nil
 }
 
+// nolint:unused
 func (wrapper *DBHandler) policyLatestStateChange(policyTypeId, transactionTypeId int, policyEnforcingJurisdictionId, originatorJurisdictionId, parameters string) error {
 	// Check if Policy exists
 	query := `SELECT Id FROM Policy WHERE PolicyTypeId = @p1 AND TransactionTypeId = @p2 AND PolicyEnforcingJurisdictionId = @p3
