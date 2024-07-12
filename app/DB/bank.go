@@ -142,7 +142,7 @@ func (wrapper *DBHandler) GetBanks() []models.BankModel {
 	return banks
 }
 
-func (wrapper *DBHandler) GetClientNameByID(clientID uint) string {
+func (wrapper *DBHandler) GetClientNameByID(clientID int) string {
 	query := `SELECT Name FROM BankClient WHERE Id = @p1`
 
 	var clientName string

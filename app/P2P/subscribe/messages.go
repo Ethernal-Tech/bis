@@ -11,13 +11,13 @@ type MessageType int
 // concrete message types
 const (
 	// SCLServerStarted represents a signaling message that the GPJC server is started.
-	// Messages of this type contain the compliance check ID, so it is easy to identify
+	// Messages of this type contain the compliance check id, so it is easy to identify
 	// for which compliance check the signal has arrived.
 	SCLServerStarted MessageType = iota
 )
 
-// Map that contains "all" received messages classified by its type.
-// "all" in the context of possible message types that can be subscibed to.
+// map that contains "all" received messages classified by its type
+// "all" in the context of possible message types that can be subscibed to
 var messages map[MessageType][]any
 var mutMess sync.Mutex
 
@@ -34,7 +34,7 @@ func messageTypeExists(messageType MessageType) bool {
 	return true
 }
 
-// StoreMessage
+// StoreMessage stores a message in the storage for the given message type.
 func StoreMessage(messageType MessageType, message any) error {
 	if !messageTypeExists(messageType) {
 		return errors.New("unknown message type")
@@ -48,8 +48,13 @@ func StoreMessage(messageType MessageType, message any) error {
 	return nil
 }
 
-// FindMessage
-func FindMessage(messageType MessageType, hitFunc func([]any) (any, bool)) (any, bool, error) {
+// FindMessage, as the name suggests, can be used to find a specific message of a given type.
+// Matching logic is defined through the matchFunc parameter. Input to the matchFunc is a list
+// of all messages of the given type that are known in the system, while the return values are the
+// concrete message and a flag indicating whether it was found or not. It could be said that the
+// FindMessage function is a wrapper around the matchFunc, thus the return values ​​(excluding error)
+// of the FindMessage function are exactly the return values ​​of the matchFunc.
+func FindMessage(messageType MessageType, matchFunc func([]any) (any, bool)) (any, bool, error) {
 	if !messageTypeExists(messageType) {
 		return nil, false, errors.New("unknown message type")
 	}
@@ -61,12 +66,12 @@ func FindMessage(messageType MessageType, hitFunc func([]any) (any, bool)) (any,
 		return nil, false, nil
 	}
 
-	message, exist := hitFunc(messages[messageType])
+	message, exist := matchFunc(messages[messageType])
 
 	return message, exist, nil
 }
 
-// LoadMessages
+// LoadMessages loads (returns) all messages of the given type
 func LoadMessages(messageType MessageType) ([]any, bool, error) {
 	if !messageTypeExists(messageType) {
 		return nil, false, errors.New("unknown message type")
@@ -79,8 +84,8 @@ func LoadMessages(messageType MessageType) ([]any, bool, error) {
 		return nil, false, nil
 	}
 
-	// Because of the way slices are implemented in golang, copy of the slice must be returned
-	// Otherwise we would have a race condition (data race)
+	// because of the way slices are implemented in golang, copy of the slice must be returned
+	// otherwise we would have a race condition (data race)
 	retMessages := make([]any, len(messages[messageType]))
 	copy(retMessages, messages[messageType])
 

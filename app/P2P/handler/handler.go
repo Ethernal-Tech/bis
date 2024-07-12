@@ -357,17 +357,19 @@ func (h *P2PHandler) ProcessPolicyCheckResult(messageID int, payload []byte) err
 	return nil
 }
 
-func (h *P2PHandler) MpcServerStartSignal(messageID int, payload []byte) error {
-	returnErr := errors.New("p2p handler method MpcServerStartSignal failed to execute properly")
+// ProcessMpcStartSignal p2p handler method processes the MPC start signal. It is invoked
+// when a "mpc-start-signal" message arrives from a p2p network.
+func (h *P2PHandler) ProcessMpcStartSignal(messageID int, payload []byte) error {
+	returnErr := errors.New("p2p handler method ProcessMpcStartSignal failed to execute properly")
 
-	var sclServerStartedData common.SCLServerStartedDTO
-	err := json.Unmarshal(payload, &sclServerStartedData)
+	var signal common.MPCStartSignalDTO
+	err := json.Unmarshal(payload, &signal)
 	if err != nil {
 		errlog.Println(err)
 		return returnErr
 	}
 
-	err = subscribe.StoreAndNotify(subscribe.SCLServerStarted, sclServerStartedData)
+	err = subscribe.StoreAndNotify(subscribe.SCLServerStarted, signal)
 	if err != nil {
 		errlog.Println(err)
 		return returnErr

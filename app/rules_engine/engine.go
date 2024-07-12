@@ -42,7 +42,7 @@ func rulesEngineStartLog(complianceCheckId string) {
 }
 
 func (e *RulesEngine) Do(complianceCheckId string, proofType string) {
-	// due to the system running locally there is almost no delay so we
+	// due to the system running locally, there is almost no delay, so we
 	// need to introduce it somehow thus it feels like a distributed system
 	time.Sleep(2 * time.Second)
 
@@ -156,13 +156,14 @@ func (e *RulesEngine) interactivePrivatePolicy(complianceCheck models.Compliance
 }
 
 func (e *RulesEngine) interactiveSanctionCheckList(complianceCheck models.ComplianceCheck, policy models.PolicyAndItsType) {
-	// check whether the current bank is originator or beneficiary
+	// check whether the current bank is originator or beneficiary bank
+	// depending on that, the client (if) or server (else) side of the SCL MPC protocol is executed
 	if complianceCheck.OriginatorBankId == config.ResolveMyGlobalIdentifier() {
-		// originator
-		ch, subID, err := subscribe.Subscribe(subscribe.SCLServerStarted, func(sclServerStartedMessages []any) (any, bool) {
-			for _, message := range sclServerStartedMessages {
-				sclMessage := message.(common.SCLServerStartedDTO)
-				if sclMessage.ComplianceCheckId == complianceCheck.Id {
+		// originator bank (client side of the SCL MPC protocol)
+
+		ch, subId, err := subscribe.Subscribe(subscribe.SCLServerStarted, func(messages []any) (any, bool) {
+			for _, message := range messages {
+				if message.(common.MPCStartSignalDTO).ComplianceCheckId == complianceCheck.Id {
 					return message, true
 				}
 			}
@@ -174,38 +175,42 @@ func (e *RulesEngine) interactiveSanctionCheckList(complianceCheck models.Compli
 			return
 		}
 
-		var sclMessage common.SCLServerStartedDTO
-		for {
-			sclMessage = (<-ch).(common.SCLServerStartedDTO)
+		var signal common.MPCStartSignalDTO
 
-			if sclMessage.ComplianceCheckId == complianceCheck.Id {
+		for {
+			signal = (<-ch).(common.MPCStartSignalDTO)
+
+			if signal.ComplianceCheckId == complianceCheck.Id {
+				err = subscribe.Unsubscribe(subscribe.SCLServerStarted, subId)
+				if err != nil {
+					errlog.Println(err)
+					return
+				}
+
 				break
 			}
 		}
 
-		err = subscribe.Unsubscribe(subscribe.SCLServerStarted, subID)
-		if err != nil {
-			errlog.Println(err)
-			return
-		}
-
-		err = e.provingClient.SendProofRequest("interactive", complianceCheck.Id, policy.Policy.Id, sclMessage.VMAddress)
+		err = e.provingClient.SendProofRequest("interactive", complianceCheck.Id, policy.Policy.Id, signal.VMAddress)
 		if err != nil {
 			errlog.Println(err)
 			return
 		}
 	} else {
-		// beneficiary
+		// beneficiary bank (server side of the SCL MPC protocol)
+
 		err := e.provingClient.SendProofRequest("interactive", complianceCheck.Id, policy.Policy.Id, "")
 		if err != nil {
 			errlog.Println(err)
 			return
 		}
 
-		_, err = e.p2pClient.Send(complianceCheck.OriginatorBankId, "mpc-server-start-signal", common.SCLServerStartedDTO{
+		signal := common.MPCStartSignalDTO{
 			ComplianceCheckId: complianceCheck.Id,
 			VMAddress:         e.provingClient.GetVMAddress(),
-		}, 0)
+		}
+
+		_, err = e.p2pClient.Send(complianceCheck.OriginatorBankId, "mpc-start-signal", signal, 0)
 		if err != nil {
 			errlog.Println(err)
 			return

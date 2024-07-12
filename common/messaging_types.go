@@ -82,7 +82,7 @@ type PolicyCheckResultDTO struct {
 	Result            int    `json:"policy_check_result"`
 }
 
-type SCLServerStartedDTO struct {
+type MPCStartSignalDTO struct {
 	ComplianceCheckId string `json:"compliance_check_id"`
 	VMAddress         string `json:"vm_address"`
 }
