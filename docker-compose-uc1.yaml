@@ -1,9 +1,9 @@
 version: '3.8'
 
 services:
-  sql-database-jpm:
+  sql-database-sgc:
     image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: sql-database-jpm
+    container_name: sql-database-sgc
     environment:
       ACCEPT_EULA: Y
       SA_PASSWORD: Ethernal123
@@ -26,36 +26,35 @@ services:
       retries: 10
       start_period: 2m
 
-  jpm:
+  sgc:
     build:
       context: .
       dockerfile: image/Dockerfile
       args:
-        - DNS_NAME=jpm
-    container_name: jpm
+        - DNS_NAME=sgc
+    container_name: sgc
     environment:
-      - DB_ADDRESS=sql-database-jpm
+      - DB_ADDRESS=sql-database-sgc
       - DB_PORT=1433
       - DB_NAME=BIS1
       - DB_PASSWORD=Ethernal123
       - SERVER_PORT=4000
-      - P2P_NODE_ADDRESS=http://jpm-p2p:80/passthrough
-      - GPJC_API_ADDRESS=jpm
+      - P2P_NODE_ADDRESS=http://sgc-p2p:80/passthrough
+      - GPJC_API_ADDRESS=sgc
       - GPJC_PORT=10501
       - GPJC_PUBLISH_ADDR=0.0.0.0:4000
-      - MY_GLOBAL_IDENTIFIER=984500653R409CC5AB28
+      - MY_GLOBAL_IDENTIFIER=YYYYYYYYYYYYYYYYYYYY
     ports:
       - "4001:4000"
-      - "9091:9090"
     depends_on:
-      sql-database-jpm:
+      sql-database-sgc:
         condition: service_healthy
     networks:
       - peers
 
-  sql-database-hlb:
+  sql-database-myc:
     image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: sql-database-hlb
+    container_name: sql-database-myc
     environment:
       ACCEPT_EULA: Y
       SA_PASSWORD: Ethernal123
@@ -66,7 +65,7 @@ services:
     volumes:
       - ./app/DB/scripts/:/docker-entrypoint-initdb/scripts/
     command: >
-      /bin/bash -c " /opt/mssql/bin/sqlservr & sleep 30 &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.03_CreateBISdb2.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.03_InsertData2.sql && /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.05_HLBPolicy.sql  && wait"
+      /bin/bash -c " /opt/mssql/bin/sqlservr & sleep 30 &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.03_CreateBISdb2.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.03_InsertData2.sql && /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.05_MYCPolicy.sql  && wait"
     healthcheck:
       test:
         [
@@ -78,31 +77,30 @@ services:
       retries: 10
       start_period: 2m
 
-  hlb:
+  myc:
     build:
       context: .
       dockerfile: image/Dockerfile
       args:
-        - DNS_NAME=hlb
-    container_name: hlb
+        - DNS_NAME=myc
+    container_name: myc
     environment:
-      - DB_ADDRESS=sql-database-hlb
+      - DB_ADDRESS=sql-database-myc
       - DB_PORT=1433
       - DB_NAME=BIS2
       - DB_PASSWORD=Ethernal123
       - SERVER_PORT=4000
-      - MY_GLOBAL_IDENTIFIER=549300BUPYUQGB5BFX94
+      - MY_GLOBAL_IDENTIFIER=XXXXXXXXXXXXXXXXXXXX
       - CB_GLOBAL_IDENTIFIER=549300NROGNBV2T1GS07
       - JURISDICTION_CODE=MY
-      - P2P_NODE_ADDRESS=http://hlb-p2p:80/passthrough
-      - GPJC_API_ADDRESS=hlb
+      - P2P_NODE_ADDRESS=http://myc-p2p:80/passthrough
+      - GPJC_API_ADDRESS=myc
       - GPJC_PORT=10501
       - GPJC_PUBLISH_ADDR=0.0.0.0:4000
     ports:
       - "4002:4000"
-      - "9092:9090"
     depends_on:
-      sql-database-hlb:
+      sql-database-myc:
         condition: service_healthy
     networks:
       - peers
@@ -120,12 +118,12 @@ services:
     volumes:
       - ./app/DB/scripts/:/docker-entrypoint-initdb/scripts/
     command: >
-      /bin/bash -c " /opt/mssql/bin/sqlservr & sleep 30 &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.03_CreateBISdb4.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.03_InsertData4.sql && /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.05_BNMPolicy.sql  && wait"
+      /bin/bash -c " /opt/mssql/bin/sqlservr & sleep 30 &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.03_CreateBISdb3.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.03_InsertData3.sql && /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.05_BNMPolicy.sql  && wait"
     healthcheck:
       test:
         [
           "CMD-SHELL",
-          "/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -Q \"IF EXISTS (SELECT name FROM sys.databases WHERE name = 'BIS2') SELECT 1 ELSE SELECT 0\" | grep -q 1"
+          "/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -Q \"IF EXISTS (SELECT name FROM sys.databases WHERE name = 'BIS3') SELECT 1 ELSE SELECT 0\" | grep -q 1"
         ]
       interval: 30s
       timeout: 10s
@@ -142,7 +140,7 @@ services:
     environment:
       - DB_ADDRESS=sql-database-bnm
       - DB_PORT=1433
-      - DB_NAME=BIS4
+      - DB_NAME=BIS3
       - DB_PASSWORD=Ethernal123
       - JURISDICTION_CODE=MY
       - SERVER_PORT=4000
@@ -250,19 +248,19 @@ services:
     volumes: &volumes
       - /var/run/docker.sock:/var/run/docker.sock
     #   - /tmp/r0:/tmp/r0
-    container_name: jpm-p2p
+    container_name: sgc-p2p
     environment:
       !!merge <<: *bootstrap_env
       EXPIRE_TIME: "604800"
-      PUBLISH_ADDR: http://jpm:4000/proof/noninteractive
+      PUBLISH_ADDR: http://sgc:4000/proof/noninteractive
       AMQP_ADDR: amqp://rabbitmq-ob:5672/celery
       REDIS_ADDR: redis://redis-ob:6379
       BOOTSTRAP_NODE: "false"
       PEER_SEED: "ob-1"
       BOOTSTRAP_PEER_ID: *ob_peer_id
       BOOTSTRAP_IP: *ob_http_addr
-      FORWARD_REQUEST_HOST: http://jpm:4000/p2p
-      INSTITUTION_NAME: "984500653R409CC5AB28" # JPM
+      FORWARD_REQUEST_HOST: http://sgc:4000/p2p
+      INSTITUTION_NAME: "YYYYYYYYYYYYYYYYYYYY" # SG Commercial Bank
       NVIDIA_VISIBLE_DEVICES: all
       RISC0_WORK_DIR: /tmp/r0
     ports: *ports
@@ -279,7 +277,7 @@ services:
     restart: always
     build: *build
     volumes: *volumes
-    container_name: hlb-p2p
+    container_name: myc-p2p
     environment:
       !!merge <<: *bootstrap_env
       AMQP_ADDR: amqp://rabbitmq-bb:5672/celery
@@ -288,8 +286,8 @@ services:
       PEER_SEED: "bb-1"
       BOOTSTRAP_PEER_ID: *bb_peer_id
       BOOTSTRAP_IP: *bb_http_addr
-      FORWARD_REQUEST_HOST: http://hlb:4000/p2p
-      INSTITUTION_NAME: "549300BUPYUQGB5BFX94" # HLB
+      FORWARD_REQUEST_HOST: http://myc:4000/p2p
+      INSTITUTION_NAME: "XXXXXXXXXXXXXXXXXXXX" # MY Commercial Bank
     ports: *ports
     healthcheck: *healthcheck
     networks:

@@ -48,8 +48,8 @@ stop-docker:
 	docker compose -f docker-compose-uc1.yaml down --rmi local -v
 
 restart-docker:
-	docker compose -f docker-compose-uc1.yaml down --rmi local jpm hlb bnm
-	docker compose -f docker-compose-uc1.yaml up --build jpm hlb bnm -d
+	docker compose -f docker-compose-uc1.yaml down --rmi local sgc myc bnm
+	docker compose -f docker-compose-uc1.yaml up --build sgc myc bnm -d
 
 test: run-docker
 	sleep 90
