@@ -217,7 +217,7 @@ func (h *P2PHandler) ReceivePolicies(messageID int, payload []byte) error {
 }
 
 // ConfirmComplianceCheck p2p handler method, as the name suggests, confirms a selected compliance check and starts the
-// rules engige for an originator bank and beneficiary central bank. It is invoked when a "compliance-check-confirmation"
+// rules engine for an originator bank and beneficiary central bank. It is invoked when a "compliance-check-confirmation"
 // message arrives from a p2p network. Additionally, it also aligns the central bank with the rest of the system.
 func (h *P2PHandler) ConfirmComplianceCheck(messageID int, payload []byte) error {
 	returnErr := errors.New("p2p handler method ConfirmComplianceCheck failed to execute properly")
