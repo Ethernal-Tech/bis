@@ -315,27 +315,6 @@ func (wrapper *DBHandler) GetTransactionHistory(transactionId string) models.Tra
 	}
 	trnx.Status = trnx.StatusHistory[len(trnx.StatusHistory)-1].Name
 
-	query = `SELECT pt.Name
-				FROM TransactionPolicy tp
-				JOIN Policy as p ON tp.PolicyId = p.Id
-				JOIN PolicyType pt ON p.PolicyTypeId = pt.Id
-				Where p.TransactionTypeId = (SELECT t.TransactionTypeId FROM [Transaction] as t
-												Where t.Id = @p1)`
-
-	rows, err = wrapper.db.Query(query, sql.Named("p1", transactionId))
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var policyName string
-		if err := rows.Scan(&policyName); err != nil {
-			log.Fatal(err)
-		}
-		trnx.Policies = append(trnx.Policies, policyName)
-	}
-
 	return trnx
 }
 
