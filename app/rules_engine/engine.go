@@ -161,7 +161,7 @@ func (e *RulesEngine) interactiveSanctionCheckList(complianceCheck models.Compli
 	if complianceCheck.OriginatorBankId == config.ResolveMyGlobalIdentifier() {
 		// originator bank (client side of the SCL MPC protocol)
 
-		ch, subId, err := subscribe.Subscribe(subscribe.SCLServerStarted, func(messages []any) (any, bool) {
+		subscription, err := subscribe.Subscribe(subscribe.SCLServerStarted, func(messages []any) (any, bool) {
 			for _, message := range messages {
 				if message.(common.MPCStartSignalDTO).ComplianceCheckId == complianceCheck.Id {
 					return message, true
@@ -178,10 +178,10 @@ func (e *RulesEngine) interactiveSanctionCheckList(complianceCheck models.Compli
 		var signal common.MPCStartSignalDTO
 
 		for {
-			signal = (<-ch).(common.MPCStartSignalDTO)
+			signal = (<-subscription.NotifyCh).(common.MPCStartSignalDTO)
 
 			if signal.ComplianceCheckId == complianceCheck.Id {
-				err = subscribe.Unsubscribe(subscribe.SCLServerStarted, subId)
+				err = subscribe.Unsubscribe(subscribe.SCLServerStarted, subscription)
 				if err != nil {
 					errlog.Println(err)
 					return
