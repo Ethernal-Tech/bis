@@ -131,7 +131,7 @@ func (c *ComplianceCheckController) AddComplianceCheck(w http.ResponseWriter, r 
 			ComplianceCheckId:               complianceCheckId,
 			OriginatorGlobalIdentifier:      data.OriginatorGlobalIdentifier,
 			OriginatorName:                  data.OriginatorName,
-			BeneficiaryGlobalIdentifier:     data.BeneficiaryBankGlobalIdentifier,
+			BeneficiaryGlobalIdentifier:     data.BeneficiaryGlobalIdentifier,
 			BeneficiaryName:                 data.BeneficiaryName,
 			OriginatorBankGlobalIdentifier:  originatorBankGlobalIdentifier,
 			BeneficiaryBankGlobalIdentifier: data.BeneficiaryBankGlobalIdentifier,
