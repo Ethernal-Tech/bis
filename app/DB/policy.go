@@ -10,7 +10,7 @@ import (
 
 // GetPolicyById comment
 func (h *DBHandler) GetPolicyById(policyID int) (models.PolicyAndItsType, error) {
-	query := `SELECT p.Id, p.PolicyTypeId, p.Owner, pt.Code, pt.Name, p.TransactionTypeId, p.PolicyEnforcingJurisdictionId, p.OriginatingJurisdictionId, p.Parameters, p.IsPrivate, p.Latest 
+	query := `SELECT p.Id, p.PolicyTypeId, p.Owner, pt.Code, pt.Name, p.TransactionTypeId, p.PolicyEnforcingJurisdictionId, p.OriginatingJurisdictionId, p.BeneficiaryJurisdictionId, p.Parameters, p.IsPrivate, p.Latest 
 				FROM Policy p, PolicyType pt 
 				WHERE p.PolicyTypeId = pt.Id AND p.Id = @p1`
 
@@ -23,6 +23,7 @@ func (h *DBHandler) GetPolicyById(policyID int) (models.PolicyAndItsType, error)
 		&policy.Policy.TransactionTypeId,
 		&policy.Policy.PolicyEnforcingJurisdictionId,
 		&policy.Policy.OriginatingJurisdictionId,
+		&policy.Policy.BeneficiaryJurisdictionId,
 		&policy.Policy.Parameters,
 		&policy.Policy.IsPrivate,
 		&policy.Policy.Latest)
@@ -69,9 +70,9 @@ func (h *DBHandler) GetPolicies(originatorBankId string, beneficiaryBankId strin
 	}
 
 	// query to obtain all policies that beneficiary jurisdiction (commercial bank + central bank) imposes to originator jurisdiction for the given transaction type
-	query = `SELECT Id, PolicyTypeId, TransactionTypeId, Owner, PolicyEnforcingJurisdictionId, OriginatingJurisdictionId, Parameters, IsPrivate, Latest 
+	query = `SELECT Id, PolicyTypeId, TransactionTypeId, Owner, PolicyEnforcingJurisdictionId, OriginatingJurisdictionId, BeneficiaryJurisdictionId, Parameters, IsPrivate, Latest 
 				FROM Policy WHERE OriginatingJurisdictionId = @p1 
-				AND PolicyEnforcingJurisdictionId = @p2 
+				AND BeneficiaryJurisdictionId = @p2 
 				AND TransactionTypeId = @p3
 				AND Owner IN (@p4, @p5) 
 				AND Latest = 1`
@@ -99,6 +100,7 @@ func (h *DBHandler) GetPolicies(originatorBankId string, beneficiaryBankId strin
 			&policy.Owner,
 			&policy.PolicyEnforcingJurisdictionId,
 			&policy.OriginatingJurisdictionId,
+			&policy.BeneficiaryJurisdictionId,
 			&policy.Parameters,
 			&policy.IsPrivate,
 			&policy.Latest)
@@ -118,7 +120,7 @@ func (h *DBHandler) GetAppliedPolicies(jurisdictionId string, transactionTypeId 
 	returnErr := errors.New("unsuccessful obtainance of policies")
 
 	// query to obtain all policies
-	query := `SELECT p.Id, p.PolicyTypeId, p.Owner, pt.Code, pt.Name, p.TransactionTypeId, p.PolicyEnforcingJurisdictionId, p.OriginatingJurisdictionId, p.Parameters, p.IsPrivate, p.Latest
+	query := `SELECT p.Id, p.PolicyTypeId, p.Owner, pt.Code, pt.Name, p.TransactionTypeId, p.PolicyEnforcingJurisdictionId, p.OriginatingJurisdictionId, p.BeneficiaryJurisdictionId, p.Parameters, p.IsPrivate, p.Latest
               FROM Policy p, PolicyType pt WHERE p.PolicyTypeId = pt.Id
               AND p.OriginatingJurisdictionId = @p1 AND p.TransactionTypeId = @p2 and p.Latest = 1`
 	rows, err := h.db.Query(query,
@@ -144,6 +146,7 @@ func (h *DBHandler) GetAppliedPolicies(jurisdictionId string, transactionTypeId 
 			&policy.Policy.TransactionTypeId,
 			&policy.Policy.PolicyEnforcingJurisdictionId,
 			&policy.Policy.OriginatingJurisdictionId,
+			&policy.Policy.BeneficiaryJurisdictionId,
 			&policy.Policy.Parameters,
 			&policy.Policy.IsPrivate,
 			&policy.Policy.Latest)
@@ -163,7 +166,7 @@ func (h *DBHandler) GetAppliedPoliciesByOwner(owner string, jurisdictionId strin
 	returnErr := errors.New("unsuccessful get of policies")
 
 	// query to obtain all policies
-	query := `SELECT p.Id, p.PolicyTypeId, p.Owner, pt.Code, pt.Name, p.TransactionTypeId, p.PolicyEnforcingJurisdictionId, p.OriginatingJurisdictionId, p.Parameters, p.IsPrivate, p.Latest
+	query := `SELECT p.Id, p.PolicyTypeId, p.Owner, pt.Code, pt.Name, p.TransactionTypeId, p.PolicyEnforcingJurisdictionId, p.OriginatingJurisdictionId, p.BeneficiaryJurisdictionId, p.Parameters, p.IsPrivate, p.Latest
               FROM Policy p, PolicyType pt WHERE p.PolicyTypeId = pt.Id
               AND p.Owner = @p1 AND p.OriginatingJurisdictionId = @p2 AND p.TransactionTypeId = @p3 and p.Latest = 1`
 	rows, err := h.db.Query(query,
@@ -190,6 +193,7 @@ func (h *DBHandler) GetAppliedPoliciesByOwner(owner string, jurisdictionId strin
 			&policy.Policy.TransactionTypeId,
 			&policy.Policy.PolicyEnforcingJurisdictionId,
 			&policy.Policy.OriginatingJurisdictionId,
+			&policy.Policy.BeneficiaryJurisdictionId,
 			&policy.Policy.Parameters,
 			&policy.Policy.IsPrivate,
 			&policy.Policy.Latest)
@@ -209,7 +213,7 @@ func (h *DBHandler) GetPoliciesByComplianceCheckId(complianceCheckId string) ([]
 	returnErr := errors.New("unsuccessful obtainance of policies")
 
 	// query to obtain all policies
-	query := `SELECT p.Id, p.PolicyTypeId, p.Owner, pt.Code, pt.Name, p.TransactionTypeId, p.PolicyEnforcingJurisdictionId, p.OriginatingJurisdictionId, p.Parameters, p.IsPrivate, p.Latest 
+	query := `SELECT p.Id, p.PolicyTypeId, p.Owner, pt.Code, pt.Name, p.TransactionTypeId, p.PolicyEnforcingJurisdictionId, p.OriginatingJurisdictionId, p.BeneficiaryJurisdictionId, p.Parameters, p.IsPrivate, p.Latest 
 				FROM TransactionPolicy tp, Policy p, PolicyType pt 
 				WHERE tp.PolicyId = p.Id AND p.PolicyTypeId = pt.Id AND tp.TransactionId = @p1`
 	rows, err := h.db.Query(query, sql.Named("p1", complianceCheckId))
@@ -233,6 +237,7 @@ func (h *DBHandler) GetPoliciesByComplianceCheckId(complianceCheckId string) ([]
 			&policy.Policy.TransactionTypeId,
 			&policy.Policy.PolicyEnforcingJurisdictionId,
 			&policy.Policy.OriginatingJurisdictionId,
+			&policy.Policy.BeneficiaryJurisdictionId,
 			&policy.Policy.Parameters,
 			&policy.Policy.IsPrivate,
 			&policy.Policy.Latest)
@@ -308,7 +313,7 @@ func (h *DBHandler) GetPolicyTypeByCode(code string) (models.NewPolicyType, erro
 // 4. originating jurisdiction (id)
 // 5. isPrivate flag
 func (h *DBHandler) GetPolicyToProcessItsCheckResult(policyTypeId int, owner string, transactionTypeId int, originatingJurisditionId string, isPrivate int) (models.NewPolicy, error) {
-	query := `SELECT Id, PolicyTypeId, Owner, TransactionTypeId, PolicyEnforcingJurisdictionId, OriginatingJurisdictionId, Parameters, IsPrivate, Latest 
+	query := `SELECT Id, PolicyTypeId, Owner, TransactionTypeId, PolicyEnforcingJurisdictionId, OriginatingJurisdictionId, BeneficiaryJurisdictionId, Parameters, IsPrivate, Latest 
 				FROM Policy WHERE PolicyTypeId = @p1 
 				AND Owner = @p2 
 				AND TransactionTypeId = @p3
@@ -327,6 +332,7 @@ func (h *DBHandler) GetPolicyToProcessItsCheckResult(policyTypeId int, owner str
 		&policy.TransactionTypeId,
 		&policy.PolicyEnforcingJurisdictionId,
 		&policy.OriginatingJurisdictionId,
+		&policy.BeneficiaryJurisdictionId,
 		&policy.Parameters,
 		&policy.IsPrivate,
 		&policy.Latest)
@@ -362,7 +368,7 @@ func (wrapper *DBHandler) GetPolicy(policyId uint64) models.PolicyModel {
 }
 
 func (wrapper *DBHandler) GetPoliciesForTransaction(transactionID string) []models.PolicyAndItsType {
-	query := `SELECT p.Id, p.PolicyTypeId, pt.Code, pt.Name, p.TransactionTypeId, p.PolicyEnforcingJurisdictionId, p.OriginatingJurisdictionId, p.Parameters, p.IsPrivate, p.Latest
+	query := `SELECT p.Id, p.PolicyTypeId, pt.Code, pt.Name, p.TransactionTypeId, p.PolicyEnforcingJurisdictionId, p.OriginatingJurisdictionId, p.BeneficiaryJurisdictionId, p.Parameters, p.IsPrivate, p.Latest
               FROM Policy p
               JOIN PolicyType pt ON p.PolicyTypeId = pt.Id
               JOIN TransactionPolicy tp ON p.Id = tp.PolicyId
@@ -378,7 +384,18 @@ func (wrapper *DBHandler) GetPoliciesForTransaction(transactionID string) []mode
 	policies := []models.PolicyAndItsType{}
 	for rows.Next() {
 		var policy models.PolicyAndItsType
-		if err := rows.Scan(&policy.Policy.Id, &policy.Policy.PolicyTypeId, &policy.PolicyType.Code, &policy.PolicyType.Name, &policy.Policy.TransactionTypeId, &policy.Policy.PolicyEnforcingJurisdictionId, &policy.Policy.OriginatingJurisdictionId, &policy.Policy.Parameters, &policy.Policy.IsPrivate, &policy.Policy.Latest); err != nil {
+		if err := rows.Scan(
+			&policy.Policy.Id,
+			&policy.Policy.PolicyTypeId,
+			&policy.PolicyType.Code,
+			&policy.PolicyType.Name,
+			&policy.Policy.TransactionTypeId,
+			&policy.Policy.PolicyEnforcingJurisdictionId,
+			&policy.Policy.OriginatingJurisdictionId,
+			&policy.Policy.BeneficiaryJurisdictionId,
+			&policy.Policy.Parameters,
+			&policy.Policy.IsPrivate,
+			&policy.Policy.Latest); err != nil {
 			log.Fatal(err)
 		}
 
@@ -388,7 +405,7 @@ func (wrapper *DBHandler) GetPoliciesForTransaction(transactionID string) []mode
 }
 
 func (wrapper *DBHandler) GetAllPolicies() []models.NewFullPolicyModel {
-	query := `SELECT p.Id, p.PolicyTypeId, pt.Code, pt.Name, p.TransactionTypeId, p.PolicyEnforcingJurisdictionId, p.OriginatingJurisdictionId, p.Parameters, p.IsPrivate, p.Latest, tt.Id, tt.Code, tt.Name
+	query := `SELECT p.Id, p.PolicyTypeId, pt.Code, pt.Name, p.TransactionTypeId, p.PolicyEnforcingJurisdictionId, p.OriginatingJurisdictionId, p.BeneficiaryJurisdictionId, p.Parameters, p.IsPrivate, p.Latest, tt.Id, tt.Code, tt.Name
               FROM Policy p
               JOIN PolicyType pt ON p.PolicyTypeId = pt.Id
 			  JOIN TransactionType tt ON p.TransactionTypeId = tt.Id
@@ -404,9 +421,18 @@ func (wrapper *DBHandler) GetAllPolicies() []models.NewFullPolicyModel {
 	policies := []models.NewFullPolicyModel{}
 	for rows.Next() {
 		var policy models.NewFullPolicyModel
-		if err := rows.Scan(&policy.Policy.Id, &policy.Policy.PolicyTypeId, &policy.PolicyType.Code,
-			&policy.PolicyType.Name, &policy.Policy.TransactionTypeId, &policy.Policy.PolicyEnforcingJurisdictionId,
-			&policy.Policy.OriginatingJurisdictionId, &policy.Policy.Parameters, &policy.Policy.IsPrivate, &policy.Policy.Latest,
+		if err := rows.Scan(
+			&policy.Policy.Id,
+			&policy.Policy.PolicyTypeId,
+			&policy.PolicyType.Code,
+			&policy.PolicyType.Name,
+			&policy.Policy.TransactionTypeId,
+			&policy.Policy.PolicyEnforcingJurisdictionId,
+			&policy.Policy.OriginatingJurisdictionId,
+			&policy.Policy.BeneficiaryJurisdictionId,
+			&policy.Policy.Parameters,
+			&policy.Policy.IsPrivate,
+			&policy.Policy.Latest,
 			&policy.TransactionType.Id, &policy.TransactionType.Code, &policy.TransactionType.Name); err != nil {
 			log.Fatal(err)
 		}
@@ -422,6 +448,7 @@ func (wrapper *DBHandler) UpdateCFMPolicyAmount(amount uint64, policyId uint64) 
 					p.TransactionTypeId,
 					p.PolicyEnforcingJurisdictionId,
 					p.OriginatingJurisdictionId,
+					p.BeneficiaryJurisdictionId,
 					p.Parameters,
 					p.IsPrivate,
 					p.Latest 
@@ -438,8 +465,16 @@ func (wrapper *DBHandler) UpdateCFMPolicyAmount(amount uint64, policyId uint64) 
 
 	var policy models.NewPolicy
 	for rows.Next() {
-		if err := rows.Scan(&policy.Id, &policy.PolicyTypeId, &policy.TransactionTypeId, &policy.PolicyEnforcingJurisdictionId, &policy.OriginatingJurisdictionId,
-			&policy.Parameters, &policy.IsPrivate, &policy.Latest); err != nil {
+		if err := rows.Scan(
+			&policy.Id,
+			&policy.PolicyTypeId,
+			&policy.TransactionTypeId,
+			&policy.PolicyEnforcingJurisdictionId,
+			&policy.OriginatingJurisdictionId,
+			&policy.BeneficiaryJurisdictionId,
+			&policy.Parameters,
+			&policy.IsPrivate,
+			&policy.Latest); err != nil {
 			log.Fatal(err)
 		}
 	}
@@ -452,14 +487,15 @@ func (wrapper *DBHandler) UpdateCFMPolicyAmount(amount uint64, policyId uint64) 
 		log.Fatal(err)
 	}
 
-	insertQuery := `INSERT INTO [dbo].[Policy] (PolicyTypeId, TransactionTypeId, PolicyEnforcingJurisdictionId, OriginatingJurisdictionId, Parameters, IsPrivate, Latest) 
-							VALUES (@p1, @p2, @p3, @p4, @p5, 0, 1)`
+	insertQuery := `INSERT INTO [dbo].[Policy] (PolicyTypeId, TransactionTypeId, PolicyEnforcingJurisdictionId, OriginatingJurisdictionId, BeneficiaryJurisdictionId, Parameters, IsPrivate, Latest) 
+							VALUES (@p1, @p2, @p3, @p4, @p5, @p6, 0, 1)`
 	_, err = wrapper.db.Exec(insertQuery,
 		sql.Named("p1", policy.PolicyTypeId),
 		sql.Named("p2", policy.TransactionTypeId),
 		sql.Named("p3", policy.PolicyEnforcingJurisdictionId),
 		sql.Named("p4", policy.OriginatingJurisdictionId),
-		sql.Named("p5", amount))
+		sql.Named("p5", policy.BeneficiaryJurisdictionId),
+		sql.Named("p6", amount))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -512,12 +548,12 @@ func (h *DBHandler) CreateOrGetPolicyType(code, name string) (int, error) {
 }
 
 // CreatePolicy creates a new policy or updates the parameters of an existing one (read docs for [UpdatePolicyParameters]).
-// Policy existence is checked against owner, originating jurisdiction, transaction type, policy type and isPrivate flag.
+// Policy existence is checked against owner, originating jurisdiction, beneficiary jurisdiction, transaction type, policy type and isPrivate flag.
 // Return values are as following:
 // 1. id of the policy (created/updated one)
 // 2. result status code (-1 - error; 0 - no action, 1 - created, 2 - updated)
 // 3. error
-func (h *DBHandler) CreateOrUpdatePolicy(policyTypeId int, owner string, transactionTypeId int, policyEnforcingJurisdictionId string, originatorJurisdictionId string, parameters string, isPrivate int) (int, int, error) {
+func (h *DBHandler) CreateOrUpdatePolicy(policyTypeId int, owner string, transactionTypeId int, policyEnforcingJurisdictionId string, originatorJurisdictionId string, beneficiaryJurisdictionId string, parameters string, isPrivate int) (int, int, error) {
 	returnErr := errors.New("unsuccessful creation/update of policy")
 
 	// query to check if the policy already exists in the system
@@ -526,7 +562,8 @@ func (h *DBHandler) CreateOrUpdatePolicy(policyTypeId int, owner string, transac
 				AND p.Owner = @p2
 				AND p.TransactionTypeId = @p3
 				AND p.OriginatingJurisdictionId = @p4 
-				AND p.IsPrivate = @p5
+				AND p.BeneficiaryJurisdictionId = @p5 
+				AND p.IsPrivate = @p6
 				AND p.Latest = 1`
 
 	var policyId int
@@ -535,7 +572,8 @@ func (h *DBHandler) CreateOrUpdatePolicy(policyTypeId int, owner string, transac
 		sql.Named("p2", owner),
 		sql.Named("p3", transactionTypeId),
 		sql.Named("p4", originatorJurisdictionId),
-		sql.Named("p5", isPrivate)).Scan(&policyId)
+		sql.Named("p5", beneficiaryJurisdictionId),
+		sql.Named("p6", isPrivate)).Scan(&policyId)
 
 	// if policy (row) doesn't exist, error [sql.ErrNoRows] appears
 	if err != nil {
@@ -546,17 +584,18 @@ func (h *DBHandler) CreateOrUpdatePolicy(policyTypeId int, owner string, transac
 		}
 
 		// query to instert a new policy and get its id
-		query := `INSERT INTO Policy (PolicyTypeId, TransactionTypeId, Owner, PolicyEnforcingJurisdictionId, OriginatingJurisdictionId, Parameters, IsPrivate, Latest) 
+		query := `INSERT INTO Policy (PolicyTypeId, TransactionTypeId, Owner, PolicyEnforcingJurisdictionId, OriginatingJurisdictionId, BeneficiaryJurisdictionId, Parameters, IsPrivate, Latest) 
 					OUTPUT INSERTED.Id 
-					VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7, 1)`
+					VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, 1)`
 		err = h.db.QueryRow(query,
 			sql.Named("p1", policyTypeId),
 			sql.Named("p2", transactionTypeId),
 			sql.Named("p3", owner),
 			sql.Named("p4", policyEnforcingJurisdictionId),
 			sql.Named("p5", originatorJurisdictionId),
-			sql.Named("p6", parameters),
-			sql.Named("p7", isPrivate)).Scan(&policyId)
+			sql.Named("p6", beneficiaryJurisdictionId),
+			sql.Named("p7", parameters),
+			sql.Named("p8", isPrivate)).Scan(&policyId)
 		if err != nil {
 			errlog.Println(err)
 			return -1, -1, returnErr
@@ -613,7 +652,7 @@ func (h *DBHandler) UpdatePolicyParameters(policyId int, parameters string) (int
 	returnErr := errors.New("unsuccessful update of policy")
 
 	// query to obtain the policy
-	query := `SELECT Id, PolicyTypeId, TransactionTypeId, Owner, PolicyEnforcingJurisdictionId, OriginatingJurisdictionId, IsPrivate, Latest FROM Policy p WHERE p.Id = @p1`
+	query := `SELECT Id, PolicyTypeId, TransactionTypeId, Owner, PolicyEnforcingJurisdictionId, OriginatingJurisdictionId, BeneficiaryJurisdictionId, IsPrivate, Latest FROM Policy p WHERE p.Id = @p1`
 
 	var policy models.NewPolicy
 	err := h.db.QueryRow(query,
@@ -623,6 +662,7 @@ func (h *DBHandler) UpdatePolicyParameters(policyId int, parameters string) (int
 		&policy.Owner,
 		&policy.PolicyEnforcingJurisdictionId,
 		&policy.OriginatingJurisdictionId,
+		&policy.BeneficiaryJurisdictionId,
 		&policy.IsPrivate,
 		&policy.Latest)
 
@@ -646,17 +686,18 @@ func (h *DBHandler) UpdatePolicyParameters(policyId int, parameters string) (int
 	}
 
 	// query to instert a new policy and get its id
-	query = `INSERT INTO Policy (PolicyTypeId, TransactionTypeId, Owner, PolicyEnforcingJurisdictionId, OriginatingJurisdictionId, Parameters, IsPrivate, Latest) 
+	query = `INSERT INTO Policy (PolicyTypeId, TransactionTypeId, Owner, PolicyEnforcingJurisdictionId, OriginatingJurisdictionId, BeneficiaryJurisdictionId, Parameters, IsPrivate, Latest) 
 				OUTPUT INSERTED.Id 
-				VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7, 1)`
+				VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, 1)`
 	err = h.db.QueryRow(query,
 		sql.Named("p1", policy.PolicyTypeId),
 		sql.Named("p2", policy.TransactionTypeId),
 		sql.Named("p3", policy.Owner),
 		sql.Named("p4", policy.PolicyEnforcingJurisdictionId),
 		sql.Named("p5", policy.OriginatingJurisdictionId),
-		sql.Named("p6", parameters),
-		sql.Named("p7", policy.IsPrivate)).Scan(&policyId)
+		sql.Named("p6", policy.BeneficiaryJurisdictionId),
+		sql.Named("p7", parameters),
+		sql.Named("p8", policy.IsPrivate)).Scan(&policyId)
 	if err != nil {
 		errlog.Println(err)
 		return -1, returnErr
@@ -666,10 +707,10 @@ func (h *DBHandler) UpdatePolicyParameters(policyId int, parameters string) (int
 }
 
 // nolint:unused
-func (wrapper *DBHandler) policyLatestStateChange(policyTypeId, transactionTypeId int, policyEnforcingJurisdictionId, originatorJurisdictionId, parameters string) error {
+func (wrapper *DBHandler) policyLatestStateChange(policyTypeId, transactionTypeId int, policyEnforcingJurisdictionId, originatorJurisdictionId, beneficiaryJurisdictionId, parameters string) error {
 	// Check if Policy exists
 	query := `SELECT Id FROM Policy WHERE PolicyTypeId = @p1 AND TransactionTypeId = @p2 AND PolicyEnforcingJurisdictionId = @p3
-			  AND OriginatingJurisdictionId = @p4 AND Parameters <> @p5 AND Latest = 1`
+			  AND OriginatingJurisdictionId = @p4 AND BeneficiaryJurisdictionId = @p5 AND Parameters <> @p6 AND Latest = 1`
 
 	var policyIDs []uint
 
@@ -678,7 +719,8 @@ func (wrapper *DBHandler) policyLatestStateChange(policyTypeId, transactionTypeI
 		sql.Named("p2", transactionTypeId),
 		sql.Named("p3", policyEnforcingJurisdictionId),
 		sql.Named("p4", originatorJurisdictionId),
-		sql.Named("p5", parameters))
+		sql.Named("p5", beneficiaryJurisdictionId),
+		sql.Named("p6", parameters))
 	if err != nil {
 		log.Fatal(err)
 	}

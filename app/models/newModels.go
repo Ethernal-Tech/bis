@@ -92,6 +92,7 @@ type NewPolicy struct {
 	TransactionTypeId             int
 	PolicyEnforcingJurisdictionId string
 	OriginatingJurisdictionId     string
+	BeneficiaryJurisdictionId     string
 	Parameters                    string
 	IsPrivate                     bool
 	Latest                        bool

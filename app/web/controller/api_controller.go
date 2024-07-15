@@ -86,7 +86,7 @@ func (c *APIController) GetBeneficiaryBankPolicies(w http.ResponseWriter, r *htt
 			return
 		}
 
-		_, _, err = c.DB.CreateOrUpdatePolicy(policyTypeId, policy.Owner, transactionTypeId, beneficiaryJurisdiction.Id, originatorJurisdiction.Id, policy.Params, 0)
+		_, _, err = c.DB.CreateOrUpdatePolicy(policyTypeId, policy.Owner, transactionTypeId, beneficiaryJurisdiction.Id, originatorJurisdiction.Id, beneficiaryJurisdiction.Id, policy.Params, 0)
 		if err != nil {
 			errlog.Println(err)
 

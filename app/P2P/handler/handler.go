@@ -131,7 +131,7 @@ func (h *P2PHandler) GetPolicies(messageID int, payload []byte) error {
 
 			// isPrivate flag is always set to 0 regardless of the policy type
 			// private CB policies are always public for commercial banks in the sense that they know about their existence, but they are not familiar with the details
-			_, _, err = h.DB.CreateOrUpdatePolicy(policyTypeId, policy.Owner, transactionTypeId, config.ResolveJurisdictionCode(), request.Jurisdiction, policy.Params, 0)
+			_, _, err = h.DB.CreateOrUpdatePolicy(policyTypeId, policy.Owner, transactionTypeId, config.ResolveJurisdictionCode(), request.Jurisdiction, config.ResolveJurisdictionCode(), policy.Params, 0)
 			if err != nil {
 				errlog.Println(err)
 				return returnErr
@@ -283,7 +283,7 @@ func (h *P2PHandler) ConfirmComplianceCheck(messageID int, payload []byte) error
 				return returnErr
 			}
 
-			_, _, err = h.DB.CreateOrUpdatePolicy(policyTypeId, policy.Owner, transactionType.Id, beneficiaryJurisdiction.Id, originatorJurisdiction.Id, policy.Params, 0)
+			_, _, err = h.DB.CreateOrUpdatePolicy(policyTypeId, policy.Owner, transactionType.Id, beneficiaryJurisdiction.Id, originatorJurisdiction.Id, beneficiaryJurisdiction.Id, policy.Params, 0)
 			if err != nil {
 				errlog.Println(err)
 				return returnErr
