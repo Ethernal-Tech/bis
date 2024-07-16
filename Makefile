@@ -42,14 +42,14 @@ create-certs:
 	./image/gpjc_scripts/ca_script.sh
 
 run-docker: create-certs
-	docker compose -f docker-compose-uc1.yaml up --build --remove-orphans -d --force-recreate --wait --wait-timeout 120
+	docker compose -f docker-compose-uc2.yaml up --build --remove-orphans -d --force-recreate --wait --wait-timeout 120
 
 stop-docker: 
-	docker compose -f docker-compose-uc1.yaml down --rmi local -v
+	docker compose -f docker-compose-uc2.yaml down --rmi local -v
 
 restart-docker:
-	docker compose -f docker-compose-uc1.yaml down --rmi local sgc myc bnm
-	docker compose -f docker-compose-uc1.yaml up --build sgc myc bnm -d
+	docker compose -f docker-compose-uc1.yaml down --rmi local krc auc
+	docker compose -f docker-compose-uc1.yaml up --build krc auc -d
 
 test: run-docker
 	sleep 90
