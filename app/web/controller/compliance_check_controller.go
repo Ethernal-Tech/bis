@@ -267,32 +267,34 @@ func (c *ComplianceCheckController) ConfirmComplianceCheck(w http.ResponseWriter
 		}
 
 		// send a compliance check confirmation to the beneficiary central bank
-		_, err = c.P2PClient.Send(config.ResolveCBGlobalIdentifier(), "compliance-check-confirmation", common.ComplianceCheckConfirmationDTO{
-			ComplianceCheckId: complianceCheck.Id,
-			Data: common.ComplianceCheckConfirmationData{
-				ComplianceCheck: common.ComplianceCheckDTO{
-					ComplianceCheckId:               complianceCheck.Id,
-					OriginatorGlobalIdentifier:      originator.GlobalIdentifier,
-					OriginatorName:                  originator.Name,
-					BeneficiaryGlobalIdentifier:     beneficiary.GlobalIdentifier,
-					BeneficiaryName:                 beneficiary.Name,
-					OriginatorBankGlobalIdentifier:  complianceCheck.OriginatorBankId,
-					BeneficiaryBankGlobalIdentifier: complianceCheck.BeneficiaryBankId,
-					PaymentType:                     "",
-					TransactionType:                 transactionType.Code,
-					Amount:                          complianceCheck.Amount,
-					Currency:                        complianceCheck.Currency,
-					SwiftBICCode:                    "",
-					LoanId:                          complianceCheck.LoanId,
+		if config.ResolveCBGlobalIdentifier() != "" {
+			_, err = c.P2PClient.Send(config.ResolveCBGlobalIdentifier(), "compliance-check-confirmation", common.ComplianceCheckConfirmationDTO{
+				ComplianceCheckId: complianceCheck.Id,
+				Data: common.ComplianceCheckConfirmationData{
+					ComplianceCheck: common.ComplianceCheckDTO{
+						ComplianceCheckId:               complianceCheck.Id,
+						OriginatorGlobalIdentifier:      originator.GlobalIdentifier,
+						OriginatorName:                  originator.Name,
+						BeneficiaryGlobalIdentifier:     beneficiary.GlobalIdentifier,
+						BeneficiaryName:                 beneficiary.Name,
+						OriginatorBankGlobalIdentifier:  complianceCheck.OriginatorBankId,
+						BeneficiaryBankGlobalIdentifier: complianceCheck.BeneficiaryBankId,
+						PaymentType:                     "",
+						TransactionType:                 transactionType.Code,
+						Amount:                          complianceCheck.Amount,
+						Currency:                        complianceCheck.Currency,
+						SwiftBICCode:                    "",
+						LoanId:                          complianceCheck.LoanId,
+					},
+					Policies: policiesDTO,
 				},
-				Policies: policiesDTO,
-			},
-		}, 0)
-		if err != nil {
-			errlog.Println(err)
+			}, 0)
+			if err != nil {
+				errlog.Println(err)
 
-			http.Error(w, "Internal Server Error", 500)
-			return
+				http.Error(w, "Internal Server Error", 500)
+				return
+			}
 		}
 
 		go c.RulesEngine.Do(complianceCheck.Id, "interactive")

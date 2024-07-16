@@ -106,7 +106,7 @@ func (h *P2PHandler) GetPolicies(messageID int, payload []byte) error {
 	}
 
 	// in the case of a commercial bank, it is first necessary to send a request to the central bank to obtain its policies as well
-	if !config.ResolveIsCentralBank() /*&& config.ResolveCBGlobalIdentifier() != ""*/ {
+	if !config.ResolveIsCentralBank() && config.ResolveCBGlobalIdentifier() != "" {
 		requestToCB := common.PolicyRequestDTO{
 			Jurisdiction:              request.Jurisdiction,
 			TransactionType:           request.TransactionType,

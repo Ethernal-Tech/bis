@@ -54,7 +54,7 @@ func (h *ProvingHandler) HandleInteractiveProof(body []byte) {
 		return
 	}
 
-	if check.BeneficiaryBankId == config.ResolveMyGlobalIdentifier() {
+	if check.BeneficiaryBankId == config.ResolveMyGlobalIdentifier() && config.ResolveCBGlobalIdentifier() != "" {
 		// notify cetntra bank
 		policy, err := h.DB.GetPolicyById(policyID)
 		if err != nil {
