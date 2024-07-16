@@ -140,14 +140,16 @@ func (e *RulesEngine) interactivePrivatePolicy(complianceCheck models.Compliance
 		}
 	} else {
 		// send policy check result to the beneficiary central bank
-		_, err := e.p2pClient.Send(config.ResolveCBGlobalIdentifier(), "policy-check-result", policyCheckResult, 0)
-		if err != nil {
-			errlog.Println(err)
-			return
+		if config.ResolveCBGlobalIdentifier() != "" {
+			_, err := e.p2pClient.Send(config.ResolveCBGlobalIdentifier(), "policy-check-result", policyCheckResult, 0)
+			if err != nil {
+				errlog.Println(err)
+				return
+			}
 		}
 
 		// send policy check result to the originator bank
-		_, err = e.p2pClient.Send(complianceCheck.OriginatorBankId, "policy-check-result", policyCheckResult, 0)
+		_, err := e.p2pClient.Send(complianceCheck.OriginatorBankId, "policy-check-result", policyCheckResult, 0)
 		if err != nil {
 			errlog.Println(err)
 			return

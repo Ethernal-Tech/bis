@@ -103,7 +103,6 @@ func ResolveMyGlobalIdentifier() string {
 func ResolveCBGlobalIdentifier() string {
 	env_global_ident := os.Getenv("CB_GLOBAL_IDENTIFIER")
 	if env_global_ident == "" {
-		//errlog.Println(errors.New("environment variable CB_GLOBAL_IDENTIFIER is not set"))
 		return ""
 	}
 
