@@ -4,6 +4,7 @@ import (
 	"bisgo/app/models"
 	"bisgo/common"
 	"bisgo/config"
+	"bisgo/errlog"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -290,7 +291,12 @@ func (controller *TransactionController) TransactionHistory(w http.ResponseWrite
 
 	//policies, _ := controller.DB.GetPolicies(bankId, transaction.TypeId)
 
-	policyStatuses := controller.DB.GetTransactionPolicyStatuses(transaction.Id)
+	policyStatuses, err := controller.DB.GetTransactionPolicyStatuses(transaction.Id)
+	if err != nil {
+		errlog.Println(err)
+		http.Error(w, "Internal Server Error", 500)
+		return
+	}
 	fmt.Println(policyStatuses)
 
 	policiesAndStatuses := []struct {

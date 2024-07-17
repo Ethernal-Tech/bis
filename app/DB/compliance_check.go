@@ -58,7 +58,7 @@ func (h *DBHandler) AddComplianceCheck(complianceCheck models.ComplianceCheck) (
 
 	// loop through all applicable policies and tie up them with the compliance check
 	for _, policy := range polices {
-		query = `INSERT INTO TransactionPolicy (TransactionId, PolicyId, Status) VALUES (@p1, @p2, @p3)`
+		query = `INSERT INTO TransactionPolicy (TransactionId, PolicyId, Status, AdditionalParameters, Description) VALUES (@p1, @p2, @p3, '', '')`
 		_, err := h.db.Exec(query,
 			sql.Named("p1", complianceCheck.Id),
 			sql.Named("p2", policy.Id),

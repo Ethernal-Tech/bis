@@ -9,6 +9,7 @@ import (
 	"bisgo/errlog"
 	"encoding/json"
 	"fmt"
+	"reflect"
 	"strconv"
 	"strings"
 )
@@ -41,10 +42,10 @@ func (h *ProvingHandler) HandleInteractiveProof(body []byte) {
 	values := strings.Split(messageData.Value, ";")
 	if strings.Split(values[0], ",")[1] == "0" {
 		result = 1
-		h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.ComplianceCheckID, policyID, false)
+		h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.ComplianceCheckID, policyID, false, "")
 	} else {
 		result = 2
-		h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.ComplianceCheckID, policyID, true)
+		h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.ComplianceCheckID, policyID, true, "Entity is sanctioned")
 	}
 
 	// originator does't need to notify its central bank about the result
@@ -105,29 +106,76 @@ func (h *ProvingHandler) HandleNonInteractiveProof(body []byte) {
 		return
 	}
 
-	result := 0
-	if messageData.Status == "Failed" {
-		h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.SanctionedCheckOutput.ComplianceCheckID, policyID, true)
-		result = 2
-	} else {
-		if messageData.SanctionedCheckOutput.NotSanctioned {
-			// Passed sanction check
-			h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.SanctionedCheckOutput.ComplianceCheckID, policyID, false)
-			result = 1
-		} else {
-			// Failed sanction check
-			h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.SanctionedCheckOutput.ComplianceCheckID, policyID, true)
-			result = 2
-		}
-	}
-
-	// originator needs to notify beneficiary with the result and send the proof through
 	check, err := h.DB.GetComplianceCheckById(messageData.SanctionedCheckOutput.ComplianceCheckID)
 	if err != nil {
 		errlog.Println(err)
 		return
 	}
 
+	result := 0
+	if messageData.Status == "Failed" {
+		h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.SanctionedCheckOutput.ComplianceCheckID, policyID, true, "Proof genereation failed")
+		result = 2
+	} else {
+		if messageData.SanctionedCheckOutput.NotSanctioned {
+			// Passed sanction check
+			h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.SanctionedCheckOutput.ComplianceCheckID, policyID, false, "")
+			result = 1
+		} else {
+			// Failed sanction check
+			sender, err := h.DB.GetBankClientById(check.SenderId)
+			if err != nil {
+				errlog.Println(err)
+				return
+			}
+
+			receiver, err := h.DB.GetBankClientById(check.ReceiverId)
+			if err != nil {
+				errlog.Println(err)
+				return
+			}
+
+			beneficiaryBank, err := h.DB.GetBankByGlobalIdentifier(check.BeneficiaryBankId)
+			if err != nil {
+				errlog.Println(err)
+				return
+			}
+
+			names := []string{sender.Name, receiver.Name, beneficiaryBank.Name}
+
+			// Iterate over elements to determine which entity is sanctioned
+			description := "Sanctioned hit on"
+			for _, entity := range messageData.SanctionedCheckInput.ParticipantsList {
+				for _, sanctioned := range messageData.SanctionedCheckInput.PubSanctionsList {
+					if reflect.DeepEqual(entity, sanctioned) {
+						for i, name := range names {
+							if reflect.DeepEqual(common.HashName(name), entity) {
+								if i == 0 {
+									description = strings.Join([]string{description}, " originator")
+								} else if i == 1 {
+									if len(description) == 0 {
+										description = strings.Join([]string{description}, " beneficiary")
+									} else {
+										description = strings.Join([]string{description}, " and beneficiary")
+									}
+								} else {
+									if len(description) == 0 {
+										description = strings.Join([]string{description}, " beneficiary bank")
+									} else {
+										description = strings.Join([]string{description}, " and beneficiary bank")
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+			h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.SanctionedCheckOutput.ComplianceCheckID, policyID, true, description)
+			result = 2
+		}
+	}
+
+	// originator needs to notify beneficiary with the result and send the proof through
 	if check.OriginatorBankId == config.ResolveMyGlobalIdentifier() {
 		// notify beneficiary bank
 		policy, err := h.DB.GetPolicyById(policyID)

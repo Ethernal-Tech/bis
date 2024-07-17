@@ -4,6 +4,7 @@ import (
 	"bisgo/app/DB"
 	p2pclient "bisgo/app/P2P/client"
 	"bisgo/app/P2P/subscribe"
+	"bisgo/app/manager"
 	"bisgo/app/models"
 	provingclient "bisgo/app/proving/client"
 	"bisgo/common"
@@ -17,18 +18,20 @@ import (
 )
 
 type RulesEngine struct {
-	db            *DB.DBHandler
-	provingClient *provingclient.ProvingClient
-	p2pClient     *p2pclient.P2PClient
+	db                          *DB.DBHandler
+	provingClient               *provingclient.ProvingClient
+	p2pClient                   *p2pclient.P2PClient
+	complianceCheckStateManager *manager.ComplianceCheckStateManager
 }
 
 var engine RulesEngine
 
 func init() {
 	engine = RulesEngine{
-		db:            DB.GetDBHandler(),
-		provingClient: provingclient.GetProvingClient(),
-		p2pClient:     p2pclient.GetP2PClient(),
+		db:                          DB.GetDBHandler(),
+		provingClient:               provingclient.GetProvingClient(),
+		p2pClient:                   p2pclient.GetP2PClient(),
+		complianceCheckStateManager: manager.CreateComplianceCheckStateManager(),
 	}
 }
 
@@ -108,7 +111,7 @@ func (e *RulesEngine) interactivePrivatePolicy(complianceCheck models.Compliance
 	// loop through private policies and set their status to successful (1)
 	// they are not checked in any way
 	for _, policy := range policies {
-		err := e.db.UpdatePolicyStatus(complianceCheck.Id, policy.Policy.Id, 1)
+		err := e.complianceCheckStateManager.UpdateComplianceCheckPolicyStatus(e.db, complianceCheck.Id, policy.Policy.Id, false, "")
 		if err != nil {
 			errlog.Println(err)
 			return
@@ -292,7 +295,7 @@ func (e *RulesEngine) interactiveCapitalFlowManagement(complianceCheck models.Co
 	// (if) CFM policy check successful
 	// (else) otherwise, unsuccessful
 	if amount <= float64(limit) {
-		err := e.db.UpdatePolicyStatus(complianceCheck.Id, policy.Policy.Id, 1)
+		err := e.complianceCheckStateManager.UpdateComplianceCheckPolicyStatus(e.db, complianceCheck.Id, policy.Policy.Id, false, "")
 		if err != nil {
 			errlog.Println(err)
 			return
@@ -306,7 +309,7 @@ func (e *RulesEngine) interactiveCapitalFlowManagement(complianceCheck models.Co
 			Result:            1,
 		}
 	} else {
-		err := e.db.UpdatePolicyStatus(complianceCheck.Id, policy.Policy.Id, 2)
+		err := e.complianceCheckStateManager.UpdateComplianceCheckPolicyStatus(e.db, complianceCheck.Id, policy.Policy.Id, true, "")
 		if err != nil {
 			errlog.Println(err)
 			return
@@ -385,20 +388,18 @@ func (e *RulesEngine) doNonInteractiveAMT(complianceCheck models.ComplianceCheck
 
 	if cumulativeAmount > 100_000 {
 		// Verify that the originator submitted reporting to the BoK
-		err := e.db.UpdatePolicyStatus(complianceCheck.Id, policyID, 1)
+		err := e.complianceCheckStateManager.UpdateComplianceCheckPolicyStatus(e.db, complianceCheck.Id, policyID, false, "Reporting submitted to BoK")
 		if err != nil {
 			errlog.Println(err)
 			return
 		}
-		fmt.Println("originator submitted reporting to the BoK")
 	} else {
 		// No reporting needed
-		err := e.db.UpdatePolicyStatus(complianceCheck.Id, policyID, 1)
+		err := e.complianceCheckStateManager.UpdateComplianceCheckPolicyStatus(e.db, complianceCheck.Id, policyID, false, "No reporting needed")
 		if err != nil {
 			errlog.Println(err)
 			return
 		}
-		fmt.Println("no reporting needed")
 	}
 }
 
@@ -415,26 +416,23 @@ func (e *RulesEngine) doNonInteractiveNETT(complianceCheck models.ComplianceChec
 
 	if convertedAmount > 10_000 {
 		// Verify that the originator submitted reporting to the BoK
-		err := e.db.UpdatePolicyStatus(complianceCheck.Id, policyID, 1)
+		err := e.complianceCheckStateManager.UpdateComplianceCheckPolicyStatus(e.db, complianceCheck.Id, policyID, false, "Reporting submitted to BoK")
 		if err != nil {
 			errlog.Println(err)
 			return
 		}
-		fmt.Println("originator submitted reporting to the BoK")
 	} else if 10_000 >= convertedAmount && convertedAmount >= 5_000 {
 		// Verify that the originator submitted reporting to the Foreign exchange bank
-		err := e.db.UpdatePolicyStatus(complianceCheck.Id, policyID, 1)
+		err := e.complianceCheckStateManager.UpdateComplianceCheckPolicyStatus(e.db, complianceCheck.Id, policyID, false, "Reporting submitted to Foreign Exchange Bank")
 		if err != nil {
 			errlog.Println(err)
 			return
 		}
-		fmt.Println("originator submitted reporting to the Foreign exchange bank")
 	} else {
-		err := e.db.UpdatePolicyStatus(complianceCheck.Id, policyID, 1)
+		err := e.complianceCheckStateManager.UpdateComplianceCheckPolicyStatus(e.db, complianceCheck.Id, policyID, false, "No reportting needed")
 		if err != nil {
 			errlog.Println(err)
 			return
 		}
-		fmt.Println("amount less than 5000 USD")
 	}
 }

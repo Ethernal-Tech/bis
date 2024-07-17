@@ -4,10 +4,10 @@ import (
 	"bisgo/app/DB"
 	"bisgo/app/manager"
 	"bisgo/app/models"
+	"bisgo/common"
 	"bisgo/config"
 	"bisgo/errlog"
 	"bytes"
-	"crypto/sha256"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -147,9 +147,9 @@ func (c *ProvingClient) sendNonInteractiveProofRequest(complianceCheckId string,
 	}
 
 	var participantsList [][]int = make([][]int, 0, 3)
-	participantsList = append(participantsList, hashName(sender.Name))
-	participantsList = append(participantsList, hashName(recever.Name))
-	participantsList = append(participantsList, hashName(beneficiaryBank.Name))
+	participantsList = append(participantsList, common.HashName(sender.Name))
+	participantsList = append(participantsList, common.HashName(recever.Name))
+	participantsList = append(participantsList, common.HashName(beneficiaryBank.Name))
 
 	publicSanctionsList, err := c.sanctionsListManager.LoadSanctionListForNoninteractiveCheck()
 	if err != nil {
@@ -200,17 +200,4 @@ func (c *ProvingClient) sendNonInteractiveProofRequest(complianceCheckId string,
 	fmt.Println(string(body))
 
 	return nil
-}
-
-func hashName(name string) []int {
-	hash := sha256.New()
-	hash.Write([]byte(name))
-	hashedName := hash.Sum(nil)
-
-	var intArray []int = make([]int, len(hashedName))
-	for i, hashByte := range hashedName {
-		intArray[i] = int(hashByte)
-	}
-
-	return intArray
 }

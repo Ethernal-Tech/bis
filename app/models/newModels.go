@@ -110,9 +110,11 @@ type NewFullPolicyModel struct {
 }
 
 type NewTransactionPolicy struct {
-	TransactionId string
-	PolicyId      int
-	Status        int
+	TransactionId        string
+	PolicyId             int
+	Status               int
+	AdditionalParameters string
+	Description          string
 }
 
 type NewTransactionProof struct {

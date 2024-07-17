@@ -2,6 +2,8 @@ package manager
 
 import (
 	"bisgo/app/DB"
+	"bisgo/errlog"
+	"errors"
 )
 
 type ComplianceCheckStateManager struct{}
@@ -10,14 +12,20 @@ func CreateComplianceCheckStateManager() *ComplianceCheckStateManager {
 	return &ComplianceCheckStateManager{}
 }
 
-func (*ComplianceCheckStateManager) UpdateComplianceCheckPolicyStatus(db *DB.DBHandler, complianceCheckID string, policyID int, isFailed bool) {
+func (*ComplianceCheckStateManager) UpdateComplianceCheckPolicyStatus(db *DB.DBHandler, complianceCheckID string, policyID int, isFailed bool, description string) error {
+	returnErr := errors.New("failed to update compliance check policy status")
 	if isFailed {
-		db.UpdateTransactionPolicyStatus(complianceCheckID, policyID, 2)
+		db.UpdateTransactionPolicyStatus(complianceCheckID, policyID, 2, description)
 	} else {
-		db.UpdateTransactionPolicyStatus(complianceCheckID, policyID, 1)
+		db.UpdateTransactionPolicyStatus(complianceCheckID, policyID, 1, description)
 	}
 
-	statuses := db.GetTransactionPolicyStatuses(complianceCheckID)
+	statuses, err := db.GetTransactionPolicyStatuses(complianceCheckID)
+	if err != nil {
+		errlog.Println(err)
+		return returnErr
+	}
+
 	noOfPassed := 0
 	noOfCompleted := 0
 	for _, status := range statuses {
@@ -42,4 +50,6 @@ func (*ComplianceCheckStateManager) UpdateComplianceCheckPolicyStatus(db *DB.DBH
 		// if !config.ResovleIsCentralBank() {
 		// }
 	}
+
+	return nil
 }

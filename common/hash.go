@@ -38,3 +38,16 @@ func GenerateHash(structure interface{}) (string, error) {
 
 	return hashHex, nil
 }
+
+func HashName(name string) []int {
+	hash := sha256.New()
+	hash.Write([]byte(name))
+	hashedName := hash.Sum(nil)
+
+	var intArray []int = make([]int, len(hashedName))
+	for i, hashByte := range hashedName {
+		intArray[i] = int(hashByte)
+	}
+
+	return intArray
+}

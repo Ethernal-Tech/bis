@@ -69,19 +69,14 @@
                 </fieldset>
                 <fieldset class="transaction-details">
                     <legend>2. Please fill in the transaction details:</legend>
+                    {{if and (ne .country "South Korea") (ne .country "Australia")}}
                     <div>
                         <div class="field-container">
                             <span class="input-descriptor">Payment Type<span>*</span></span>
                             <select id="payment-type" class="input input-select">
-                                {{if or (eq .country "South Korea") (eq .country "Australia")}}
-                                <option name="NETT">
-                                    NETT
-                                </option>
-                                {{else}}
                                 <option name="GROSS">
                                     GROSS
                                 </option>
-                                {{end}}
                             </select>
                         </div>
                         <div class="field-container">
@@ -123,6 +118,98 @@
                             </select>
                         </div>
                     </div>
+                    {{else}}
+                    <div>
+                        <div class="field-container">
+                            <span class="input-descriptor">Transaction Amount<span>*</span></span>
+                            <div class="input-container">
+                                <select id="currency">
+                                    <option name="AUD">
+                                        AUD
+                                    </option>
+                                    <option name="KRW">
+                                        KRW
+                                    </option>
+                                    <option name="MYR">
+                                        MYR
+                                    </option>
+                                    <option name="SGD">
+                                        SGD
+                                    </option>
+                                </select>
+                                <input id="amount" class="input" type="text" placeholder="e.g. 200,000">
+                            </div>
+                        </div>
+                        <div class="field-container">
+                            <span class="input-descriptor">Sec. Acquisition Amount<span>*</span></span>
+                            <div class="input-container">
+                                <select>
+                                    <option name="AUD">
+                                        AUD
+                                    </option>
+                                    <option name="KRW">
+                                        KRW
+                                    </option>
+                                    <option name="MYR">
+                                        MYR
+                                    </option>
+                                    <option name="SGD">
+                                        SGD
+                                    </option>
+                                </select>
+                                <input id="parameter" class="input" type="text" placeholder="e.g. 196,000">
+                            </div>
+                        </div>
+                        <div class="field-container">
+                            <span class="input-descriptor">Offset Amount<span>*</span></span>
+                            <div class="input-container">
+                                <select>
+                                    <option name="AUD">
+                                        AUD
+                                    </option>
+                                    <option name="KRW">
+                                        KRW
+                                    </option>
+                                    <option name="MYR">
+                                        MYR
+                                    </option>
+                                    <option name="SGD">
+                                        SGD
+                                    </option>
+                                </select>
+                                <input class="input" type="text" placeholder="e.g. 4,000">
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div>
+                            <div class="field-container">
+                                <span class="input-descriptor">Payment Type<span>*</span></span>
+                                <select id="payment-type" class="input input-select">
+                                    <option name="NETT">
+                                        NETT
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="field-container">
+                            <span class="input-descriptor">Transaction Type<span>*</span></span>
+                            <select id="transaction-type" class="input input-select">
+                                {{range .transactionTypes}}
+                                <option value="{{.Id}}">{{.Code}} - {{.Name}}</option>
+                                {{end}}
+                            </select>
+                        </div>
+                        <div class="field-container">
+                            <span class="input-descriptor">Beneficiary Bank<span>*</span></span>
+                            <select id="beneficiary-bank" class="input input-select">
+                                {{range .banks}}
+                                <option value="{{.Id}}">{{.Name}} ({{.Country}})</option>
+                                {{end}}
+                            </select>
+                        </div>
+                    </div>
+                    {{end}}
                 </fieldset>
             </div>
             <div class="not-display view-2" id="view-2">
