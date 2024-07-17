@@ -122,6 +122,13 @@ type NewTransactionProof struct {
 }
 
 type NonInteractiveComplianceCheckProofRequest struct {
+	ComplianceCheckId   string  `json:"compliance_check_id"`
+	PolicyId            string  `json:"policy_id"`
+	ParticipantsList    [][]int `json:"participants_list"`
+	PublicSanctionsList [][]int `json:"pub_sanctions_list"`
+}
+
+type NonInteractiveComplianceCheckProofResponse struct {
 	ID                    string                              `json:"id"`
 	SanctionedCheckInput  NonInteractiveSanctionedCheckInput  `json:"sanctioned_check_input"`
 	SanctionedCheckOutput NonInteractiveSanctionedCheckOutput `json:"sanctioned_check_output"`

@@ -95,6 +95,34 @@ func (c *APIController) GetBeneficiaryBankPolicies(w http.ResponseWriter, r *htt
 		}
 	}
 
+	// Query OB's locally applicable policies from DB
+	locallyApplicablePolicies, err := c.DB.GetPolicies(originatorBankGlobalIdentifier, data.BeneficiaryBankGlobalIdentifier, transactionTypeId)
+	if err != nil {
+		errlog.Println(err)
+
+		http.Error(w, "Internal Server Error", 500)
+		return
+	}
+	fmt.Println(originatorBankGlobalIdentifier, originatorJurisdiction, transactionTypeId)
+	fmt.Println(locallyApplicablePolicies)
+	// Add them to the responseData
+	for _, policy := range locallyApplicablePolicies {
+		policyType, err := c.DB.GetPolicyTypeById(policy.PolicyTypeId)
+		if err != nil {
+			errlog.Println(err)
+
+			http.Error(w, "Internal Server Error", 500)
+			return
+		}
+
+		responseData.Policies = append(responseData.Policies, common.PolicyDTO{
+			Code:   policyType.Code,
+			Name:   policyType.Name,
+			Params: policy.Parameters,
+			Owner:  policy.Owner,
+		})
+	}
+
 	response, err := json.Marshal(responseData)
 	if err != nil {
 		errlog.Println(fmt.Errorf("%v %w", responseData, err))

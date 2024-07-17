@@ -48,8 +48,8 @@ stop-docker:
 	docker compose -f docker-compose-uc2.yaml down --rmi local -v
 
 restart-docker:
-	docker compose -f docker-compose-uc1.yaml down --rmi local krc auc
-	docker compose -f docker-compose-uc1.yaml up --build krc auc -d
+	docker compose -f docker-compose-uc2.yaml down --rmi local kr au
+	docker compose -f docker-compose-uc2.yaml up --build kr au -d
 
 test: run-docker
 	sleep 90

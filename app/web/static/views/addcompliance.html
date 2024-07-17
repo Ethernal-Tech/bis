@@ -73,9 +73,15 @@
                         <div class="field-container">
                             <span class="input-descriptor">Payment Type<span>*</span></span>
                             <select id="payment-type" class="input input-select">
+                                {{if or (eq .country "South Korea") (eq .country "Australia")}}
+                                <option name="NETT">
+                                    NETT
+                                </option>
+                                {{else}}
                                 <option name="GROSS">
                                     GROSS
                                 </option>
+                                {{end}}
                             </select>
                         </div>
                         <div class="field-container">

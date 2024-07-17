@@ -4,8 +4,8 @@ import (
 	"bisgo/app/P2P/core"
 	"bisgo/app/P2P/messages"
 	"bisgo/app/P2P/subscribe"
+	"bisgo/app/manager"
 	"bisgo/app/models"
-	"bisgo/app/web/manager"
 	"bisgo/common"
 	"bisgo/config"
 	"bisgo/errlog"
@@ -307,7 +307,8 @@ func (h *P2PHandler) ConfirmComplianceCheck(messageID int, payload []byte) error
 		}
 	}
 
-	go h.RulesEngine.Do(complianceCheckConfirmation.ComplianceCheckId, "interactive")
+	// Return to interactive for UC1
+	go h.RulesEngine.Do(complianceCheckConfirmation.ComplianceCheckId, "noninteractive")
 
 	return nil
 }

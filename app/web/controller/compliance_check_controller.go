@@ -110,6 +110,12 @@ func (c *ComplianceCheckController) AddComplianceCheck(w http.ResponseWriter, r 
 			return
 		}
 
+		/*
+			if data.Parameter != "" {
+				handleAddOnParameter(data.Parameter, complianceCheckId, transactionTypeId)
+			}
+		*/
+
 		// TODO: a compliance check status manager call instead of a direct state change
 		err = c.DB.UpdateComplianceCheckStatus(complianceCheckId, 1)
 		if err != nil {
@@ -297,7 +303,8 @@ func (c *ComplianceCheckController) ConfirmComplianceCheck(w http.ResponseWriter
 			}
 		}
 
-		go c.RulesEngine.Do(complianceCheck.Id, "interactive")
+		// Return to interactive for UC1
+		go c.RulesEngine.Do(complianceCheck.Id, "noninteractive")
 
 		http.Redirect(w, r, "/home", http.StatusSeeOther)
 	}

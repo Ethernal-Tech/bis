@@ -76,6 +76,30 @@ func (h *DBHandler) GetBankIdByName(bankName string) (string, error) {
 	return bankId, nil
 }
 
+// GetBankByID returns the bank with specified GlobalIdentifier.
+func (h *DBHandler) GetBankByGlobalIdentifier(bankGlobalIdentifier string) (models.NewBank, error) {
+	query := `
+        SELECT GlobalIdentifier, Name, Address, JurisdictionId, BankTypeId
+        FROM Bank
+        WHERE GlobalIdentifier = @globalIdentifier
+    `
+
+	var bank models.NewBank
+	err := h.db.QueryRow(query, sql.Named("globalIdentifier", bankGlobalIdentifier)).Scan(
+		&bank.GlobalIdentifier,
+		&bank.Name,
+		&bank.Address,
+		&bank.JurisdictionId,
+		&bank.BankTypeId,
+	)
+	if err != nil {
+		errlog.Println(err)
+		return bank, errors.New("unsuccessful obtainance of bank id")
+	}
+
+	return bank, nil
+}
+
 func (wrapper *DBHandler) GetBanks() []models.BankModel {
 	query := `SELECT b.GlobalIdentifier, b.Name, j.Name JurisdictionName
           FROM Bank b

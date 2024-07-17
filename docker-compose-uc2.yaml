@@ -153,6 +153,8 @@ services:
     environment:
       ACCEPT_EULA: Y
       SA_PASSWORD: Ethernal123
+    ports:
+      - "1434:1433"
     networks:
       - peers
     volumes:
@@ -184,6 +186,7 @@ services:
       - DB_PASSWORD=Ethernal123
       - SERVER_PORT=4000
       - P2P_NODE_ADDRESS=http://kr-p2p:80/passthrough
+      - NONINTERACTIVE_API_ADDRESS=http://kr-p2p:80/compliance/check-sanctioned
       - JURISDICTION_CODE=KR
       - GPJC_API_ADDRESS=kr
       - GPJC_PORT=10501
@@ -203,6 +206,8 @@ services:
     environment:
       ACCEPT_EULA: Y
       SA_PASSWORD: Ethernal123
+    ports:
+      - "1435:1433"
     networks:
       - peers
     volumes:
@@ -236,6 +241,7 @@ services:
       - MY_GLOBAL_IDENTIFIER=xxxxxxxxxxxxxxxxxxxx
       - JURISDICTION_CODE=AU
       - P2P_NODE_ADDRESS=http://au-p2p:80/passthrough
+      - NONINTERACTIVE_API_ADDRESS=http://au-p2p:80/compliance/check-sanctioned
       - GPJC_API_ADDRESS=au
       - GPJC_PORT=10501
       - GPJC_PUBLISH_ADDR=0.0.0.0:4000

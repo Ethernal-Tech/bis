@@ -9,6 +9,7 @@ import (
 	"bisgo/common"
 	"bisgo/config"
 	"bisgo/errlog"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
@@ -336,5 +337,104 @@ func (e *RulesEngine) interactiveCapitalFlowManagement(complianceCheck models.Co
 }
 
 func (e *RulesEngine) doNonInteractive(complianceCheck models.ComplianceCheck, policies []models.PolicyAndItsType) {
+	for _, policy := range policies {
+		switch policy.PolicyType.Code {
+		case "AML":
+			go e.doNonInteractiveAML(complianceCheck, policy.Policy.Id)
+		case "AMT":
+			e.doNonInteractiveAMT(complianceCheck, policy.Policy.Id)
+		case "NETT":
+			e.doNonInteractiveNETT(complianceCheck, policy.Policy.Id)
+			// TODO: Add SECU for the Australia side after clarification
+		}
+	}
+}
 
+func (e *RulesEngine) doNonInteractiveAML(complianceCheck models.ComplianceCheck, policyID int) {
+	err := e.provingClient.SendProofRequest("noninteractive", complianceCheck.Id, policyID, "")
+	if err != nil {
+		errlog.Println(err)
+	}
+}
+
+func (e *RulesEngine) doNonInteractiveAMT(complianceCheck models.ComplianceCheck, policyID int) {
+	// Only transfers in current year are taken into cumulative amount
+	complianceChecks, err := e.db.GetAllComplianceChecksForSenderInCurrentYear(complianceCheck.SenderId)
+	if err != nil {
+		errlog.Println(err)
+	}
+
+	complianceChecks = append(complianceChecks, complianceCheck)
+	cumulativeAmount := float64(0)
+	for _, complianceCheck := range complianceChecks {
+		// Convert currency with the use case assumption of 1 AUD = 0.65 USD
+		convertedAmount := float64(0)
+		if complianceCheck.Currency == "AUD" {
+			convertedAmount = float64(complianceCheck.Amount) * 0.65
+		} else if complianceCheck.Currency == "USD" {
+			convertedAmount = float64(complianceCheck.Amount)
+		} else {
+			errlog.Println(errors.New("unexpected currency in cumulative amount calculations"))
+		}
+
+		// Only amounts greather than 5000 USD are calculated into cumulative amount
+		if convertedAmount > 5000 {
+			cumulativeAmount += convertedAmount
+		}
+	}
+
+	if cumulativeAmount > 100_000 {
+		// Verify that the originator submitted reporting to the BoK
+		err := e.db.UpdatePolicyStatus(complianceCheck.Id, policyID, 1)
+		if err != nil {
+			errlog.Println(err)
+			return
+		}
+		fmt.Println("originator submitted reporting to the BoK")
+	} else {
+		// No reporting needed
+		err := e.db.UpdatePolicyStatus(complianceCheck.Id, policyID, 1)
+		if err != nil {
+			errlog.Println(err)
+			return
+		}
+		fmt.Println("no reporting needed")
+	}
+}
+
+func (e *RulesEngine) doNonInteractiveNETT(complianceCheck models.ComplianceCheck, policyID int) {
+	// Convert currency with the use case assumption of 1 AUD = 0.65 USD
+	convertedAmount := float64(0)
+	if complianceCheck.Currency == "AUD" {
+		convertedAmount = float64(complianceCheck.Amount) * 0.65
+	} else if complianceCheck.Currency == "USD" {
+		convertedAmount = float64(complianceCheck.Amount)
+	} else {
+		errlog.Println(errors.New("unexpected currency in cumulative amount calculations"))
+	}
+
+	if convertedAmount > 10_000 {
+		// Verify that the originator submitted reporting to the BoK
+		err := e.db.UpdatePolicyStatus(complianceCheck.Id, policyID, 1)
+		if err != nil {
+			errlog.Println(err)
+			return
+		}
+		fmt.Println("originator submitted reporting to the BoK")
+	} else if 10_000 >= convertedAmount && convertedAmount >= 5_000 {
+		// Verify that the originator submitted reporting to the Foreign exchange bank
+		err := e.db.UpdatePolicyStatus(complianceCheck.Id, policyID, 1)
+		if err != nil {
+			errlog.Println(err)
+			return
+		}
+		fmt.Println("originator submitted reporting to the Foreign exchange bank")
+	} else {
+		err := e.db.UpdatePolicyStatus(complianceCheck.Id, policyID, 1)
+		if err != nil {
+			errlog.Println(err)
+			return
+		}
+		fmt.Println("amount less than 5000 USD")
+	}
 }

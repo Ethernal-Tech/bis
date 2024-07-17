@@ -1,6 +1,7 @@
 package manager
 
 import (
+	"crypto/sha256"
 	"encoding/csv"
 	"fmt"
 	"net/http"
@@ -84,6 +85,51 @@ func (*SanctionListManager) GetNewestSanctionsList() (string, error) {
 	}
 
 	return fileName, nil
+}
+
+// LoadSanctionListForNoninteractiveCheck reads a sanctions list csv file where each row contains only one string element and returns a slice of strings.
+// additionally, it hashes the elements in the result using SHA-256.
+func (*SanctionListManager) LoadSanctionListForNoninteractiveCheck() ([][]int, error) {
+	dir := "./sanction-lists"
+	filePath := path.Join(dir, "UN_List.csv")
+
+	// Open the CSV file
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	// Create a new CSV reader
+	reader := csv.NewReader(file)
+
+	// Read all the records from the CSV file
+	records, err := reader.ReadAll()
+	if err != nil {
+		return nil, err
+	}
+
+	// Create a slice to store the hashed strings
+	var result [][]int = make([][]int, len(records))
+
+	// Iterate through the records
+	for i, record := range records {
+		if len(record) > 0 {
+			// Hash each string using SHA-256
+			hash := sha256.New()
+			hash.Write([]byte(record[0]))
+			hashedBytes := hash.Sum(nil)
+
+			var intArray []int = make([]int, len(hashedBytes))
+			for j, hashedByte := range hashedBytes {
+				intArray[j] = int(hashedByte)
+			}
+
+			result[i] = intArray
+		}
+	}
+
+	return result, nil
 }
 
 func saveCSV(records [][]string, date string) (string, error) {

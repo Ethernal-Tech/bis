@@ -1,9 +1,9 @@
 package handler
 
 import (
+	"bisgo/app/manager"
 	"bisgo/app/models"
 	"bisgo/app/proving/core"
-	"bisgo/app/web/manager"
 	"bisgo/common"
 	"bisgo/config"
 	"bisgo/errlog"
@@ -79,7 +79,6 @@ func (h *ProvingHandler) HandleInteractiveProof(body []byte) {
 }
 
 func (h *ProvingHandler) HandleNonInteractiveProof(body []byte) {
-	fmt.Println("called /proof/noninteractive")
 
 	// Remove the leading and trailing quotes
 	trimmedBody := strings.Trim(string(body), "\"")
@@ -91,22 +90,65 @@ func (h *ProvingHandler) HandleNonInteractiveProof(body []byte) {
 		return
 	}
 
-	var messageData models.NonInteractiveComplianceCheckProofRequest
+	var messageData models.NonInteractiveComplianceCheckProofResponse
 	if err := json.Unmarshal([]byte(unescapedBody), &messageData); err != nil {
 		errlog.Println(err)
 		return
 	}
 
-	fmt.Println(messageData)
+	h.DB.InsertTransactionProof(messageData.SanctionedCheckOutput.ComplianceCheckID, unescapedBody)
 
+	fmt.Println(messageData)
+	policyID, err := strconv.Atoi(messageData.SanctionedCheckOutput.PolicyID)
+	if err != nil {
+		errlog.Println(err)
+		return
+	}
+
+	result := 0
 	if messageData.Status == "Failed" {
-		// TODO: Should we rerun?
+		h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.SanctionedCheckOutput.ComplianceCheckID, policyID, true)
+		result = 2
 	} else {
 		if messageData.SanctionedCheckOutput.NotSanctioned {
 			// Passed sanction check
-
+			h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.SanctionedCheckOutput.ComplianceCheckID, policyID, false)
+			result = 1
 		} else {
 			// Failed sanction check
+			h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.SanctionedCheckOutput.ComplianceCheckID, policyID, true)
+			result = 2
 		}
+	}
+
+	// originator needs to notify beneficiary with the result and send the proof through
+	check, err := h.DB.GetComplianceCheckById(messageData.SanctionedCheckOutput.ComplianceCheckID)
+	if err != nil {
+		errlog.Println(err)
+		return
+	}
+
+	if check.OriginatorBankId == config.ResolveMyGlobalIdentifier() {
+		// notify beneficiary bank
+		policy, err := h.DB.GetPolicyById(policyID)
+		if err != nil {
+			errlog.Println(err)
+			return
+		}
+
+		policyCheckResult := common.PolicyCheckResultDTO{
+			ComplianceCheckId: check.Id,
+			Code:              policy.PolicyType.Code,
+			Name:              policy.PolicyType.Name,
+			Owner:             policy.Policy.Owner,
+			Result:            result,
+		}
+
+		_, err = h.P2PClient.Send(check.BeneficiaryBankId, "policy-check-result", policyCheckResult, 0)
+		if err != nil {
+			errlog.Println(err)
+			return
+		}
+
 	}
 }

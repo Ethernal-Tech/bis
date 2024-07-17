@@ -2,30 +2,37 @@ package client
 
 import (
 	"bisgo/app/DB"
+	"bisgo/app/manager"
+	"bisgo/app/models"
 	"bisgo/config"
 	"bisgo/errlog"
 	"bytes"
+	"crypto/sha256"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 )
 
 type ProvingClient struct {
-	gpjcApiAddress string
-	gpjcApiPort    string
-	gpjcPort       string
-	db             *DB.DBHandler
+	gpjcApiAddress       string
+	gpjcApiPort          string
+	gpjcPort             string
+	db                   *DB.DBHandler
+	sanctionsListManager *manager.SanctionListManager
 }
 
 var client ProvingClient
 
 func init() {
 	client = ProvingClient{
-		gpjcApiAddress: config.ResolveGpjcApiAddress(),
-		gpjcApiPort:    config.ResolveGpjcApiPort(),
-		gpjcPort:       config.ResolveGpjcPort(),
-		db:             DB.GetDBHandler(),
+		gpjcApiAddress:       config.ResolveGpjcApiAddress(),
+		gpjcApiPort:          config.ResolveGpjcApiPort(),
+		gpjcPort:             config.ResolveGpjcPort(),
+		db:                   DB.GetDBHandler(),
+		sanctionsListManager: manager.CreateSanctionListManager(),
 	}
 }
 
@@ -47,7 +54,7 @@ func (c *ProvingClient) SendProofRequest(proofType string, complianceCheckId str
 	if proofType == "interactive" {
 		err = c.sendInteractiveProofRequest(complianceCheckId, policyId, targetedServer)
 	} else {
-		// non-interactive ...
+		err = c.sendNonInteractiveProofRequest(complianceCheckId, policyId)
 	}
 
 	if err != nil {
@@ -114,4 +121,96 @@ func (c *ProvingClient) sendInteractiveProofRequest(complianceCheckId string, po
 	}
 
 	return nil
+}
+
+func (c *ProvingClient) sendNonInteractiveProofRequest(complianceCheckId string, policyId int) error {
+	returnErr := errors.New("unsucessful send of noninteractive proof request")
+
+	complianceCheck := c.db.GetComplianceCheckByID(complianceCheckId)
+
+	sender, err := c.db.GetBankClientById(int(complianceCheck.SenderId))
+	if err != nil {
+		errlog.Println(err)
+		return returnErr
+	}
+
+	recever, err := c.db.GetBankClientById(int(complianceCheck.ReceiverId))
+	if err != nil {
+		errlog.Println(err)
+		return returnErr
+	}
+
+	beneficiaryBank, err := c.db.GetBankByGlobalIdentifier(complianceCheck.BeneficiaryBankId)
+	if err != nil {
+		errlog.Println(err)
+		return returnErr
+	}
+
+	var participantsList [][]int = make([][]int, 0, 3)
+	participantsList = append(participantsList, hashName(sender.Name))
+	participantsList = append(participantsList, hashName(recever.Name))
+	participantsList = append(participantsList, hashName(beneficiaryBank.Name))
+
+	publicSanctionsList, err := c.sanctionsListManager.LoadSanctionListForNoninteractiveCheck()
+	if err != nil {
+		errlog.Println(err)
+		return returnErr
+	}
+
+	moq := true
+	if moq {
+		publicSanctionsList = [][]int{{1, 2, 3}, {4, 5, 6}}
+	}
+
+	data := models.NonInteractiveComplianceCheckProofRequest{
+		ComplianceCheckId:   complianceCheckId,
+		PolicyId:            fmt.Sprintf("%d", policyId),
+		ParticipantsList:    participantsList,
+		PublicSanctionsList: publicSanctionsList,
+	}
+
+	fmt.Println(data)
+
+	payload, err := json.Marshal(data)
+	if err != nil {
+		return err
+	}
+
+	client := &http.Client{}
+
+	req, err := http.NewRequest("POST", config.ResolveNonInteractiveAPIAddress(), bytes.NewBuffer(payload))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Connection", "close")
+
+	response, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	body, err := io.ReadAll(response.Body)
+	if err != nil {
+		errlog.Println(err)
+		return err
+	}
+
+	fmt.Println(string(body))
+
+	return nil
+}
+
+func hashName(name string) []int {
+	hash := sha256.New()
+	hash.Write([]byte(name))
+	hashedName := hash.Sum(nil)
+
+	var intArray []int = make([]int, len(hashedName))
+	for i, hashByte := range hashedName {
+		intArray[i] = int(hashByte)
+	}
+
+	return intArray
 }

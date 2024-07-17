@@ -117,3 +117,12 @@ func ResolveJurisdictionCode() string {
 
 	return env_code
 }
+
+func ResolveNonInteractiveAPIAddress() string {
+	env_addr := os.Getenv("NONINTERACTIVE_API_ADDRESS")
+	if env_addr == "" {
+		errlog.Println(errors.New("environment variable NONINTERACTIVE_API_ADDRESS is not set"))
+	}
+
+	return env_addr
+}

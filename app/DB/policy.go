@@ -73,15 +73,15 @@ func (h *DBHandler) GetPolicies(originatorBankId string, beneficiaryBankId strin
 	query = `SELECT Id, PolicyTypeId, TransactionTypeId, Owner, PolicyEnforcingJurisdictionId, OriginatingJurisdictionId, BeneficiaryJurisdictionId, Parameters, IsPrivate, Latest 
 				FROM Policy WHERE OriginatingJurisdictionId = @p1 
 				AND BeneficiaryJurisdictionId = @p2 
-				AND TransactionTypeId = @p3
-				AND Owner IN (@p4, @p5) 
+				AND TransactionTypeId = @p3 
 				AND Latest = 1`
+	//AND Owner IN (@p4, @p5)
 	rows, err := h.db.Query(query,
 		sql.Named("p1", originatorJurisdiction),
 		sql.Named("p2", beneficiaryJurisdiction),
-		sql.Named("p3", transactionTypeId),
-		sql.Named("p4", beneficiaryBankId),
-		sql.Named("p5", beneficiaryCentralBankId))
+		sql.Named("p3", transactionTypeId)) /*,
+	sql.Named("p4", beneficiaryBankId),
+	sql.Named("p5", beneficiaryCentralBankId))*/
 	if err != nil {
 		errlog.Println(err)
 		return nil, returnErr
@@ -294,6 +294,23 @@ func (h *DBHandler) GetPolicyTypeByCode(code string) (models.NewPolicyType, erro
 	var policyType models.NewPolicyType
 	err := h.db.QueryRow(query,
 		sql.Named("p1", code)).Scan(&policyType.Id,
+		&policyType.Code,
+		&policyType.Name)
+	if err != nil {
+		errlog.Println(err)
+		return models.NewPolicyType{}, errors.New("unsuccessful obtainance of policy type")
+	}
+
+	return policyType, nil
+}
+
+// GetPolicyTypeById returns policy type with the given ID.
+func (h *DBHandler) GetPolicyTypeById(id int) (models.NewPolicyType, error) {
+	query := `SELECT Id, Code, Name FROM PolicyType WHERE Id = @p1`
+
+	var policyType models.NewPolicyType
+	err := h.db.QueryRow(query,
+		sql.Named("p1", id)).Scan(&policyType.Id,
 		&policyType.Code,
 		&policyType.Name)
 	if err != nil {
