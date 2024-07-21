@@ -16,7 +16,7 @@ VALUES
 INSERT [dbo].[Policy]
     ([Id], [PolicyTypeId], [TransactionTypeId], [Owner], [PolicyEnforcingJurisdictionId], [OriginatingJurisdictionId], [BeneficiaryJurisdictionId], [Parameters], [IsPrivate], [Latest])
 VALUES
-    (3, 3, 1, N'yyyyyyyyyyyyyyyyyyyy', N'KR', N'KR', N'AU', N'5000,10000', 0, 1)
+    (3, 3, 1, N'yyyyyyyyyyyyyyyyyyyy', N'KR', N'KR', N'AU', N'5000', 0, 1)
 GO
 
 SET IDENTITY_INSERT [dbo].[Policy] OFF

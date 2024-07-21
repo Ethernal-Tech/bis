@@ -41,13 +41,23 @@ create-certs:
 	chmod +x image/gpjc_scripts/ca_script.sh
 	./image/gpjc_scripts/ca_script.sh
 
-run-docker: create-certs
+run-docker-uc1: create-certs
+	docker compose -f docker-compose-uc1.yaml up --build --remove-orphans -d --force-recreate --wait --wait-timeout 120
+
+stop-docker-uc1: 
+	docker compose -f docker-compose-uc1.yaml down --rmi local -v
+
+restart-docker-uc1:
+	docker compose -f docker-compose-uc1.yaml down --rmi local myc sgc bnm
+	docker compose -f docker-compose-uc1.yaml up --build myc sgc bnm -d
+
+run-docker-uc2: create-certs
 	docker compose -f docker-compose-uc2.yaml up --build --remove-orphans -d --force-recreate --wait --wait-timeout 120
 
-stop-docker: 
+stop-docker-uc2: 
 	docker compose -f docker-compose-uc2.yaml down --rmi local -v
 
-restart-docker:
+restart-docker-uc2:
 	docker compose -f docker-compose-uc2.yaml down --rmi local kr au
 	docker compose -f docker-compose-uc2.yaml up --build kr au -d
 

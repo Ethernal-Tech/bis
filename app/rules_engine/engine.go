@@ -361,78 +361,177 @@ func (e *RulesEngine) doNonInteractiveAML(complianceCheck models.ComplianceCheck
 }
 
 func (e *RulesEngine) doNonInteractiveAMT(complianceCheck models.ComplianceCheck, policyID int) {
-	// Only transfers in current year are taken into cumulative amount
-	complianceChecks, err := e.db.GetAllComplianceChecksForSenderInCurrentYear(complianceCheck.SenderId)
+	policy, err := e.db.GetPolicyById(policyID)
 	if err != nil {
 		errlog.Println(err)
+		return
 	}
 
-	complianceChecks = append(complianceChecks, complianceCheck)
-	cumulativeAmount := float64(0)
-	for _, complianceCheck := range complianceChecks {
-		// Convert currency with the use case assumption of 1 AUD = 0.65 USD
-		convertedAmount := float64(0)
-		if complianceCheck.Currency == "AUD" {
-			convertedAmount = float64(complianceCheck.Amount) * 0.65
-		} else if complianceCheck.Currency == "USD" {
-			convertedAmount = float64(complianceCheck.Amount)
-		} else {
-			errlog.Println(errors.New("unexpected currency in cumulative amount calculations"))
-		}
+	splitedParams := strings.Split(policy.Policy.Parameters, ",")
 
-		// Only amounts greather than 5000 USD are calculated into cumulative amount
-		if convertedAmount > 5000 {
-			cumulativeAmount += convertedAmount
-		}
+	// Cumulative amount limit == limit for payment verifiction == 5000
+	cumulativeAmountLimit, err := strconv.Atoi(splitedParams[0])
+	if err != nil {
+		errlog.Println(err)
+		return
 	}
 
-	if cumulativeAmount > 100_000 {
-		// Verify that the originator submitted reporting to the BoK
-		err := e.complianceCheckStateManager.UpdateComplianceCheckPolicyStatus(e.db, complianceCheck.Id, policyID, false, "Reporting submitted to BoK")
-		if err != nil {
-			errlog.Println(err)
-			return
-		}
-	} else {
-		// No reporting needed
-		err := e.complianceCheckStateManager.UpdateComplianceCheckPolicyStatus(e.db, complianceCheck.Id, policyID, false, "No reporting needed")
-		if err != nil {
-			errlog.Println(err)
-			return
-		}
+	reportingAmountLimit, err := strconv.Atoi(splitedParams[1])
+	if err != nil {
+		errlog.Println(err)
+		return
 	}
-}
 
-func (e *RulesEngine) doNonInteractiveNETT(complianceCheck models.ComplianceCheck, policyID int) {
-	// Convert currency with the use case assumption of 1 AUD = 0.65 USD
-	convertedAmount := float64(0)
+	var policyStatus string
+
+	// 1. Check compliance chek amount as in transfer amount with a 5000 limit for payment verifiction
+	// Convert currency with the use case assumption of 1 AUD = 0.65 USD if needed
 	if complianceCheck.Currency == "AUD" {
-		convertedAmount = float64(complianceCheck.Amount) * 0.65
+		convertedAmount := float64(complianceCheck.Amount) * 0.65
+		if convertedAmount > float64(cumulativeAmountLimit) {
+			policyStatus = "FEB verified the transfer reason"
+		} else {
+			policyStatus = "No FEB verification needed"
+		}
 	} else if complianceCheck.Currency == "USD" {
-		convertedAmount = float64(complianceCheck.Amount)
+		if complianceCheck.Amount > cumulativeAmountLimit {
+			policyStatus = "FEB verified the transfer reason"
+		} else {
+			policyStatus = "No FEB verification needed"
+		}
 	} else {
 		errlog.Println(errors.New("unexpected currency in cumulative amount calculations"))
 	}
 
-	if convertedAmount > 10_000 {
-		// Verify that the originator submitted reporting to the BoK
-		err := e.complianceCheckStateManager.UpdateComplianceCheckPolicyStatus(e.db, complianceCheck.Id, policyID, false, "Reporting submitted to BoK")
+	// Retrieve the Acquisition amount (A)
+	additionalParameter, err := e.db.GetTransactionPolicyAdditionalParameters(complianceCheck.Id, policyID)
+	if err != nil {
+		errlog.Println(err)
+		return
+	}
+
+	acquisitionAmount, err := strconv.Atoi(additionalParameter)
+	if err != nil {
+		errlog.Println(err)
+		return
+	}
+
+	if complianceCheck.Currency == "AUD" {
+		acquisitionAmount = int(float64(acquisitionAmount) * 0.65)
+	}
+
+	// If the Acquisition amount is lower than the limit then there are no actions needed
+	if acquisitionAmount > cumulativeAmountLimit {
+		// Update cumulative amount
+		cumulativeAmount, err := e.db.GetOrAddCumulativeAmount(complianceCheck.SenderId)
 		if err != nil {
 			errlog.Println(err)
 			return
 		}
-	} else if 10_000 >= convertedAmount && convertedAmount >= 5_000 {
-		// Verify that the originator submitted reporting to the Foreign exchange bank
-		err := e.complianceCheckStateManager.UpdateComplianceCheckPolicyStatus(e.db, complianceCheck.Id, policyID, false, "Reporting submitted to Foreign Exchange Bank")
-		if err != nil {
-			errlog.Println(err)
-			return
+
+		cumulativeAmount += int64(acquisitionAmount)
+		if cumulativeAmount > int64(reportingAmountLimit) {
+			policyStatus = policyStatus + ",Reporting submitted to BoK"
+		} else {
+			policyStatus = policyStatus + ",No reporting needed"
 		}
-	} else {
-		err := e.complianceCheckStateManager.UpdateComplianceCheckPolicyStatus(e.db, complianceCheck.Id, policyID, false, "No reportting needed")
+
+		err = e.db.UpdateCumulativeAmount(complianceCheck.SenderId, cumulativeAmount)
 		if err != nil {
 			errlog.Println(err)
 			return
 		}
 	}
+
+	err = e.complianceCheckStateManager.UpdateComplianceCheckPolicyStatus(e.db, complianceCheck.Id, policyID, false, policyStatus)
+	if err != nil {
+		errlog.Println(err)
+		return
+	}
+
+	/*	TODO: Currently beneficiary is not aware of these policies so this part is TBD
+		// Notify the beneficiary about the policy result
+		policyCheckResult := common.PolicyCheckResultDTO{
+			ComplianceCheckId: complianceCheck.Id,
+			Code:              policy.PolicyType.Code,
+			Name:              policy.PolicyType.Name,
+			Owner:             config.ResolveMyGlobalIdentifier(),
+			Result:            1,
+		}
+
+		_, err = e.p2pClient.Send(complianceCheck.BeneficiaryBankId, "policy-check-result", policyCheckResult, 0)
+		if err != nil {
+			errlog.Println(err)
+			return
+		}
+	*/
+}
+
+func (e *RulesEngine) doNonInteractiveNETT(complianceCheck models.ComplianceCheck, policyID int) {
+	policy, err := e.db.GetPolicyById(policyID)
+	if err != nil {
+		errlog.Println(err)
+		return
+	}
+
+	// Retrieve the Set-off amount
+	additionalParameter, err := e.db.GetTransactionPolicyAdditionalParameters(complianceCheck.Id, policyID)
+	if err != nil {
+		errlog.Println(err)
+		return
+	}
+
+	setOffAmount, err := strconv.Atoi(additionalParameter)
+	if err != nil {
+		errlog.Println(err)
+		return
+	}
+
+	limit, err := strconv.Atoi(policy.Policy.Parameters)
+	if err != nil {
+		errlog.Println(err)
+		return
+	}
+
+	var polictStatus string
+	// Convert currency with the use case assumption of 1 AUD = 0.65 USD
+	if complianceCheck.Currency == "AUD" {
+		convertedAmount := float64(setOffAmount) * 0.65
+		if convertedAmount > float64(limit) {
+			polictStatus = "Bilateral offset reported to FEB,Multilateral offset reported to BOK"
+		} else {
+			polictStatus = "No reporting required"
+		}
+	} else if complianceCheck.Currency == "USD" {
+		if setOffAmount > limit {
+			polictStatus = "Bilateral offset reported to FEB,Multilateral offset reported to BOK"
+		} else {
+			polictStatus = "No reporting required"
+		}
+	} else {
+		errlog.Println(errors.New("unexpected currency in cumulative amount calculations"))
+	}
+
+	err = e.complianceCheckStateManager.UpdateComplianceCheckPolicyStatus(e.db, complianceCheck.Id, policyID, false, polictStatus)
+	if err != nil {
+		errlog.Println(err)
+		return
+	}
+
+	/*	TODO: Currently beneficiary is not aware of these policies so this part is TBD
+		// Notify the beneficiary about the policy result
+		policyCheckResult := common.PolicyCheckResultDTO{
+			ComplianceCheckId: complianceCheck.Id,
+			Code:              policy.PolicyType.Code,
+			Name:              policy.PolicyType.Name,
+			Owner:             config.ResolveMyGlobalIdentifier(),
+			Result:            1,
+		}
+
+		_, err = e.p2pClient.Send(complianceCheck.BeneficiaryBankId, "policy-check-result", policyCheckResult, 0)
+		if err != nil {
+			errlog.Println(err)
+			return
+		}
+	*/
 }

@@ -192,6 +192,7 @@ services:
       - GPJC_PORT=10501
       - GPJC_PUBLISH_ADDR=0.0.0.0:4000
       - MY_GLOBAL_IDENTIFIER=yyyyyyyyyyyyyyyyyyyy
+      - PROOF_TYPE=noninteractive
     ports:
       - "4001:4000"
     depends_on:
@@ -245,6 +246,7 @@ services:
       - GPJC_API_ADDRESS=au
       - GPJC_PORT=10501
       - GPJC_PUBLISH_ADDR=0.0.0.0:4000
+      - PROOF_TYPE=noninteractive
     ports:
       - "4002:4000"
     depends_on:

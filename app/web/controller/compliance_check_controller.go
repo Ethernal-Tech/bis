@@ -6,6 +6,8 @@ import (
 	"bisgo/config"
 	"bisgo/errlog"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -38,6 +40,7 @@ func (c *ComplianceCheckController) AddComplianceCheck(w http.ResponseWriter, r 
 			Currency                        string `json:"currency"`
 			Amount                          string `json:"amount"`
 			BeneficiaryBankGlobalIdentifier string `json:"beneficiaryBank"`
+			Parameter                       string `json:"parameter"`
 		}{}
 
 		decoder := json.NewDecoder(r.Body)
@@ -110,11 +113,15 @@ func (c *ComplianceCheckController) AddComplianceCheck(w http.ResponseWriter, r 
 			return
 		}
 
-		/*
-			if data.Parameter != "" {
-				handleAddOnParameter(data.Parameter, complianceCheckId, transactionTypeId)
+		if data.Parameter != "" {
+			err := c.handleAdditionalParameter(data.Parameter, complianceCheckId, transactionTypeId)
+			if err != nil {
+				errlog.Println(err)
+
+				http.Error(w, "Internal Server Error", 500)
+				return
 			}
-		*/
+		}
 
 		// TODO: a compliance check status manager call instead of a direct state change
 		err = c.DB.UpdateComplianceCheckStatus(complianceCheckId, 1)
@@ -303,9 +310,66 @@ func (c *ComplianceCheckController) ConfirmComplianceCheck(w http.ResponseWriter
 			}
 		}
 
-		// Return to interactive for UC1
-		go c.RulesEngine.Do(complianceCheck.Id, "noninteractive")
+		go c.RulesEngine.Do(complianceCheck.Id, config.ResolveRuleEngineProofType())
 
 		http.Redirect(w, r, "/home", http.StatusSeeOther)
 	}
+}
+
+func (c *ComplianceCheckController) handleAdditionalParameter(additionalParameter string, complianceCheckId string, transactionTypeId int) error {
+	returnErr := errors.New("failed to add additional parameters to policies")
+
+	transactionTypes := c.DB.GetTransactionTypes()
+	for _, transactionType := range transactionTypes {
+		if transactionType.Id == transactionTypeId && transactionType.Code == "SECU" {
+			// There are 3 different amounts defined in the process of compliance check creation
+			// Acquisition amount (A): The total amount for acquiring securities
+			// Offset amount (B): The amount being offset in the transaction
+			// Payment amount (C): The actual amount being transferred (C = A - B)
+			// For the purposes of the checks we will pass C and A so we can calculate B
+
+			A, err := strconv.Atoi(additionalParameter)
+			if err != nil {
+				errlog.Println(err)
+				return returnErr
+			}
+
+			check, err := c.DB.GetComplianceCheckById(complianceCheckId)
+			if err != nil {
+				errlog.Println(err)
+				return returnErr
+			}
+
+			B := A - check.Amount
+
+			applicablePolices, err := c.DB.GetPoliciesByComplianceCheckId(complianceCheckId)
+			if err != nil {
+				errlog.Println(err)
+				return returnErr
+			}
+
+			for _, policy := range applicablePolices {
+				if policy.PolicyType.Code == "AMT" {
+					// AMT policy should check the Acquisition amount (A)
+					err = c.DB.UpdateTransactionPolicyAdditionalParameters(complianceCheckId, policy.Policy.Id, additionalParameter)
+					if err != nil {
+						errlog.Println(err)
+						return returnErr
+					}
+					continue
+				}
+
+				if policy.PolicyType.Code == "NETT" {
+					// NETT policy should check the Offset amount (B)
+					err = c.DB.UpdateTransactionPolicyAdditionalParameters(complianceCheckId, policy.Policy.Id, fmt.Sprintf("%d", B))
+					if err != nil {
+						errlog.Println(err)
+						return returnErr
+					}
+					continue
+				}
+			}
+		}
+	}
+	return nil
 }

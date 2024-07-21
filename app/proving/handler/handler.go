@@ -8,7 +8,6 @@ import (
 	"bisgo/config"
 	"bisgo/errlog"
 	"encoding/json"
-	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
@@ -99,7 +98,6 @@ func (h *ProvingHandler) HandleNonInteractiveProof(body []byte) {
 
 	h.DB.InsertTransactionProof(messageData.SanctionedCheckOutput.ComplianceCheckID, unescapedBody)
 
-	fmt.Println(messageData)
 	policyID, err := strconv.Atoi(messageData.SanctionedCheckOutput.PolicyID)
 	if err != nil {
 		errlog.Println(err)

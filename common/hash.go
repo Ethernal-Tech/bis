@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"math/rand"
+	"strings"
 	"time"
 )
 
@@ -50,4 +51,15 @@ func HashName(name string) []int {
 	}
 
 	return intArray
+}
+
+func IntArrayToHexString(array []int) string {
+	var hexStrings []string
+
+	for _, num := range array {
+		hexStr := fmt.Sprintf("%02x", num)
+		hexStrings = append(hexStrings, hexStr)
+	}
+
+	return "0x" + strings.Join(hexStrings, "")
 }

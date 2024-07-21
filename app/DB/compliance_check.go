@@ -6,7 +6,6 @@ import (
 	"bisgo/errlog"
 	"database/sql"
 	"errors"
-	"fmt"
 	"time"
 )
 
@@ -205,54 +204,4 @@ complianceCheck:
 	}
 
 	return successfulComplianceChecks, nil
-}
-
-func (h *DBHandler) GetAllComplianceChecksForSenderInCurrentYear(senderId int) ([]models.ComplianceCheck, error) {
-	returnErr := errors.New("unsuccessful obtainance of compliance checks for current year")
-	currentYear := time.Now().Year()
-	startDate := fmt.Sprintf("%d-01-01", currentYear)
-	endDate := fmt.Sprintf("%d-12-31", currentYear)
-
-	// TODO: Update StatusId to be the COMPLETED not CREATED when all states get defined
-	query := `
-		SELECT t.Id, t.OriginatorBankId, t.BeneficiaryBankId, t.SenderId, t.ReceiverId, 
-			t.Currency, t.Amount, t.TransactionTypeId, t.LoanId
-		FROM [Transaction] t
-		INNER JOIN [TransactionHistory] th ON t.Id = th.TransactionId
-		WHERE t.SenderId = @senderID
-		AND th.Date BETWEEN @startDate AND @endDate
-		AND th.StatusId = 1
-		ORDER BY th.Date DESC
-	`
-
-	rows, err := h.db.Query(query, sql.Named("senderID", senderId),
-		sql.Named("startDate", startDate),
-		sql.Named("endDate", endDate))
-	if err != nil {
-		errlog.Println(err)
-		return nil, returnErr
-	}
-	defer rows.Close()
-
-	var complianceChecks []models.ComplianceCheck
-	for rows.Next() {
-		var complianceCheck models.ComplianceCheck
-		err := rows.Scan(&complianceCheck.Id,
-			&complianceCheck.OriginatorBankId,
-			&complianceCheck.BeneficiaryBankId,
-			&complianceCheck.SenderId,
-			&complianceCheck.ReceiverId,
-			&complianceCheck.Currency,
-			&complianceCheck.Amount,
-			&complianceCheck.TransactionTypeId,
-			&complianceCheck.LoanId)
-		if err != nil {
-			errlog.Println(err)
-			return nil, returnErr
-		}
-
-		complianceChecks = append(complianceChecks, complianceCheck)
-	}
-
-	return complianceChecks, nil
 }

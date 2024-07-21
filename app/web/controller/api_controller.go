@@ -103,9 +103,9 @@ func (c *APIController) GetBeneficiaryBankPolicies(w http.ResponseWriter, r *htt
 		http.Error(w, "Internal Server Error", 500)
 		return
 	}
-	fmt.Println(originatorBankGlobalIdentifier, originatorJurisdiction, transactionTypeId)
-	fmt.Println(locallyApplicablePolicies)
-	// Add them to the responseData
+
+	// Add received + already existing applicable policies to the response
+	responseData.Policies = make([]common.PolicyDTO, 0, len(locallyApplicablePolicies))
 	for _, policy := range locallyApplicablePolicies {
 		policyType, err := c.DB.GetPolicyTypeById(policy.PolicyTypeId)
 		if err != nil {

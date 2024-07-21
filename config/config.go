@@ -126,3 +126,12 @@ func ResolveNonInteractiveAPIAddress() string {
 
 	return env_addr
 }
+
+func ResolveRuleEngineProofType() string {
+	env_var := os.Getenv("PROOF_TYPE")
+	if env_var == "" {
+		return "interactive"
+	}
+
+	return env_var
+}

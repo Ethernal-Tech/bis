@@ -47,6 +47,7 @@ function setElements() {
     amount = document.getElementById("amount")
     transactionType = document.getElementById("transaction-type")
     beneficiaryBank = document.getElementById("beneficiary-bank")
+    parameter = document.getElementById("parameter")
 
     senderLeiTI = document.getElementById("ti-sender-lei")
     senderNameTI = document.getElementById("ti-sender-name")
@@ -149,8 +150,8 @@ function upgradeView() {
             "transactionType": transactionType.value,
             "currency": currency.options[currency.selectedIndex].text,
             "amount": amount.value,
-            // TODO: Change to dropdown select
-            "beneficiaryBank": beneficiaryBank.value
+            "beneficiaryBank": beneficiaryBank.value,
+            "parameter": (parameter?.value ?? "")
         };
 
         fetch("/addcompliancecheck", {

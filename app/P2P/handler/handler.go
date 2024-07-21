@@ -307,8 +307,7 @@ func (h *P2PHandler) ConfirmComplianceCheck(messageID int, payload []byte) error
 		}
 	}
 
-	// Return to interactive for UC1
-	go h.RulesEngine.Do(complianceCheckConfirmation.ComplianceCheckId, "noninteractive")
+	go h.RulesEngine.Do(complianceCheckConfirmation.ComplianceCheckId, config.ResolveRuleEngineProofType())
 
 	return nil
 }
