@@ -41,10 +41,18 @@ func (h *ProvingHandler) HandleInteractiveProof(body []byte) {
 	values := strings.Split(messageData.Value, ";")
 	if strings.Split(values[0], ",")[1] == "0" {
 		result = 1
-		h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.ComplianceCheckID, policyID, false, "")
+		err = h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.ComplianceCheckID, policyID, false, "")
+		if err != nil {
+			errlog.Println(err)
+			return
+		}
 	} else {
 		result = 2
-		h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.ComplianceCheckID, policyID, true, "Entity is sanctioned")
+		err = h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.ComplianceCheckID, policyID, true, "Entity is sanctioned")
+		if err != nil {
+			errlog.Println(err)
+			return
+		}
 	}
 
 	// originator does't need to notify its central bank about the result
@@ -96,7 +104,13 @@ func (h *ProvingHandler) HandleNonInteractiveProof(body []byte) {
 		return
 	}
 
-	h.DB.InsertTransactionProof(messageData.SanctionedCheckOutput.ComplianceCheckID, unescapedBody)
+	marshaledOutput, err := json.Marshal(messageData.SanctionedCheckOutput)
+	if err != nil {
+		errlog.Println(err)
+		return
+	}
+
+	h.DB.InsertTransactionProof(messageData.SanctionedCheckOutput.ComplianceCheckID, string(marshaledOutput))
 
 	policyID, err := strconv.Atoi(messageData.SanctionedCheckOutput.PolicyID)
 	if err != nil {
@@ -112,12 +126,20 @@ func (h *ProvingHandler) HandleNonInteractiveProof(body []byte) {
 
 	result := 0
 	if messageData.Status == "Failed" {
-		h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.SanctionedCheckOutput.ComplianceCheckID, policyID, true, "Proof genereation failed")
+		err = h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.SanctionedCheckOutput.ComplianceCheckID, policyID, true, "Proof genereation failed")
+		if err != nil {
+			errlog.Println(err)
+			return
+		}
 		result = 2
 	} else {
 		if messageData.SanctionedCheckOutput.NotSanctioned {
 			// Passed sanction check
-			h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.SanctionedCheckOutput.ComplianceCheckID, policyID, false, "")
+			err = h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.SanctionedCheckOutput.ComplianceCheckID, policyID, false, "")
+			if err != nil {
+				errlog.Println(err)
+				return
+			}
 			result = 1
 		} else {
 			// Failed sanction check
@@ -168,7 +190,11 @@ func (h *ProvingHandler) HandleNonInteractiveProof(body []byte) {
 					}
 				}
 			}
-			h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.SanctionedCheckOutput.ComplianceCheckID, policyID, true, description)
+			err = h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.SanctionedCheckOutput.ComplianceCheckID, policyID, true, description)
+			if err != nil {
+				errlog.Println(err)
+				return
+			}
 			result = 2
 		}
 	}
@@ -197,4 +223,21 @@ func (h *ProvingHandler) HandleNonInteractiveProof(body []byte) {
 		}
 
 	}
+
+	/*	TODO: Currently beneficiary is not aware of these policies so this part is TBD
+		// Notify the beneficiary about the policy result
+		policyCheckResult := common.PolicyCheckResultDTO{
+			ComplianceCheckId: complianceCheck.Id,
+			Code:              policy.PolicyType.Code,
+			Name:              policy.PolicyType.Name,
+			Owner:             config.ResolveMyGlobalIdentifier(),
+			Result:            1,
+		}
+
+		_, err = e.p2pClient.Send(complianceCheck.BeneficiaryBankId, "policy-check-result", policyCheckResult, 0)
+		if err != nil {
+			errlog.Println(err)
+			return
+		}
+	*/
 }
