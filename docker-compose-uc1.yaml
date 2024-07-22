@@ -44,6 +44,7 @@ services:
       - GPJC_PORT=10501
       - GPJC_PUBLISH_ADDR=0.0.0.0:4000
       - MY_GLOBAL_IDENTIFIER=YYYYYYYYYYYYYYYYYYYY
+      - JURISDICTION_CODE=SG
     ports:
       - "4001:4000"
     depends_on:

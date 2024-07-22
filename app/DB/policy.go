@@ -115,7 +115,7 @@ func (h *DBHandler) GetPolicies(originatorBankId string, beneficiaryBankId strin
 	return policies, nil
 }
 
-// GetPolicies returns all policies that apply to the passed jurisdiction for the given transaction type.
+// GetAppliedPolicies returns all policies that apply to the passed jurisdiction for the given transaction type.
 func (h *DBHandler) GetAppliedPolicies(jurisdictionId string, transactionTypeId int) ([]models.PolicyAndItsType, error) {
 	returnErr := errors.New("unsuccessful obtainance of policies")
 
@@ -161,7 +161,7 @@ func (h *DBHandler) GetAppliedPolicies(jurisdictionId string, transactionTypeId 
 	return policies, nil
 }
 
-// GetPolicesByOwner provides the same functionality as [GetPolicies], but with additional filter on owner.
+// GetPolicesByOwner provides the same functionality as [GetAppliedPolicies], but with additional filter on owner.
 func (h *DBHandler) GetAppliedPoliciesByOwner(owner string, jurisdictionId string, transactionTypeId int) ([]models.PolicyAndItsType, error) {
 	returnErr := errors.New("unsuccessful get of policies")
 

@@ -104,13 +104,13 @@ func (h *ProvingHandler) HandleNonInteractiveProof(body []byte) {
 		return
 	}
 
-	marshaledOutput, err := json.Marshal(messageData.SanctionedCheckOutput)
+	marshaledSanctionedCheckOutput, err := json.Marshal(messageData.SanctionedCheckOutput)
 	if err != nil {
 		errlog.Println(err)
 		return
 	}
 
-	h.DB.InsertTransactionProof(messageData.SanctionedCheckOutput.ComplianceCheckID, string(marshaledOutput))
+	h.DB.InsertTransactionProof(messageData.SanctionedCheckOutput.ComplianceCheckID, string(marshaledSanctionedCheckOutput))
 
 	policyID, err := strconv.Atoi(messageData.SanctionedCheckOutput.PolicyID)
 	if err != nil {
@@ -199,21 +199,22 @@ func (h *ProvingHandler) HandleNonInteractiveProof(body []byte) {
 		}
 	}
 
+	policy, err := h.DB.GetPolicyById(policyID)
+	if err != nil {
+		errlog.Println(err)
+		return
+	}
+
 	// originator needs to notify beneficiary with the result and send the proof through
 	if check.OriginatorBankId == config.ResolveMyGlobalIdentifier() {
 		// notify beneficiary bank
-		policy, err := h.DB.GetPolicyById(policyID)
-		if err != nil {
-			errlog.Println(err)
-			return
-		}
-
 		policyCheckResult := common.PolicyCheckResultDTO{
 			ComplianceCheckId: check.Id,
 			Code:              policy.PolicyType.Code,
 			Name:              policy.PolicyType.Name,
 			Owner:             policy.Policy.Owner,
 			Result:            result,
+			Proof:             string(marshaledSanctionedCheckOutput),
 		}
 
 		_, err = h.P2PClient.Send(check.BeneficiaryBankId, "policy-check-result", policyCheckResult, 0)
@@ -221,23 +222,5 @@ func (h *ProvingHandler) HandleNonInteractiveProof(body []byte) {
 			errlog.Println(err)
 			return
 		}
-
 	}
-
-	/*	TODO: Currently beneficiary is not aware of these policies so this part is TBD
-		// Notify the beneficiary about the policy result
-		policyCheckResult := common.PolicyCheckResultDTO{
-			ComplianceCheckId: complianceCheck.Id,
-			Code:              policy.PolicyType.Code,
-			Name:              policy.PolicyType.Name,
-			Owner:             config.ResolveMyGlobalIdentifier(),
-			Result:            1,
-		}
-
-		_, err = e.p2pClient.Send(complianceCheck.BeneficiaryBankId, "policy-check-result", policyCheckResult, 0)
-		if err != nil {
-			errlog.Println(err)
-			return
-		}
-	*/
 }

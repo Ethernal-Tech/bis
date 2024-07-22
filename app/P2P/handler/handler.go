@@ -59,6 +59,39 @@ func (h *P2PHandler) AddComplianceCheck(messageID int, payload []byte) error {
 		return returnErr
 	}
 
+	// Insert potentialy sent policies by OB in the DB
+	if len(complianceCheck.OBApplicabePolicies) > 0 {
+		originatorJurisdiction, err := h.DB.GetBankJurisdiction(complianceCheck.OriginatorBankGlobalIdentifier)
+		if err != nil {
+			errlog.Println(err)
+			return returnErr
+		}
+
+		beneficiaryJurisdiction, err := h.DB.GetBankJurisdiction(complianceCheck.BeneficiaryBankGlobalIdentifier)
+		if err != nil {
+			errlog.Println(err)
+			return returnErr
+		}
+
+		for _, policy := range complianceCheck.OBApplicabePolicies {
+			if policy.Owner == config.ResolveMyGlobalIdentifier() {
+				continue
+			}
+
+			policyTypeId, err := h.DB.CreateOrGetPolicyType(policy.Code, policy.Name)
+			if err != nil {
+				errlog.Println(err)
+				return returnErr
+			}
+
+			_, _, err = h.DB.CreateOrUpdatePolicy(policyTypeId, policy.Owner, transactionType.Id, beneficiaryJurisdiction.Id, originatorJurisdiction.Id, beneficiaryJurisdiction.Id, policy.Params, 0)
+			if err != nil {
+				errlog.Println(err)
+				return returnErr
+			}
+		}
+	}
+
 	_, err = h.DB.AddComplianceCheck(models.ComplianceCheck{
 		Id:                complianceCheck.ComplianceCheckId,
 		OriginatorBankId:  complianceCheck.OriginatorBankGlobalIdentifier,
@@ -352,6 +385,10 @@ func (h *P2PHandler) ProcessPolicyCheckResult(messageID int, payload []byte) err
 	if err != nil {
 		errlog.Println(err)
 		return returnErr
+	}
+
+	if policyCheckResult.Proof != "" {
+		h.DB.InsertTransactionProof(complianceCheck.Id, policyCheckResult.Proof)
 	}
 
 	return nil

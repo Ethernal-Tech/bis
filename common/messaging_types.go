@@ -32,19 +32,20 @@ type TransactionDTO struct {
 }
 
 type ComplianceCheckDTO struct {
-	ComplianceCheckId               string `json:"compliance_check_id"`
-	OriginatorGlobalIdentifier      string `json:"originator_lei"`
-	OriginatorName                  string `json:"originator_name"`
-	BeneficiaryGlobalIdentifier     string `json:"beneficiary_lei"`
-	BeneficiaryName                 string `json:"beneficiary_name"`
-	OriginatorBankGlobalIdentifier  string `json:"originator_bank"`
-	BeneficiaryBankGlobalIdentifier string `json:"beneficiary_bank"`
-	PaymentType                     string `json:"payment_type"`
-	TransactionType                 string `json:"tx_type"`
-	Amount                          int    `json:"amount"`
-	Currency                        string `json:"currency"`
-	SwiftBICCode                    string `json:"swift_code"`
-	LoanId                          int    `json:"loan_id"`
+	ComplianceCheckId               string      `json:"compliance_check_id"`
+	OriginatorGlobalIdentifier      string      `json:"originator_lei"`
+	OriginatorName                  string      `json:"originator_name"`
+	BeneficiaryGlobalIdentifier     string      `json:"beneficiary_lei"`
+	BeneficiaryName                 string      `json:"beneficiary_name"`
+	OriginatorBankGlobalIdentifier  string      `json:"originator_bank"`
+	BeneficiaryBankGlobalIdentifier string      `json:"beneficiary_bank"`
+	PaymentType                     string      `json:"payment_type"`
+	TransactionType                 string      `json:"tx_type"`
+	Amount                          int         `json:"amount"`
+	Currency                        string      `json:"currency"`
+	SwiftBICCode                    string      `json:"swift_code"`
+	LoanId                          int         `json:"loan_id"`
+	OBApplicabePolicies             []PolicyDTO `json:"ob_policies"`
 }
 
 type PolicyRequestDTO struct {
@@ -80,6 +81,7 @@ type PolicyCheckResultDTO struct {
 	Name              string `json:"policy_name"`
 	Owner             string `json:"policy_owner"`
 	Result            int    `json:"policy_check_result"`
+	Proof             string `json:"proof"`
 }
 
 type MPCStartSignalDTO struct {

@@ -449,22 +449,20 @@ func (e *RulesEngine) doNonInteractiveAMT(complianceCheck models.ComplianceCheck
 		return
 	}
 
-	/*	TODO: Currently beneficiary is not aware of these policies so this part is TBD
-		// Notify the beneficiary about the policy result
-		policyCheckResult := common.PolicyCheckResultDTO{
-			ComplianceCheckId: complianceCheck.Id,
-			Code:              policy.PolicyType.Code,
-			Name:              policy.PolicyType.Name,
-			Owner:             config.ResolveMyGlobalIdentifier(),
-			Result:            1,
-		}
+	// Notify the beneficiary about the policy result
+	policyCheckResult := common.PolicyCheckResultDTO{
+		ComplianceCheckId: complianceCheck.Id,
+		Code:              policy.PolicyType.Code,
+		Name:              policy.PolicyType.Name,
+		Owner:             config.ResolveMyGlobalIdentifier(),
+		Result:            1,
+	}
 
-		_, err = e.p2pClient.Send(complianceCheck.BeneficiaryBankId, "policy-check-result", policyCheckResult, 0)
-		if err != nil {
-			errlog.Println(err)
-			return
-		}
-	*/
+	_, err = e.p2pClient.Send(complianceCheck.BeneficiaryBankId, "policy-check-result", policyCheckResult, 0)
+	if err != nil {
+		errlog.Println(err)
+		return
+	}
 }
 
 func (e *RulesEngine) doNonInteractiveNETT(complianceCheck models.ComplianceCheck, policyID int) {
@@ -518,20 +516,18 @@ func (e *RulesEngine) doNonInteractiveNETT(complianceCheck models.ComplianceChec
 		return
 	}
 
-	/*	TODO: Currently beneficiary is not aware of these policies so this part is TBD
-		// Notify the beneficiary about the policy result
-		policyCheckResult := common.PolicyCheckResultDTO{
-			ComplianceCheckId: complianceCheck.Id,
-			Code:              policy.PolicyType.Code,
-			Name:              policy.PolicyType.Name,
-			Owner:             config.ResolveMyGlobalIdentifier(),
-			Result:            1,
-		}
+	// Notify the beneficiary about the policy result
+	policyCheckResult := common.PolicyCheckResultDTO{
+		ComplianceCheckId: complianceCheck.Id,
+		Code:              policy.PolicyType.Code,
+		Name:              policy.PolicyType.Name,
+		Owner:             config.ResolveMyGlobalIdentifier(),
+		Result:            1,
+	}
 
-		_, err = e.p2pClient.Send(complianceCheck.BeneficiaryBankId, "policy-check-result", policyCheckResult, 0)
-		if err != nil {
-			errlog.Println(err)
-			return
-		}
-	*/
+	_, err = e.p2pClient.Send(complianceCheck.BeneficiaryBankId, "policy-check-result", policyCheckResult, 0)
+	if err != nil {
+		errlog.Println(err)
+		return
+	}
 }

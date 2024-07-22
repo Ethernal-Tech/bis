@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"strconv"
 	"strings"
@@ -77,6 +78,9 @@ func (c *ComplianceCheckController) AddComplianceCheck(w http.ResponseWriter, r 
 		}
 
 		// TODO: potentially handle loan
+		min := 1000000
+		max := 9999999
+		loanID := rand.Intn(max-min) + min
 
 		originatorId, err := c.DB.CreateOrGetBankClient(data.OriginatorGlobalIdentifier, data.OriginatorName, "", originatorBankGlobalIdentifier)
 		if err != nil {
@@ -102,7 +106,7 @@ func (c *ComplianceCheckController) AddComplianceCheck(w http.ResponseWriter, r 
 			Currency:          data.Currency,
 			Amount:            amount,
 			TransactionTypeId: transactionTypeId,
-			LoanId:            0,
+			LoanId:            loanID,
 		}
 
 		complianceCheckId, err := c.DB.AddComplianceCheck(complianceCheck)
@@ -140,6 +144,38 @@ func (c *ComplianceCheckController) AddComplianceCheck(w http.ResponseWriter, r 
 			return
 		}
 
+		// Query OB's applicable policies so they can be sent and displayed
+		// for the BB's compliance check history
+		obApplicablePolicies, err := c.DB.GetAppliedPolicies(config.ResolveJurisdictionCode(), transactionTypeId)
+		if err != nil {
+			errlog.Println(err)
+
+			http.Error(w, "Internal Server Error", 500)
+			return
+		}
+		obPolicies := make([]common.PolicyDTO, 0)
+
+		if len(obApplicablePolicies) > 0 {
+			beneficiaryJurisdiction, err := c.DB.GetBankJurisdiction(data.BeneficiaryBankGlobalIdentifier)
+			if err != nil {
+				errlog.Println(err)
+
+				http.Error(w, "Internal Server Error", 500)
+				return
+			}
+
+			for _, obPolicy := range obApplicablePolicies {
+				if obPolicy.Policy.BeneficiaryJurisdictionId == beneficiaryJurisdiction.Id {
+					obPolicies = append(obPolicies, common.PolicyDTO{
+						Code:   obPolicy.PolicyType.Code,
+						Name:   obPolicy.PolicyType.Name,
+						Params: obPolicy.Policy.Parameters,
+						Owner:  obPolicy.Policy.Owner,
+					})
+				}
+			}
+		}
+
 		complianceCheckDTO := common.ComplianceCheckDTO{
 			ComplianceCheckId:               complianceCheckId,
 			OriginatorGlobalIdentifier:      data.OriginatorGlobalIdentifier,
@@ -153,7 +189,8 @@ func (c *ComplianceCheckController) AddComplianceCheck(w http.ResponseWriter, r 
 			Amount:                          amount,
 			Currency:                        data.Currency,
 			SwiftBICCode:                    "",
-			LoanId:                          0,
+			LoanId:                          loanID,
+			OBApplicabePolicies:             obPolicies,
 		}
 
 		_, err = c.P2PClient.Send(data.BeneficiaryBankGlobalIdentifier, "new-compliance-check", complianceCheckDTO, 0)
