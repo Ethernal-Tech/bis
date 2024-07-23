@@ -82,6 +82,7 @@ type PolicyCheckResultDTO struct {
 	Owner             string `json:"policy_owner"`
 	Result            int    `json:"policy_check_result"`
 	Proof             string `json:"proof"`
+	ForwardTo         string `json:"forward_to"`
 }
 
 type MPCStartSignalDTO struct {

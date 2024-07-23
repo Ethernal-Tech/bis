@@ -391,6 +391,16 @@ func (h *P2PHandler) ProcessPolicyCheckResult(messageID int, payload []byte) err
 		h.DB.InsertTransactionProof(complianceCheck.Id, policyCheckResult.Proof)
 	}
 
+	if policyCheckResult.ForwardTo != "" {
+		forwardToGlobalIdentifier := policyCheckResult.ForwardTo
+		policyCheckResult.ForwardTo = ""
+		_, err = h.P2PClient.Send(forwardToGlobalIdentifier, "policy-check-result", policyCheckResult, 0)
+		if err != nil {
+			errlog.Println(err)
+			return returnErr
+		}
+	}
+
 	return nil
 }
 

@@ -10,11 +10,14 @@ import (
 	"bisgo/common"
 	"bisgo/config"
 	"bisgo/errlog"
+	"encoding/hex"
 	"errors"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/ethereum/go-ethereum/crypto"
 )
 
 type RulesEngine struct {
@@ -292,6 +295,19 @@ func (e *RulesEngine) interactiveCapitalFlowManagement(complianceCheck models.Co
 
 	var policyCheckResult common.PolicyCheckResultDTO
 
+	signCFMResult := func(compliance_check_id string, result int) string {
+		message := fmt.Sprintf("%s,%d", compliance_check_id, result)
+
+		// TODO: Align with the SC flow (which keys will we use in the system, possible env secret needed)
+		key := common.KeyGen()
+
+		signature := common.Sign(message, key)
+
+		address := crypto.PubkeyToAddress(key.PublicKey)
+
+		return strings.Join([]string{message, address.String(), hex.EncodeToString(signature)}, ";")
+	}
+
 	// (if) CFM policy check successful
 	// (else) otherwise, unsuccessful
 	if amount <= float64(limit) {
@@ -301,12 +317,17 @@ func (e *RulesEngine) interactiveCapitalFlowManagement(complianceCheck models.Co
 			return
 		}
 
+		proof := signCFMResult(complianceCheck.Id, 0)
+		e.db.InsertTransactionProof(complianceCheck.Id, proof)
+
 		policyCheckResult = common.PolicyCheckResultDTO{
 			ComplianceCheckId: complianceCheck.Id,
 			Code:              "CFM",
 			Name:              "Capital Flow Management",
 			Owner:             config.ResolveMyGlobalIdentifier(),
 			Result:            1,
+			ForwardTo:         complianceCheck.OriginatorBankId,
+			Proof:             proof,
 		}
 	} else {
 		err := e.complianceCheckStateManager.UpdateComplianceCheckPolicyStatus(e.db, complianceCheck.Id, policy.Policy.Id, true, "")
@@ -315,24 +336,22 @@ func (e *RulesEngine) interactiveCapitalFlowManagement(complianceCheck models.Co
 			return
 		}
 
+		proof := signCFMResult(complianceCheck.Id, 1)
+		e.db.InsertTransactionProof(complianceCheck.Id, proof)
+
 		policyCheckResult = common.PolicyCheckResultDTO{
 			ComplianceCheckId: complianceCheck.Id,
 			Code:              "CFM",
 			Name:              "Capital Flow Management",
 			Owner:             config.ResolveMyGlobalIdentifier(),
 			Result:            2,
+			ForwardTo:         complianceCheck.OriginatorBankId,
+			Proof:             proof,
 		}
 	}
 
 	// send CFM policy check result to the beneficiary bank
 	_, err = e.p2pClient.Send(complianceCheck.BeneficiaryBankId, "policy-check-result", policyCheckResult, 0)
-	if err != nil {
-		errlog.Println(err)
-		return
-	}
-
-	// send CFM policy check result to the originator bank
-	_, err = e.p2pClient.Send(complianceCheck.OriginatorBankId, "policy-check-result", policyCheckResult, 0)
 	if err != nil {
 		errlog.Println(err)
 		return
