@@ -1,0 +1,265 @@
+name: mandala
+
+services:
+  rabbitmq-ob:
+    image: docker.io/rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_VHOST: celery
+    ports:
+      - "5672"
+      - "15672"
+    networks:
+      peers:
+        ipv4_address: 172.22.1.254
+  rabbitmq-bb:
+    image: docker.io/rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_VHOST: celery
+    ports:
+      - "5672"
+      - "15672"
+    networks:
+      peers:
+        ipv4_address: 172.22.2.254
+  redis-ob:
+    image: docker.io/redis:7
+    command: --save 60 1 --loglevel warning
+    ports:
+      - "6379"
+    networks:
+      peers:
+        ipv4_address: 172.22.1.253
+  redis-bb:
+    image: docker.io/redis:7
+    command: --save 60 1 --loglevel warning
+    ports:
+      - "6379"
+    networks:
+      peers:
+        ipv4_address: 172.22.2.253
+
+  bootstrap-ob:
+    restart: always
+    build: &build
+      context: ./mandala-p2p-client
+      dockerfile: image/Dockerfile
+      args:
+        IMAGE_FQDN: docker.io/nvidia/cuda:12.3.2-devel-ubuntu22.04
+    #runtime: &runtime nvidia
+    environment: &bootstrap_env
+      EXPIRE_TIME: "604800"
+      PUBLISH_ADDR: http://localhost/compliance/publish
+      BOOTSTRAP_NODE: "true"
+      PEER_SEED: "42"
+      HTTP_ADDR: 127.0.0.1
+      HTTP_PORT: &http_port "80"
+      PEER_PORT: &peer_port "37000"
+      BOOTSTRAP_PEER_PORT: *peer_port
+      BOOTSTRAP_PEER_ID: &bb_peer_id 12D3KooWG9eizGC7AwkrwpNfcmrQtvWQ4yGrRQgGTTurkLtUwhZG
+      BOOTSTRAP_IP: &bb_http_addr 172.22.2.0
+      FORWARD_REQUEST_HOST: http://bok:4000/p2p
+      INSTITUTION_NAME: "RVHOHKPBCJ2GSJ37YH94" # KR
+      NVIDIA_VISIBLE_DEVICES: all
+      RISC0_WORK_DIR: /tmp/r0
+    ports: &ports
+      - *http_port
+      - *peer_port
+    healthcheck: &healthcheck
+      test: /healthcheck.sh
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    networks:
+      peers:
+        ipv4_address: &ob_http_addr 172.22.1.0
+
+  bootstrap-bb:
+    restart: always
+    build: *build
+    #runtime: *runtime
+    environment:
+      !!merge <<: *bootstrap_env
+      PEER_SEED: "421"
+      BOOTSTRAP_PEER_ID: &ob_peer_id 12D3KooW9z8jijSnjH85ZwTLyGGhqPujfn15uRpzx24QQiPZcUAE
+      BOOTSTRAP_IP: *ob_http_addr
+      FORWARD_REQUEST_HOST: http://rba:4000/p2p
+      INSTITUTION_NAME: "5493003GYPR7VI37GG77" # RBA
+    ports: *ports
+    healthcheck: *healthcheck
+    networks:
+      peers:
+        ipv4_address: *bb_http_addr
+
+  ob-peer1:
+    restart: always
+    build: *build
+    container_name: kr-p2p
+    volumes: &volumes
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /tmp/r0:/tmp/r0
+    environment:
+      !!merge <<: *bootstrap_env
+      AMQP_ADDR: amqp://rabbitmq-ob:5672/celery
+      REDIS_ADDR: redis://redis-ob:6379
+      EXPIRE_TIME: "604800"
+      PUBLISH_ADDR: http://kr:4000/proof/noninteractive
+      BOOTSTRAP_NODE: "false"
+      PEER_SEED: "ob-1"
+      BOOTSTRAP_PEER_ID: *ob_peer_id
+      BOOTSTRAP_IP: *ob_http_addr
+      FORWARD_REQUEST_HOST: http://kr:4000/p2p
+      INSTITUTION_NAME: "yyyyyyyyyyyyyyyyyyyy" # KRC
+      NVIDIA_VISIBLE_DEVICES: all
+      RISC0_WORK_DIR: /tmp/r0
+    ports: *ports
+    healthcheck: *healthcheck
+    networks:
+      peers:
+        ipv4_address: 172.22.1.1
+    depends_on:
+      - bootstrap-ob
+      - rabbitmq-ob
+      - redis-ob
+
+  bb-peer1:
+    restart: always
+    build: *build
+    container_name: au-p2p
+    volumes: *volumes
+    environment:
+      !!merge <<: *bootstrap_env
+      AMQP_ADDR: amqp://rabbitmq-bb:5672/celery
+      REDIS_ADDR: redis://redis-bb:6379
+      BOOTSTRAP_NODE: "false"
+      PEER_SEED: "bb-1"
+      BOOTSTRAP_PEER_ID: *bb_peer_id
+      BOOTSTRAP_IP: *bb_http_addr
+      FORWARD_REQUEST_HOST: http://au:4000/p2p
+      INSTITUTION_NAME: "xxxxxxxxxxxxxxxxxxxx" # AUC
+    ports: *ports
+    healthcheck: *healthcheck
+    networks:
+      peers:
+        ipv4_address: 172.22.2.1
+    depends_on:
+      - bootstrap-bb
+      - rabbitmq-bb
+      - redis-bb
+
+  sql-database-kr:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sql-database-kr
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: Ethernal123
+    ports:
+      - "1434:1433"
+    networks:
+      - peers
+    volumes:
+      - ./app/DB/scripts/:/docker-entrypoint-initdb/scripts/
+    command: >
+      /bin/bash -c " /opt/mssql/bin/sqlservr & sleep 30 &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.03_CreateBISdbUC2_1.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.03_InsertDataUC2_1.sql && /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.05_KRCPolicy.sql && wait"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -Q \"IF EXISTS (SELECT name FROM sys.databases WHERE name = 'BIS1') SELECT 1 ELSE SELECT 0\" | grep -q 1"
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 2m
+
+  kr:
+    build:
+      context: .
+      dockerfile: image/Dockerfile
+      args:
+        - DNS_NAME=kr
+    container_name: kr
+    environment:
+      - DB_ADDRESS=sql-database-kr
+      - DB_PORT=1433
+      - DB_NAME=BIS1
+      - DB_PASSWORD=Ethernal123
+      - SERVER_PORT=4000
+      - P2P_NODE_ADDRESS=http://kr-p2p:80/passthrough
+      - NONINTERACTIVE_API_ADDRESS=http://kr-p2p:80/compliance/check-sanctioned
+      - JURISDICTION_CODE=KR
+      - GPJC_API_ADDRESS=kr
+      - GPJC_PORT=10501
+      - GPJC_PUBLISH_ADDR=0.0.0.0:4000
+      - MY_GLOBAL_IDENTIFIER=yyyyyyyyyyyyyyyyyyyy
+      - PROOF_TYPE=noninteractive
+    ports:
+      - "4001:4000"
+    depends_on:
+      sql-database-kr:
+        condition: service_healthy
+    networks:
+      - peers
+
+  sql-database-au:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sql-database-au
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: Ethernal123
+    ports:
+      - "1435:1433"
+    networks:
+      - peers
+    volumes:
+      - ./app/DB/scripts/:/docker-entrypoint-initdb/scripts/
+    command: >
+      /bin/bash -c " /opt/mssql/bin/sqlservr & sleep 30 &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.03_CreateBISdbUC2_1.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.03_InsertDataUC2_1.sql && wait"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -Q \"IF EXISTS (SELECT name FROM sys.databases WHERE name = 'BIS1') SELECT 1 ELSE SELECT 0\" | grep -q 1"
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 2m
+
+  au:
+    build:
+      context: .
+      dockerfile: image/Dockerfile
+      args:
+        - DNS_NAME=au
+    container_name: au
+    environment:
+      - DB_ADDRESS=sql-database-au
+      - DB_PORT=1433
+      - DB_NAME=BIS1
+      - DB_PASSWORD=Ethernal123
+      - SERVER_PORT=4000
+      - MY_GLOBAL_IDENTIFIER=xxxxxxxxxxxxxxxxxxxx
+      - JURISDICTION_CODE=AU
+      - P2P_NODE_ADDRESS=http://au-p2p:80/passthrough
+      - NONINTERACTIVE_API_ADDRESS=http://au-p2p:80/compliance/check-sanctioned
+      - GPJC_API_ADDRESS=au
+      - GPJC_PORT=10501
+      - GPJC_PUBLISH_ADDR=0.0.0.0:4000
+      - PROOF_TYPE=noninteractive
+    ports:
+      - "4002:4000"
+    depends_on:
+      sql-database-au:
+        condition: service_healthy
+    networks:
+      - peers
+
+networks:
+  peers:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.22.0.0/16
+          gateway: 172.22.0.1

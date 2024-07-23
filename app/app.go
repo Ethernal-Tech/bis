@@ -6,8 +6,8 @@ import (
 	provingserver "bisgo/app/proving/server"
 	webserver "bisgo/app/web/server"
 	"bisgo/config"
+	"bisgo/errlog"
 	"fmt"
-	"log"
 	"net/http"
 	"strings"
 )
@@ -33,11 +33,11 @@ func Run() {
 
 	defer DB.Close()
 
-	fmt.Println("The server starts at", app.Addr)
-	err := app.ListenAndServe()
+	fmt.Println("Starting server at port", strings.Split(app.Addr, ":")[1])
 
+	err := app.ListenAndServe()
 	if err != nil {
-		log.Fatalf("\033[31m" + "Failed to start the server!" + "\033[31m")
+		errlog.Println(err)
 	}
 }
 

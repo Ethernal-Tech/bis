@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"bisgo/app/models"
 	"log"
 	"math"
 	"net/http"
@@ -21,8 +22,8 @@ func (controller *CBController) ShowAnalytics(w http.ResponseWriter, r *http.Req
 	viewData["country"] = controller.SessionManager.GetString(r.Context(), "country")
 	viewData["centralBankEmployee"] = controller.SessionManager.GetBool(r.Context(), "centralBankEmployee")
 
-	centralBankId := controller.SessionManager.Get(r.Context(), "bankId").(uint64)
-	transactions, countryId := controller.DB.GetTransactionsForCentralbank(centralBankId, "")
+	centralBankId := controller.SessionManager.Get(r.Context(), "bankId").(string)
+	transactions, countryId := controller.DB.GetCentralBankTransactions(centralBankId, models.SearchModel{})
 
 	sentAmount := 0
 	receivedAmount := 0
@@ -40,17 +41,17 @@ func (controller *CBController) ShowAnalytics(w http.ResponseWriter, r *http.Req
 				receivedAmount += tx.Amount
 			}
 		} else if tx.Status == "CANCELED" {
-			policyStatuses := controller.DB.GetTransactionPolicyStatuses(tx.Id)
+			//policyStatuses := controller.DB.GetTransactionPolicyStatuses(tx.Id)
 
-			for _, policyStatus := range policyStatuses {
-				policy := controller.DB.GetPolicyById(policyStatus.PolicyId)
-				if policy.Code == "CFM" && policyStatus.Status == 2 {
-					failedBecauseOfCFMCheck += 1
-				}
-				if policy.Code == "SCL" && policyStatus.Status == 2 {
-					failedBecauseOfSanctionsCheck += 1
-				}
-			}
+			// for _, policyStatus := range policyStatuses {
+			// 	policy := controller.DB.GetPolicyById(policyStatus.PolicyId)
+			// 	if policy.Code == "CFM" && policyStatus.Status == 2 {
+			// 		failedBecauseOfCFMCheck += 1
+			// 	}
+			// 	if policy.Code == "SCL" && policyStatus.Status == 2 {
+			// 		failedBecauseOfSanctionsCheck += 1
+			// 	}
+			// }
 		}
 	}
 

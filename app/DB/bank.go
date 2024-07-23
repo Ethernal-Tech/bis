@@ -2,14 +2,18 @@ package DB
 
 import (
 	"bisgo/app/models"
+	"bisgo/errlog"
 	"database/sql"
+	"errors"
 	"log"
 )
 
 func (wrapper *DBHandler) Login(username, password string) *models.BankEmployeeModel {
-	query := `SELECT [BankEmployee].Name Name, Username, Password, BankId, [Bank].Name BankName
-			  FROM [dbo].[BankEmployee], [dbo].[Bank]
-			  WHERE BankId = [Bank].Id AND Username = @p1 AND Password = @p2`
+	query := `SELECT be.Name, be.Username, be.Password, be.BankId, b.Name BankName, j.Name Jurisdiction
+				FROM [dbo].[BankEmployee] be
+				JOIN [dbo].[Bank] b ON be.BankId = b.GlobalIdentifier
+				JOIN [dbo].[Jurisdiction] j ON b.JurisdictionId = j.Id
+			  	WHERE be.Username = @p1 AND be.Password = @p2`
 
 	rows, err := wrapper.db.Query(query, sql.Named("p1", username), sql.Named("p2", password))
 	if err != nil {
@@ -19,7 +23,7 @@ func (wrapper *DBHandler) Login(username, password string) *models.BankEmployeeM
 
 	if rows.Next() {
 		var user models.BankEmployeeModel
-		if err := rows.Scan(&user.Name, &user.Username, &user.Password, &user.BankId, &user.BankName); err != nil {
+		if err := rows.Scan(&user.Name, &user.Username, &user.Password, &user.BankId, &user.BankName, &user.Country); err != nil {
 			log.Println("Error scanning row:", err)
 			return nil
 		}
@@ -31,15 +35,15 @@ func (wrapper *DBHandler) Login(username, password string) *models.BankEmployeeM
 
 func (wrapper *DBHandler) IsCentralBankEmployee(username string) bool {
 	query := `SELECT CASE
-					WHEN EXISTS (
-						SELECT 1
-						FROM BankEmployee AS be
-						LEFT JOIN Bank AS b ON b.Id = be.BankId
-						WHERE be.username = @p1 AND b.BankTypeId = @p2
-					)
-					THEN 'true'
-					ELSE 'false'
-				END AS CentralBankEmployee;`
+                  WHEN EXISTS (
+                    SELECT 1
+                    FROM BankEmployee AS be
+                    JOIN Bank AS b ON b.GlobalIdentifier = be.BankId
+                    WHERE be.Username = @p1 AND b.BankTypeId = @p2
+                  )
+                  THEN 'true'
+                  ELSE 'false'
+              END AS CentralBankEmployee;`
 
 	rows, err := wrapper.db.Query(query, sql.Named("p1", username), sql.Named("p2", models.CentralBank))
 	if err != nil {
@@ -58,74 +62,48 @@ func (wrapper *DBHandler) IsCentralBankEmployee(username string) bool {
 	return CentralBankEmployee
 }
 
-func (wrapper *DBHandler) GetBankId(bankName string) uint64 {
-	query := `SELECT Id FROM [Bank] WHERE name = @p1`
+// GetBankIdByName returns the id (global identifier) of the selected (bankName) bank.
+func (h *DBHandler) GetBankIdByName(bankName string) (string, error) {
+	query := `SELECT GlobalIdentifier FROM Bank WHERE Name = @p1`
 
-	rows, err := wrapper.db.Query(query, sql.Named("p1", bankName))
-
+	var bankId string
+	err := h.db.QueryRow(query, sql.Named("p1", bankName)).Scan(&bankId)
 	if err != nil {
-		log.Fatal(err)
+		errlog.Println(err)
+		return "", errors.New("unsuccessful obtainance of bank id")
 	}
 
-	defer rows.Close()
-
-	var bankId uint64
-	for rows.Next() {
-		if err := rows.Scan(&bankId); err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	return bankId
+	return bankId, nil
 }
 
-func (wrapper *DBHandler) GetBankClientId(bankClientName string) uint64 {
-	query := `SELECT Id FROM [BankClient] WHERE Name = @p1`
+// GetBankByID returns the bank with specified GlobalIdentifier.
+func (h *DBHandler) GetBankByGlobalIdentifier(bankGlobalIdentifier string) (models.NewBank, error) {
+	query := `
+        SELECT GlobalIdentifier, Name, Address, JurisdictionId, BankTypeId
+        FROM Bank
+        WHERE GlobalIdentifier = @globalIdentifier
+    `
 
-	rows, err := wrapper.db.Query(query, sql.Named("p1", bankClientName))
-
+	var bank models.NewBank
+	err := h.db.QueryRow(query, sql.Named("globalIdentifier", bankGlobalIdentifier)).Scan(
+		&bank.GlobalIdentifier,
+		&bank.Name,
+		&bank.Address,
+		&bank.JurisdictionId,
+		&bank.BankTypeId,
+	)
 	if err != nil {
-		log.Fatal(err)
-	}
-	defer rows.Close()
-
-	var bankClientId uint64
-	for rows.Next() {
-		if err := rows.Scan(&bankClientId); err != nil {
-			log.Fatal(err)
-		}
+		errlog.Println(err)
+		return bank, errors.New("unsuccessful obtainance of bank id")
 	}
 
-	return bankClientId
-}
-
-func (wrapper *DBHandler) GetBank(bankId uint64) models.Bank {
-	query := `SELECT b.Id, b.Name, b.CountryId
-					From Bank b
-					WHERE b.Id = @p1`
-
-	rows, err := wrapper.db.Query(query, sql.Named("p1", bankId))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer rows.Close()
-
-	var bank models.Bank
-
-	for rows.Next() {
-		if err := rows.Scan(&bank.Id, &bank.Name, &bank.CountryId); err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	return bank
+	return bank, nil
 }
 
 func (wrapper *DBHandler) GetBanks() []models.BankModel {
-	query := `SELECT b.Id, b.Name, c.Name
-					From Bank b
-					JOIN Country as c ON c.Id = b.CountryId`
+	query := `SELECT b.GlobalIdentifier, b.Name, j.Name JurisdictionName
+          FROM Bank b
+          JOIN Jurisdiction j ON b.JurisdictionId = j.Id`
 
 	rows, err := wrapper.db.Query(query)
 	if err != nil {
@@ -145,68 +123,54 @@ func (wrapper *DBHandler) GetBanks() []models.BankModel {
 	return banks
 }
 
-func (wrapper *DBHandler) GetCountry(countryId uint) models.Country {
-	query := `SELECT c.Id, c.Name, c.CountryCode
-					From Country c
-					WHERE c.Id = @p1`
+func (wrapper *DBHandler) GetClientByID(clientID uint) models.NewBankClient {
+	query := `SELECT Id, GlobalIdentifier, Name, Address, BankId FROM BankClient WHERE Id = @p1`
 
-	rows, err := wrapper.db.Query(query, sql.Named("p1", countryId))
+	var client models.NewBankClient
+	err := wrapper.db.QueryRow(query, sql.Named("p1", clientID)).Scan(&client.Id, &client.GlobalIdentifier, &client.Name, &client.Address, &client.BankId)
 	if err != nil {
+		if err == sql.ErrNoRows {
+			return models.NewBankClient{}
+		}
 		log.Fatal(err)
 	}
 
-	defer rows.Close()
-
-	var country models.Country
-
-	for rows.Next() {
-		if err := rows.Scan(&country.Id, &country.Name, &country.CountryCode); err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	return country
+	return client
 }
 
-// ------------------------------------------------------------------------------------------------
-func (wrapper *DBHandler) GetBankIdByIdentifier(identifier string) uint64 {
-	query := `SELECT Id FROM [Bank] WHERE GlobalIdentifier = @p1`
+// CreateOrGetBankClient creates a new bank client and returns its id.
+// If bank client already exists, method only returns id.
+func (h *DBHandler) CreateOrGetBankClient(globalIdentifier, name, address, bankId string) (int, error) {
+	returnErr := errors.New("unsuccessful creation/obtainance of bank client/its id")
 
-	rows, err := wrapper.db.Query(query, sql.Named("p1", identifier))
+	// query to check if the bank client already exists in the system
+	query := `SELECT Id FROM BankClient WHERE GlobalIdentifier = @p1 AND Name = @p2`
 
+	var bankClientId int
+	err := h.db.QueryRow(query,
+		sql.Named("p1", globalIdentifier),
+		sql.Named("p2", name)).Scan(&bankClientId)
+
+	// if policy type (row) doesn't exist, error [sql.ErrNoRows] appears
 	if err != nil {
-		log.Fatal(err)
-	}
+		// check for potentially some other type of error
+		if err != sql.ErrNoRows {
+			errlog.Println(err)
+			return -1, returnErr
+		}
 
-	defer rows.Close()
-
-	var bankId uint64
-	for rows.Next() {
-		if err := rows.Scan(&bankId); err != nil {
-			log.Fatal(err)
+		// query to instert a new bank client and get its id
+		query := `INSERT INTO BankClient (GlobalIdentifier, Name, Address, BankId) OUTPUT INSERTED.Id VALUES (@p1, @p2, @p3, @p4)`
+		err = h.db.QueryRow(query,
+			sql.Named("p1", globalIdentifier),
+			sql.Named("p2", name),
+			sql.Named("p3", address),
+			sql.Named("p4", bankId)).Scan(&bankClientId)
+		if err != nil {
+			errlog.Println(err)
+			return -1, returnErr
 		}
 	}
 
-	return bankId
-}
-
-func (wrapper *DBHandler) GetBankGlobalIdentifier(id int) string {
-	query := `SELECT GlobalIdentifier FROM [Bank] WHERE Id = @p1`
-
-	rows, err := wrapper.db.Query(query, sql.Named("p1", id))
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer rows.Close()
-
-	var bankGlobalIdentifier string
-	for rows.Next() {
-		if err := rows.Scan(&bankGlobalIdentifier); err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	return bankGlobalIdentifier
+	return bankClientId, nil
 }

@@ -1,0 +1,309 @@
+version: '3.8'
+
+services:
+  sql-database-sgc:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sql-database-sgc
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: Ethernal123
+    ports:
+      - "1434:1433"
+    networks:
+      - peers
+    volumes:
+      - ./app/DB/scripts/:/docker-entrypoint-initdb/scripts/
+    command: >
+      /bin/bash -c " /opt/mssql/bin/sqlservr & sleep 30 &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.03_CreateBISdb1.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.03_InsertData1.sql &&  wait"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -Q \"IF EXISTS (SELECT name FROM sys.databases WHERE name = 'BIS1') SELECT 1 ELSE SELECT 0\" | grep -q 1"
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 2m
+
+  sgc:
+    build:
+      context: .
+      dockerfile: image/Dockerfile
+      args:
+        - DNS_NAME=sgc
+    container_name: sgc
+    environment:
+      - DB_ADDRESS=sql-database-sgc
+      - DB_PORT=1433
+      - DB_NAME=BIS1
+      - DB_PASSWORD=Ethernal123
+      - SERVER_PORT=4000
+      - P2P_NODE_ADDRESS=http://sgc-p2p:80/passthrough
+      - GPJC_API_ADDRESS=sgc
+      - GPJC_PORT=10501
+      - GPJC_PUBLISH_ADDR=0.0.0.0:4000
+      - MY_GLOBAL_IDENTIFIER=YYYYYYYYYYYYYYYYYYYY
+      - JURISDICTION_CODE=SG
+    ports:
+      - "4001:4000"
+    depends_on:
+      sql-database-sgc:
+        condition: service_healthy
+    networks:
+      - peers
+
+  sql-database-myc:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sql-database-myc
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: Ethernal123
+    ports:
+      - "1435:1433"
+    networks:
+      - peers
+    volumes:
+      - ./app/DB/scripts/:/docker-entrypoint-initdb/scripts/
+    command: >
+      /bin/bash -c " /opt/mssql/bin/sqlservr & sleep 30 &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.03_CreateBISdb2.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.03_InsertData2.sql && /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.05_MYCPolicy.sql  && wait"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -Q \"IF EXISTS (SELECT name FROM sys.databases WHERE name = 'BIS2') SELECT 1 ELSE SELECT 0\" | grep -q 1"
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 2m
+
+  myc:
+    build:
+      context: .
+      dockerfile: image/Dockerfile
+      args:
+        - DNS_NAME=myc
+    container_name: myc
+    environment:
+      - DB_ADDRESS=sql-database-myc
+      - DB_PORT=1433
+      - DB_NAME=BIS2
+      - DB_PASSWORD=Ethernal123
+      - SERVER_PORT=4000
+      - MY_GLOBAL_IDENTIFIER=XXXXXXXXXXXXXXXXXXXX
+      - CB_GLOBAL_IDENTIFIER=549300NROGNBV2T1GS07
+      - JURISDICTION_CODE=MY
+      - P2P_NODE_ADDRESS=http://myc-p2p:80/passthrough
+      - GPJC_API_ADDRESS=myc
+      - GPJC_PORT=10501
+      - GPJC_PUBLISH_ADDR=0.0.0.0:4000
+    ports:
+      - "4002:4000"
+    depends_on:
+      sql-database-myc:
+        condition: service_healthy
+    networks:
+      - peers
+
+  sql-database-bnm:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: sql-database-bnm
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: Ethernal123
+    ports:
+      - "1436:1433"
+    networks:
+      - peers
+    volumes:
+      - ./app/DB/scripts/:/docker-entrypoint-initdb/scripts/
+    command: >
+      /bin/bash -c " /opt/mssql/bin/sqlservr & sleep 30 &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.03_CreateBISdb3.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.03_InsertData3.sql && /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.05_BNMPolicy.sql  && wait"
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "/opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -Q \"IF EXISTS (SELECT name FROM sys.databases WHERE name = 'BIS3') SELECT 1 ELSE SELECT 0\" | grep -q 1"
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 2m
+
+  bnm:
+    build:
+      context: .
+      dockerfile: image/Dockerfile
+      args:
+        - DNS_NAME=bnm
+    container_name: bnm
+    environment:
+      - DB_ADDRESS=sql-database-bnm
+      - DB_PORT=1433
+      - DB_NAME=BIS3
+      - DB_PASSWORD=Ethernal123
+      - JURISDICTION_CODE=MY
+      - SERVER_PORT=4000
+      - PEER_ID=12D3KooW9z8jijSnjH85ZwTLyGGhqPujfn15uRpzx24QQiPZcUAE
+      - IS_CENTRAL_BANK=true
+      - P2P_NODE_ADDRESS=http://bnm-p2p:80/passthrough
+      - MY_GLOBAL_IDENTIFIER=549300NROGNBV2T1GS07
+    ports:
+      - "4003:4000"
+    depends_on:
+      sql-database-bnm:
+        condition: service_healthy
+    networks:
+      - peers
+
+  rabbitmq-ob:
+    image: docker.io/rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_VHOST: celery
+    ports:
+      - "5672"
+      - "15672"
+    networks:
+      peers:
+        ipv4_address: 172.22.1.254
+  rabbitmq-bb:
+    image: docker.io/rabbitmq:3-management
+    environment:
+      RABBITMQ_DEFAULT_VHOST: celery
+    ports:
+      - "5672"
+      - "15672"
+    networks:
+      peers:
+        ipv4_address: 172.22.2.254
+  redis-ob:
+    image: docker.io/redis:7
+    command: --save 60 1 --loglevel warning
+    ports:
+      - "6379"
+    networks:
+      peers:
+        ipv4_address: 172.22.1.253
+  redis-bb:
+    image: docker.io/redis:7
+    command: --save 60 1 --loglevel warning
+    ports:
+      - "6379"
+    networks:
+      peers:
+        ipv4_address: 172.22.2.253
+
+  bootstrap-ob:
+    restart: always
+    build: &build
+      context: ./mandala-p2p-client
+      dockerfile: image/Dockerfile
+      args:
+        IMAGE_FQDN: docker.io/nvidia/cuda:12.3.2-devel-ubuntu22.04
+    container_name: mas-p2p
+    environment: &bootstrap_env
+      BOOTSTRAP_NODE: "true"
+      PEER_SEED: "42"
+      HTTP_ADDR: 127.0.0.1
+      HTTP_PORT: &http_port "80"
+      PEER_PORT: &peer_port "37000"
+      BOOTSTRAP_PEER_PORT: *peer_port
+      BOOTSTRAP_PEER_ID: &bb_peer_id 12D3KooWG9eizGC7AwkrwpNfcmrQtvWQ4yGrRQgGTTurkLtUwhZG
+      BOOTSTRAP_IP: &bb_http_addr 172.22.2.0
+      FORWARD_REQUEST_HOST: http://mas:4000/p2p # format "http://{ip:port}/endpoint", Change with the actual banking app backend!
+      INSTITUTION_NAME: "54930035WQZLGC45RZ35" # MAS
+    ports: &ports
+      - *http_port
+      - *peer_port
+    healthcheck: &healthcheck
+      test: /healthcheck.sh
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 5s
+    networks:
+      peers:
+        ipv4_address: &ob_http_addr 172.22.1.0
+
+  bootstrap-bb:
+    restart: always
+    build: *build
+    container_name: bnm-p2p
+    environment:
+      !!merge <<: *bootstrap_env
+      PEER_SEED: "421"
+      BOOTSTRAP_PEER_ID: &ob_peer_id 12D3KooW9z8jijSnjH85ZwTLyGGhqPujfn15uRpzx24QQiPZcUAE
+      BOOTSTRAP_IP: *ob_http_addr
+      FORWARD_REQUEST_HOST: http://bnm:4000/p2p
+      INSTITUTION_NAME: "549300NROGNBV2T1GS07" # BNM
+    ports: *ports
+    healthcheck: *healthcheck
+    networks:
+      peers:
+        ipv4_address: *bb_http_addr
+
+  ob-peer1:
+    restart: always
+    build: *build
+    volumes: &volumes
+      - /var/run/docker.sock:/var/run/docker.sock
+    #   - /tmp/r0:/tmp/r0
+    container_name: sgc-p2p
+    environment:
+      !!merge <<: *bootstrap_env
+      EXPIRE_TIME: "604800"
+      PUBLISH_ADDR: http://sgc:4000/proof/noninteractive
+      AMQP_ADDR: amqp://rabbitmq-ob:5672/celery
+      REDIS_ADDR: redis://redis-ob:6379
+      BOOTSTRAP_NODE: "false"
+      PEER_SEED: "ob-1"
+      BOOTSTRAP_PEER_ID: *ob_peer_id
+      BOOTSTRAP_IP: *ob_http_addr
+      FORWARD_REQUEST_HOST: http://sgc:4000/p2p
+      INSTITUTION_NAME: "YYYYYYYYYYYYYYYYYYYY" # SG Commercial Bank
+      NVIDIA_VISIBLE_DEVICES: all
+      RISC0_WORK_DIR: /tmp/r0
+    ports: *ports
+    healthcheck: *healthcheck
+    networks:
+      peers:
+        ipv4_address: 172.22.1.1
+    depends_on:
+      - bootstrap-ob
+      - rabbitmq-ob
+      - redis-ob
+
+  bb-peer1:
+    restart: always
+    build: *build
+    volumes: *volumes
+    container_name: myc-p2p
+    environment:
+      !!merge <<: *bootstrap_env
+      AMQP_ADDR: amqp://rabbitmq-bb:5672/celery
+      REDIS_ADDR: redis://redis-bb:6379
+      BOOTSTRAP_NODE: "false"
+      PEER_SEED: "bb-1"
+      BOOTSTRAP_PEER_ID: *bb_peer_id
+      BOOTSTRAP_IP: *bb_http_addr
+      FORWARD_REQUEST_HOST: http://myc:4000/p2p
+      INSTITUTION_NAME: "XXXXXXXXXXXXXXXXXXXX" # MY Commercial Bank
+    ports: *ports
+    healthcheck: *healthcheck
+    networks:
+      peers:
+        ipv4_address: 172.22.2.1
+    depends_on:
+      - bootstrap-bb
+      - rabbitmq-bb
+      - redis-bb
+
+networks:
+  peers:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.22.0.0/16
+          gateway: 172.22.0.1

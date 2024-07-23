@@ -3,16 +3,16 @@ package models
 import "time"
 
 type BankEmployeeModel struct {
-	Id       uint64
 	Name     string
 	Username string
 	Password string
-	BankId   uint64
+	BankId   string
 	BankName string
+	Country  string
 }
 
 type TransactionModel struct {
-	Id                       uint64
+	Id                       string
 	OriginatorBank           string
 	BeneficiaryBank          string
 	SenderGlobalIdentifier   string
@@ -28,7 +28,7 @@ type TransactionModel struct {
 	Status                   string
 	StatusHistory            []StatusHistoryModel
 	Policies                 []string
-	OriginatorBankCountryId  int
+	OriginatorBankCountryId  string
 }
 
 type StatusHistoryModel struct {
@@ -49,14 +49,21 @@ type PolicyModel struct {
 	TransactionType string
 }
 
-type TransactionProofRequest struct {
-	Value         string
-	TransactionId string
-	PolicyId      string
+type InteractiveComplianceCheckProofRequest struct {
+	Value             string `json:"value"`
+	ComplianceCheckID string `json:"compliance_check_id"`
+	PolicyID          string `json:"policy_id"`
 }
 
 type BankModel struct {
-	Id      uint64
+	Id      string
 	Name    string
 	Country string
+}
+
+type SearchModel struct {
+	Value    string `json:"value"`
+	From     string `json:"from"`
+	To       string `json:"to"`
+	StatusId string `json:statusId`
 }

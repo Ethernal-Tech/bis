@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <title>BIS Innovation Hub</title>
+    <link rel="stylesheet" href="/app/web/static/styles/addcompliance-style.css">
+    <link rel="icon" href="/static/images/webpage-logo.png">
+</head>
+
+<body>
+    <header>
+        <div>
+            <a href="/home"><img src="/static/images/logo.png" alt="" height="32px"></a>
+            <div class="user">
+                <svg xmlns="http://www.w3.org/2000/svg" width="26px" height="26px" fill="#AA322F"
+                    class="bi bi-person-circle" viewBox="0 0 16 16">
+                    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0" />
+                    <path fill-rule="evenodd"
+                        d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1" />
+                </svg>
+                <span>{{.bankName}} - {{.country}}</span>
+                <a class="logout" href="/logout">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="26px" height="26px" fill="#706F6F"
+                        class="bi bi-box-arrow-right" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd"
+                            d="M10 12.5a.5.5 0 0 1-.5.5h-8a.5.5 0 0 1-.5-.5v-9a.5.5 0 0 1 .5-.5h8a.5.5 0 0 1 .5.5v2a.5.5 0 0 0 1 0v-2A1.5 1.5 0 0 0 9.5 2h-8A1.5 1.5 0 0 0 0 3.5v9A1.5 1.5 0 0 0 1.5 14h8a1.5 1.5 0 0 0 1.5-1.5v-2a.5.5 0 0 0-1 0z" />
+                        <path fill-rule="evenodd"
+                            d="M15.854 8.354a.5.5 0 0 0 0-.708l-3-3a.5.5 0 0 0-.708.708L14.293 7.5H5.5a.5.5 0 0 0 0 1h8.793l-2.147 2.146a.5.5 0 0 0 .708.708z" />
+                    </svg>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <div class="add-compliance">
+        <div class="title">
+            <span>New Compliance Check</span>
+        </div>
+        <div class="view">
+            <div class="display view-1" id="view-1">
+                <fieldset class="sender-beneficiary-details">
+                    <legend>1. Please fill in the sender and beneficiary's personal details:</legend>
+                    <div class="sender">
+                        <div class="field-container">
+                            <span class="input-descriptor">Sender's Legal Entity Identifier (LEI)</span>
+                            <div class="input-container"><input id="sender-lei" class="input" type="text"
+                                    placeholder="e.g. 123456X89Y123Z5A7890"><a class="non-selectable">Populate</a></div>
+                        </div>
+                        <div class="field-container">
+                            <span class="input-descriptor">Sender's Company Name<span>*</span></span>
+                            <input id="sender-name" class="input" type="text" placeholder="e.g. Sender company Limited">
+                        </div>
+                    </div>
+                    <div class="beneficiary">
+                        <div class="field-container">
+                            <span class="input-descriptor">Beneficiary's Legal Entity Identifier (LEI)</span>
+                            <div class="input-container"><input id="beneficiary-lei" class="input" type="text"
+                                    placeholder="e.g. 123456X89Y123Z5A7890"><a class="non-selectable">Populate</a></div>
+                        </div>
+                        <div class="field-container">
+                            <span class="input-descriptor">Beneficiary's Company Name<span>*</span></span>
+                            <input id="beneficiary-name" class="input" type="text"
+                                placeholder="e.g. Beneficiary Company Limited">
+                        </div>
+                    </div>
+                </fieldset>
+                <fieldset class="transaction-details">
+                    <legend>2. Please fill in the transaction details:</legend>
+                    {{if and (ne .country "South Korea") (ne .country "Australia")}}
+                    <div>
+                        <div class="field-container">
+                            <span class="input-descriptor">Payment Type<span>*</span></span>
+                            <select id="payment-type" class="input input-select">
+                                <option name="GROSS">
+                                    GROSS
+                                </option>
+                            </select>
+                        </div>
+                        <div class="field-container">
+                            <span class="input-descriptor">Transaction Amount<span>*</span></span>
+                            <div class="input-container">
+                                <select id="currency">
+                                    <option name="SGD">
+                                        SGD
+                                    </option>
+                                    <option name="MYR">
+                                        MYR
+                                    </option>
+                                </select>
+                                <input id="amount" class="input" type="text" placeholder="e.g. 200,000,000">
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="field-container">
+                            <span class="input-descriptor">Transaction Type<span>*</span></span>
+                            <select id="transaction-type" class="input input-select">
+                                {{range .transactionTypes}}
+                                <option value="{{.Id}}">{{.Code}} - {{.Name}}</option>
+                                {{end}}
+                            </select>
+                        </div>
+                        <div class="field-container">
+                            <span class="input-descriptor">Beneficiary Bank<span>*</span></span>
+                            <select id="beneficiary-bank" class="input input-select">
+                                {{range .banks}}
+                                <option value="{{.Id}}">{{.Name}} ({{.Country}})</option>
+                                {{end}}
+                            </select>
+                        </div>
+                    </div>
+                    {{else}}
+                    <div>
+                        <div class="field-container">
+                            <span class="input-descriptor">Transaction Amount<span>*</span></span>
+                            <div class="input-container">
+                                <select id="currency">
+                                    <option name="USD">
+                                        USD
+                                    </option>
+                                    <option name="AUD">
+                                        AUD
+                                    </option>
+                                    <option name="KRW">
+                                        KRW
+                                    </option>
+                                </select>
+                                <input id="amount" class="input" type="text" placeholder="e.g. 4,000">
+                            </div>
+                        </div>
+                        <div class="field-container">
+                            <span class="input-descriptor">Sec. Acquisition Amount<span>*</span></span>
+                            <div class="input-container">
+                                <select>
+                                    <option name="AUD">
+                                        AUD
+                                    </option>
+                                    <option name="KRW">
+                                        KRW
+                                    </option>
+                                    <option name="MYR">
+                                        MYR
+                                    </option>
+                                    <option name="SGD">
+                                        SGD
+                                    </option>
+                                </select>
+                                <input id="parameter" class="input" type="text" placeholder="e.g. 200,000">
+                            </div>
+                        </div>
+                        <div class="field-container">
+                            <span class="input-descriptor">Offset Amount<span>*</span></span>
+                            <div class="input-container">
+                                <select>
+                                    <option name="AUD">
+                                        AUD
+                                    </option>
+                                    <option name="KRW">
+                                        KRW
+                                    </option>
+                                    <option name="MYR">
+                                        MYR
+                                    </option>
+                                    <option name="SGD">
+                                        SGD
+                                    </option>
+                                </select>
+                                <input class="input" type="text" placeholder="e.g. 196,000">
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <div>
+                            <div class="field-container">
+                                <span class="input-descriptor">Payment Type<span>*</span></span>
+                                <select id="payment-type" class="input input-select">
+                                    <option name="NETT">
+                                        NETT
+                                    </option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="field-container">
+                            <span class="input-descriptor">Transaction Type<span>*</span></span>
+                            <select id="transaction-type" class="input input-select">
+                                {{range .transactionTypes}}
+                                <option value="{{.Id}}">{{.Code}} - {{.Name}}</option>
+                                {{end}}
+                            </select>
+                        </div>
+                        <div class="field-container">
+                            <span class="input-descriptor">Beneficiary Bank<span>*</span></span>
+                            <select id="beneficiary-bank" class="input input-select">
+                                {{range .banks}}
+                                <option value="{{.Id}}">{{.Name}} ({{.Country}})</option>
+                                {{end}}
+                            </select>
+                        </div>
+                    </div>
+                    {{end}}
+                </fieldset>
+            </div>
+            <div class="not-display view-2" id="view-2">
+                <div class="view-2-note">
+                    Please review and confirm the following details:
+                </div>
+                <div class="transaction-informations">
+                    <div>
+                        <div class="transaction-information">
+                            <div class="transaction-information-name">Sender's Legal Entity Identifier (LEI)</div>
+                            <div id="ti-sender-lei" class="transaction-information-value">123456X89Y123Z5A7890</div>
+                        </div>
+                        <div class="transaction-information">
+                            <div class="transaction-information-name">Sender's Company Name<span>*</span></div>
+                            <div id="ti-sender-name" class="transaction-information-value">Sender Company Limited</div>
+                        </div>
+                        <div class="transaction-information">
+                            <div class="transaction-information-name">Payment Type<span>*</span></div>
+                            <div id="ti-payment-type" class="transaction-information-value">NETT - Netting</div>
+                        </div>
+                        <div class="transaction-information">
+                            <div class="transaction-information-name">Transaction Amount<span>*</span></div>
+                            <div id="ti-amount" class="transaction-information-value">200,000,000 KRW</div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="transaction-information">
+                            <div class="transaction-information-name">Beneficiary's Legal Entity Identifier (LEI)</div>
+                            <div id="ti-beneficiary-lei" class="transaction-information-value">-</div>
+                        </div>
+                        <div class="transaction-information">
+                            <div class="transaction-information-name">Beneficiary's Company Name<span>*</span></div>
+                            <div id="ti-beneficiary-name" class="transaction-information-value">Beneficiary Company
+                                Limited</div>
+                        </div>
+                        <div class="transaction-information">
+                            <div class="transaction-information-name">Transaction Type<span>*</span></div>
+                            <div id="ti-transaction-type" class="transaction-information-value">SECU - Acquisition of
+                                unlisted securities</div>
+                        </div>
+                        <div class="transaction-information">
+                            <div class="transaction-information-name">Beneficiary Bank<span>*</span></div>
+                            <div id="ti-beneficiary-bank" class="transaction-information-value">ANZ</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="loader" style="display: none;"></div>
+            <div class="not-display" id="view-3">
+                <div class="view-3-note">
+                    List of applicable policies identified based on the submitted transaction details:
+                </div>
+                <div class="view-3-content">
+                    <div class="policies" id="policies">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="buttons">
+            <div id="view-indicator" class="view-indicator">
+                <div></div>
+                <div></div>
+                <div></div>
+            </div>
+            <div>
+                <div id="cancel-button" class="control-button cancel non-selectable">
+                    Cancel
+                </div>
+                <div id="next-button" class="control-button next non-selectable">
+                    Next
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="/app/web/static/javascripts/addcompliance-js.js"></script>
+</body>
+
+</html>

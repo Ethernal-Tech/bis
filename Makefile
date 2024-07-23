@@ -1,9 +1,9 @@
 GPJC_RELEASE_URL := https://github.com/Ethernal-Tech/private-join-and-compute/releases/download/v0.1.0/bazel-bin.tar.gz
-GPJC_MULTIPLE_RELEASE_URL := https://github.com/Ethernal-Tech/private-join-and-compute/releases/download/v0.1.0/bazel-bin-multiple.tar.gz
+GPJC_MULTIPLE_RELEASE_URL := https://github.com/Ethernal-Tech/private-join-and-compute/releases/download/v0.3.0/bazel-bin-multiple.tar.gz
 GPJC_RELEASE_FOLDER := private-join-and-compute
 
 GPJC_API_RELEASE_ULR := https://github.com/Ethernal-Tech/gpjc-api/releases/download/v0.1.1/gpjc-api
-GPJC_API_MULTIPLE_RELEASE_ULR := https://github.com/Ethernal-Tech/gpjc-api/releases/download/v0.1.2/gpjc-api-multiple
+GPJC_API_MULTIPLE_RELEASE_ULR := https://github.com/Ethernal-Tech/gpjc-api/releases/download/v0.1.3/gpjc-api-multiple
 
 fetch-releases:
 	@echo "Checking if $(GPJC_RELEASE_FOLDER) exists..."
@@ -41,11 +41,25 @@ create-certs:
 	chmod +x image/gpjc_scripts/ca_script.sh
 	./image/gpjc_scripts/ca_script.sh
 
-run-docker: create-certs
-	docker-compose up --build -d
+run-docker-uc1: create-certs
+	docker compose -f docker-compose-uc1.yaml up --build --remove-orphans -d --force-recreate --wait --wait-timeout 120
 
-stop-docker: 
-	docker-compose down --rmi local
+stop-docker-uc1: 
+	docker compose -f docker-compose-uc1.yaml down --rmi local -v
+
+restart-docker-uc1:
+	docker compose -f docker-compose-uc1.yaml down --rmi local myc sgc bnm
+	docker compose -f docker-compose-uc1.yaml up --build myc sgc bnm -d
+
+run-docker-uc2: create-certs
+	docker compose -f docker-compose-uc2.yaml up --build --remove-orphans -d --force-recreate --wait --wait-timeout 120
+
+stop-docker-uc2: 
+	docker compose -f docker-compose-uc2.yaml down --rmi local -v
+
+restart-docker-uc2:
+	docker compose -f docker-compose-uc2.yaml down --rmi local kr au
+	docker compose -f docker-compose-uc2.yaml up --build kr au -d
 
 test: run-docker
 	sleep 90

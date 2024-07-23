@@ -1,18 +1,22 @@
 package config
 
-import "os"
+import (
+	"bisgo/errlog"
+	"errors"
+	"os"
+)
 
 func ResolveP2PNodeAPIAddress() string {
 	env_address := os.Getenv("P2P_NODE_ADDRESS")
 	if env_address == "" {
-		return "localhost:5000"
+		return "http://localhost:5000/passthrough"
 	}
 
 	return env_address
 }
 
 func ResolveGpjcApiAddress() string {
-	env_address := os.Getenv("GPJC_API")
+	env_address := os.Getenv("GPJC_API_ADDRESS")
 	if env_address == "" {
 		return "localhost"
 	}
@@ -20,13 +24,22 @@ func ResolveGpjcApiAddress() string {
 	return env_address
 }
 
-func ResolveGpjcClientUrl() string {
-	env_url := os.Getenv("GPJC")
-	if env_url == "" {
-		return "0.0.0.0"
+func ResolveGpjcApiPort() string {
+	env_address := os.Getenv("GPJC_API_PORT")
+	if env_address == "" {
+		return "9090"
 	}
 
-	return env_url
+	return env_address
+}
+
+func ResolveGpjcPort() string {
+	env_address := os.Getenv("GPJC_PORT")
+	if env_address == "" {
+		return "10501"
+	}
+
+	return env_address
 }
 
 func ResolveDBAddress() string {
@@ -50,7 +63,7 @@ func ResolveDBPort() string {
 func ResolveDBName() string {
 	env_name := os.Getenv("DB_NAME")
 	if env_name == "" {
-		return "BIS"
+		return "BIS1"
 	}
 
 	return env_name
@@ -68,8 +81,57 @@ func ResolveDBPassword() string {
 func ResolveServerPort() string {
 	env_port := os.Getenv("SERVER_PORT")
 	if env_port == "" {
-		return ":4000"
+		return ":4001"
 	}
 
 	return ":" + env_port
+}
+
+func ResolveIsCentralBank() bool {
+	return os.Getenv("IS_CENTRAL_BANK") != ""
+}
+
+func ResolveMyGlobalIdentifier() string {
+	env_global_ident := os.Getenv("MY_GLOBAL_IDENTIFIER")
+	if env_global_ident == "" {
+		errlog.Println(errors.New("environment variable MY_GLOBAL_IDENTIFIER is not set"))
+	}
+
+	return env_global_ident
+}
+
+func ResolveCBGlobalIdentifier() string {
+	env_global_ident := os.Getenv("CB_GLOBAL_IDENTIFIER")
+	if env_global_ident == "" {
+		return ""
+	}
+
+	return env_global_ident
+}
+
+func ResolveJurisdictionCode() string {
+	env_code := os.Getenv("JURISDICTION_CODE")
+	if env_code == "" {
+		errlog.Println(errors.New("environment variable JURISDICTION_CODE is not set"))
+	}
+
+	return env_code
+}
+
+func ResolveNonInteractiveAPIAddress() string {
+	env_addr := os.Getenv("NONINTERACTIVE_API_ADDRESS")
+	if env_addr == "" {
+		errlog.Println(errors.New("environment variable NONINTERACTIVE_API_ADDRESS is not set"))
+	}
+
+	return env_addr
+}
+
+func ResolveRuleEngineProofType() string {
+	env_var := os.Getenv("PROOF_TYPE")
+	if env_var == "" {
+		return "interactive"
+	}
+
+	return env_var
 }

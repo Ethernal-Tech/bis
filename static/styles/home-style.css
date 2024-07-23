@@ -95,8 +95,25 @@ header>div>div {
     transition: 0.4s;
 }
 
+.advanced-search-field {
+    background-color: #ffffff;
+    height: 46px;
+    width: 46px;
+    margin-top: 70px;
+    margin-bottom: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    color: #706f6f;
+    font-weight: 400;
+    border: 2px solid #706f6f;
+    transition: 0.4s; 
+    margin-left: 4px;
+}
+
 .search-field {
-    width: 320px;
+    width: 270px;
 }
 
 .show-policies {
@@ -259,4 +276,110 @@ header>div>div {
 .table-body::-webkit-scrollbar-thumb {
     border-radius: 4px;
     background-color: #EAA121;
+}
+
+/* Modal Styles */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 1400px;
+    overflow: auto;
+    background-color: rgb(0,0,0);
+    background-color: rgba(0,0,0,0.4);
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 6.8% auto auto auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 600px;
+    max-height: 70vh;
+    border-radius: 15px;
+    text-decoration: none;
+    font-size: 20px;
+    font-family: 'Segoe UI';
+    color: #706f6f;
+    font-weight: 400;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.advanced-search-button {
+    cursor: pointer;
+    text-decoration: none;
+    user-select: none;
+    font-size: 20px;
+    font-family: 'Segoe UI';
+    background-color: #ffffff;
+    height: 46px;
+    width: 380px;
+    margin: 70px auto 32px 18.5%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    color: #706f6f;
+    font-weight: 400;
+    border: 2px solid #706f6f;
+    transition: 0.4s;
+}
+
+/* Modal Body Styles */
+.modal-body {
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-field {
+    margin-bottom: 15px;
+}
+
+.modal-field label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.modal-field input {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+.modal-field select {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+/* Icon Button Styles */
+.icon-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.icon-button svg {
+    fill: #000;
+}
+
+.icon-button:focus {
+    outline: none;
 }

@@ -2,49 +2,62 @@ package DB
 
 import (
 	"bisgo/app/models"
+	"bisgo/common"
 	"database/sql"
 	"log"
 	"time"
 )
 
-func (wrapper *DBHandler) InsertTransaction(t models.Transaction) uint64 {
-	query := `INSERT INTO [dbo].[Transaction] OUTPUT INSERTED.Id VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8)`
+func (wrapper *DBHandler) InsertTransaction(t models.NewTransaction) string {
+	query := `INSERT INTO [dbo].[Transaction] (Id, OriginatorBankId, BeneficiaryBankId, SenderId, ReceiverId, Currency, Amount, TransactionTypeId, LoanId)
+          VALUES (@p1, @p2, @p3, @p4, @p5, @p6, @p7, @p8, @p9)`
 
-	var insertedID uint64
+	var insertedID string
 
-	err := wrapper.db.QueryRow(query,
-		sql.Named("p1", t.OriginatorBank),
-		sql.Named("p2", t.BeneficiaryBank),
-		sql.Named("p3", t.Sender),
-		sql.Named("p4", t.Receiver),
-		sql.Named("p5", t.Currency),
-		sql.Named("p6", t.Amount),
-		sql.Named("p7", t.TypeId),
-		sql.Named("p8", t.LoanId)).Scan(&insertedID)
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	polices := wrapper.GetPolices(t.BeneficiaryBank, t.TypeId)
-
-	for _, policy := range polices {
-		query = `INSERT INTO [dbo].[TransactionPolicyStatus] VALUES (@p1, @p2, @p3)`
-		_, err := wrapper.db.Exec(query,
-			sql.Named("p1", insertedID),
-			sql.Named("p2", policy.Id),
-			sql.Named("p3", 0))
-
+	if t.Id != "" {
+		insertedID = t.Id
+	} else {
+		var err error
+		insertedID, err = common.GenerateHash(t)
 		if err != nil {
 			log.Fatal(err)
 		}
 	}
 
+	row := wrapper.db.QueryRow(query,
+		sql.Named("p1", insertedID),
+		sql.Named("p2", t.OriginatorBankId),
+		sql.Named("p3", t.BeneficiaryBankId),
+		sql.Named("p4", int(t.SenderId)),
+		sql.Named("p5", int(t.ReceiverId)),
+		sql.Named("p6", t.Currency),
+		sql.Named("p7", t.Amount),
+		sql.Named("p8", t.TransactionTypeId),
+		sql.Named("p9", t.LoanId))
+
+	if row.Err() != nil {
+		log.Fatal(row.Err())
+	}
+
+	//polices := wrapper.GetPolices(t.BeneficiaryBankId, t.TransactionTypeId)
+
+	// for _, policy := range polices {
+	// 	query = `INSERT INTO [dbo].[TransactionPolicy] VALUES (@p1, @p2, @p3)`
+	// 	_, err := wrapper.db.Exec(query,
+	// 		sql.Named("p1", insertedID),
+	// 		sql.Named("p2", policy.Id),
+	// 		sql.Named("p3", 0))
+
+	// 	if err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// }
+
 	return insertedID
 }
 
-func (wrapper *DBHandler) InsertTransactionProof(transactionId uint64, value string) {
-	query := `INSERT INTO [dbo].[TransactionProof] VALUES (@p1, @p2)`
+func (wrapper *DBHandler) InsertTransactionProof(transactionId string, value string) {
+	query := `INSERT INTO [dbo].[TransactionProof] VALUES (@p1, CONVERT(varbinary(max), @p2))`
 
 	_, err := wrapper.db.Exec(query,
 		sql.Named("p1", transactionId),
@@ -54,7 +67,7 @@ func (wrapper *DBHandler) InsertTransactionProof(transactionId uint64, value str
 	}
 }
 
-func (wrapper *DBHandler) UpdateTransactionState(transactionId uint64, state int) {
+func (wrapper *DBHandler) UpdateTransactionState(transactionId string, state int) {
 	query := `INSERT INTO [dbo].[TransactionHistory] VALUES (@p1, @p2, @p3)`
 
 	_, err := wrapper.db.Exec(query,
@@ -66,28 +79,7 @@ func (wrapper *DBHandler) UpdateTransactionState(transactionId uint64, state int
 	}
 }
 
-func (wrapper *DBHandler) GetTransactionTypeId(transactionType string) int {
-	query := `SELECT Id FROM [TransactionType] WHERE Code = @p1`
-
-	rows, err := wrapper.db.Query(query, sql.Named("p1", transactionType))
-
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer rows.Close()
-
-	var transactionTypeId int
-	for rows.Next() {
-		if err := rows.Scan(&transactionTypeId); err != nil {
-			log.Fatal(err)
-		}
-	}
-
-	return transactionTypeId
-}
-
-func (wrapper *DBHandler) GetTransactionTypes() []models.TransactionType {
+func (wrapper *DBHandler) GetTransactionTypes() []models.NewTransactionType {
 	query := `SELECT Id, Code, Name From TransactionType`
 
 	rows, err := wrapper.db.Query(query)
@@ -97,9 +89,9 @@ func (wrapper *DBHandler) GetTransactionTypes() []models.TransactionType {
 
 	defer rows.Close()
 
-	types := []models.TransactionType{}
+	types := []models.NewTransactionType{}
 	for rows.Next() {
-		var tType models.TransactionType
+		var tType models.NewTransactionType
 		if err := rows.Scan(&tType.Id, &tType.Code, &tType.Name); err != nil {
 			log.Fatal(err)
 		}
@@ -108,29 +100,54 @@ func (wrapper *DBHandler) GetTransactionTypes() []models.TransactionType {
 	return types
 }
 
-func (wrapper *DBHandler) GetTransactionsForAddress(address uint64, searchValue string) []models.TransactionModel {
-	query := `SELECT t.Id
-					,ob.Name
-					,bb.Name
-					,bcs.GlobalIdentifier
-					,bcr.GlobalIdentifier
-					,bcs.Name
-					,bcr.Name
-					,t.Currency
-					,t.Amount
-					,s.Name
-				FROM [Transaction] as t
-				LEFT JOIN (SELECT MAX(StatusId) AS StatusId, Transactionid FROM TransactionHistory GROUP BY Transactionid) as th ON th.Transactionid = t.Id 
-				LEFT JOIN [Status] as s ON s.Id = th.StatusId
-				JOIN Bank as ob ON ob.Id = t.OriginatorBank
-				JOIN Bank as bb ON bb.Id = t.BeneficiaryBank
-				JOIN BankClient as bcs ON bcs.Id = t.Sender
-				JOIN BankClient as bcr ON bcr.Id = t.Receiver
-				WHERE t.OriginatorBank = @p1 OR t.BeneficiaryBank = @p2`
+func (wrapper *DBHandler) GetCommercialBankTransactions(bankId string, searchModel models.SearchModel) []models.TransactionModel {
+	query := `WITH CreatedTransactions AS (
+					SELECT	th.TransactionId,
+							th.Date AS CreatedDate
+					FROM [dbo].[TransactionHistory] th
+					WHERE th.StatusId = 1`
+
+	if searchModel.From != "" {
+		query += " AND th.Date >= '" + searchModel.From + "'"
+	}
+	if searchModel.To != "" {
+		query += " AND th.Date <= '" + searchModel.To + "'"
+	}
+
+	query += `), LatestStatus AS (
+					SELECT  th.TransactionId,
+							th.StatusId,
+							th.Date,
+							ROW_NUMBER() OVER (PARTITION BY th.TransactionId ORDER BY th.Date DESC) AS rn
+					FROM [dbo].[TransactionHistory] th)
+
+				SELECT   t.Id
+						,ob.Name
+						,bb.Name
+						,bcs.GlobalIdentifier
+						,bcr.GlobalIdentifier
+						,bcs.Name
+						,bcr.Name
+						,t.Currency
+						,t.Amount
+						,s.Name
+					FROM [dbo].[Transaction] t
+					JOIN CreatedTransactions ct ON t.Id = ct.TransactionId
+					JOIN LatestStatus ls ON t.Id = ls.TransactionId AND ls.rn = 1
+					JOIN [dbo].[Status] s ON ls.StatusId = s.Id
+					JOIN Bank as ob ON ob.GlobalIdentifier = t.OriginatorBankId
+					JOIN Bank as bb ON bb.GlobalIdentifier = t.BeneficiaryBankId
+					JOIN BankClient as bcs ON bcs.Id = t.SenderId
+					JOIN BankClient as bcr ON bcr.Id = t.ReceiverId
+				WHERE (t.OriginatorBankId = @p1 OR t.BeneficiaryBankId = @p1) and (ob.Name like @p2 OR bb.Name like @p2 OR bcs.Name like @p2 OR bcr.Name like @p2)`
+
+	if searchModel.StatusId != "" {
+		query += ` AND ls.StatusId = ` + searchModel.StatusId
+	}
 
 	rows, err := wrapper.db.Query(query,
-		sql.Named("p1", address),
-		sql.Named("p2", address))
+		sql.Named("p1", bankId),
+		sql.Named("p2", "%"+searchModel.Value+"%"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -149,9 +166,9 @@ func (wrapper *DBHandler) GetTransactionsForAddress(address uint64, searchValue 
 	return transactions
 }
 
-func (wrapper *DBHandler) GetTransactionsForCentralbank(bankId uint64, searchValue string) ([]models.TransactionModel, int) {
-	query := `SELECT CountryId FROM Bank
-			Where Id = @p1`
+func (wrapper *DBHandler) GetCentralBankTransactions(bankId string, searchModel models.SearchModel) ([]models.TransactionModel, string) {
+	query := `SELECT JurisdictionId FROM Bank
+			Where GlobalIdentifier = @p1`
 
 	rows, err := wrapper.db.Query(query,
 		sql.Named("p1", bankId))
@@ -160,38 +177,62 @@ func (wrapper *DBHandler) GetTransactionsForCentralbank(bankId uint64, searchVal
 	}
 	defer rows.Close()
 
-	var centralBankCountryId int
+	var centralBankJurisdictionId string
 	for rows.Next() {
-		if err = rows.Scan(&centralBankCountryId); err != nil {
+		if err = rows.Scan(&centralBankJurisdictionId); err != nil {
 			log.Println("Error scanning row:", err)
-			return []models.TransactionModel{}, 0
+			return []models.TransactionModel{}, ""
 		}
 	}
 
-	query = `SELECT t.Id
-					,ob.Name
-					,ob.CountryId
-					,bb.Name
-					,bcs.GlobalIdentifier
-					,bcr.GlobalIdentifier
-					,bcs.Name
-					,bcr.Name
-					,t.Currency
-					,t.Amount
-					,s.Name
-				FROM [Transaction] as t
-				LEFT JOIN (SELECT MAX(StatusId) AS StatusId, Transactionid FROM TransactionHistory GROUP BY Transactionid) as th ON th.Transactionid = t.Id 
-				LEFT JOIN [Status] as s ON s.Id = th.StatusId
-				JOIN Bank as ob ON ob.Id = t.OriginatorBank
-				JOIN Bank as bb ON bb.Id = t.BeneficiaryBank
-				JOIN BankClient as bcs ON bcs.Id = t.Sender
-				JOIN BankClient as bcr ON bcr.Id = t.Receiver
-				WHERE (ob.CountryId = @p1 OR bb.CountryId = @p2) and (ob.Name like @p3 OR bb.Name like @p3 OR bcs.Name like @p3 OR bcr.Name like @p3)`
+	query = `WITH CreatedTransactions AS (
+		SELECT	th.TransactionId,
+				th.Date AS CreatedDate
+		FROM [dbo].[TransactionHistory] th
+		WHERE th.StatusId = 1`
+
+	if searchModel.From != "" {
+		query += " AND th.Date >= '" + searchModel.From + "'"
+	}
+	if searchModel.To != "" {
+		query += " AND th.Date <= '" + searchModel.To + "'"
+	}
+
+	query += `), LatestStatus AS (
+			SELECT  th.TransactionId,
+					th.StatusId,
+					th.Date,
+					ROW_NUMBER() OVER (PARTITION BY th.TransactionId ORDER BY th.Date DESC) AS rn
+			FROM [dbo].[TransactionHistory] th)
+
+		SELECT   t.Id
+				,ob.Name
+				,ob.JurisdictionId
+				,bb.Name
+				,bcs.GlobalIdentifier
+				,bcr.GlobalIdentifier
+				,bcs.Name
+				,bcr.Name
+				,t.Currency
+				,t.Amount
+				,s.Name
+			FROM [dbo].[Transaction] t
+			JOIN CreatedTransactions ct ON t.Id = ct.TransactionId
+			JOIN LatestStatus ls ON t.Id = ls.TransactionId AND ls.rn = 1
+			JOIN [dbo].[Status] s ON ls.StatusId = s.Id
+			JOIN Bank as ob ON ob.GlobalIdentifier = t.OriginatorBankId
+			JOIN Bank as bb ON bb.GlobalIdentifier = t.BeneficiaryBankId
+			JOIN BankClient as bcs ON bcs.Id = t.SenderId
+			JOIN BankClient as bcr ON bcr.Id = t.ReceiverId
+		WHERE (ob.JurisdictionId = @p1 OR bb.JurisdictionId = @p1) and (ob.Name like @p2 OR bb.Name like @p2 OR bcs.Name like @p2 OR bcr.Name like @p2)`
+
+	if searchModel.StatusId != "" {
+		query += ` AND ls.StatusId = ` + searchModel.StatusId
+	}
 
 	rows, err = wrapper.db.Query(query,
-		sql.Named("p1", centralBankCountryId),
-		sql.Named("p2", centralBankCountryId),
-		sql.Named("p3", "%"+searchValue+"%"))
+		sql.Named("p1", centralBankJurisdictionId),
+		sql.Named("p2", "%"+searchModel.Value+"%"))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -204,16 +245,16 @@ func (wrapper *DBHandler) GetTransactionsForCentralbank(bankId uint64, searchVal
 			&trnx.SenderGlobalIdentifier, &trnx.ReceiverGlobalIdentifier, &trnx.SenderName, &trnx.ReceiverName,
 			&trnx.Currency, &trnx.Amount, &trnx.Status); err != nil {
 			log.Println("Error scanning row:", err)
-			return []models.TransactionModel{}, 0
+			return []models.TransactionModel{}, ""
 		}
 
 		trnx = *convertTxStatusDBtoPR(&trnx)
 		transactions = append(transactions, trnx)
 	}
-	return transactions, centralBankCountryId
+	return transactions, centralBankJurisdictionId
 }
 
-func (wrapper *DBHandler) GetTransactionHistory(transactionId uint64) models.TransactionModel {
+func (wrapper *DBHandler) GetTransactionHistory(transactionId string) models.TransactionModel {
 	query := `SELECT t.Id
 					,ob.Name
 					,bb.Name
@@ -228,10 +269,10 @@ func (wrapper *DBHandler) GetTransactionHistory(transactionId uint64) models.Tra
 					,ty.Name
 					,ty.Id
 				FROM [Transaction] as t
-				JOIN Bank as ob ON ob.Id = t.OriginatorBank
-				JOIN Bank as bb ON bb.Id = t.BeneficiaryBank
-				JOIN BankClient as bcs ON bcs.Id = t.Sender
-				JOIN BankClient as bcr ON bcr.Id = t.Receiver
+				JOIN Bank as ob ON ob.GlobalIdentifier = t.OriginatorBankId
+				JOIN Bank as bb ON bb.GlobalIdentifier = t.BeneficiaryBankId
+				JOIN BankClient as bcs ON bcs.Id = t.SenderId
+				JOIN BankClient as bcr ON bcr.Id = t.ReceiverId
 				JOIN [TransactionType] as ty ON ty.Id = t.TransactionTypeId
 				WHERE t.Id = @p1`
 
@@ -274,28 +315,23 @@ func (wrapper *DBHandler) GetTransactionHistory(transactionId uint64) models.Tra
 	}
 	trnx.Status = trnx.StatusHistory[len(trnx.StatusHistory)-1].Name
 
-	query = `SELECT p.Name
-				FROM TransactionTypePolicy ttp
-				JOIN Policy as p ON ttp.PolicyId = p.Id
-				Where ttp.TransactionTypeId = (SELECT t.TransactionTypeId FROM [Transaction] as t
-												Where t.Id = @p1)
-					and ttp.CountryId = (SELECT b.CountryId FROM [Transaction] as t
-										JOIN Bank as b ON b.Id = t.BeneficiaryBank
-										Where t.Id = @p1)`
+	return trnx
+}
 
-	rows, err = wrapper.db.Query(query, sql.Named("p1", transactionId))
-	if err != nil {
+func (wrapper *DBHandler) GetComplianceCheckByID(checkID string) models.NewTransaction {
+	query := `SELECT t.Id, t.OriginatorBankId, t.BeneficiaryBankId, t.SenderId, t.ReceiverId, t.Currency, t.Amount, t.TransactionTypeId, t.LoanId
+              FROM [Transaction] t
+              WHERE t.Id = @p1`
+
+	row := wrapper.db.QueryRow(query, sql.Named("p1", checkID))
+
+	var transaction models.NewTransaction
+	if err := row.Scan(&transaction.Id, &transaction.OriginatorBankId, &transaction.BeneficiaryBankId, &transaction.SenderId, &transaction.ReceiverId, &transaction.Currency, &transaction.Amount, &transaction.TransactionTypeId, &transaction.LoanId); err != nil {
+		if err == sql.ErrNoRows {
+			return models.NewTransaction{}
+		}
 		log.Fatal(err)
 	}
-	defer rows.Close()
 
-	for rows.Next() {
-		var policyName string
-		if err := rows.Scan(&policyName); err != nil {
-			log.Fatal(err)
-		}
-		trnx.Policies = append(trnx.Policies, policyName)
-	}
-
-	return trnx
+	return transaction
 }

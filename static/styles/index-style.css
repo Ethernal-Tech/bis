@@ -29,11 +29,11 @@ input:focus {
 }
 
 ::placeholder {
-    font-family: 'Segoe UI';   
+    font-family: 'Segoe UI';
     color: #706f6f;
 }
-  
-::-ms-input-placeholder { 
+
+::-ms-input-placeholder {
     color: #706f6f;
 }
 
@@ -86,7 +86,7 @@ button {
     text-align: center;
     margin-top: 18px;
     user-select: none;
-    font-family: 'Segoe UI';   
+    font-family: 'Segoe UI';
 }
 
 .logged-in {
@@ -105,7 +105,7 @@ button {
     margin-top: 80px;
     font-size: 28px;
     color: #706f6f;
-    font-family: 'Segoe UI';  
+    font-family: 'Segoe UI';
 }
 
 .logged-in a:hover {
@@ -131,4 +131,3 @@ button {
     transition: 0.4s;
     margin-top: 70px;
 }
-

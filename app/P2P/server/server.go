@@ -4,9 +4,14 @@ import (
 	"bisgo/app/P2P/core"
 	"bisgo/app/P2P/handler"
 	"bisgo/app/P2P/messages"
+	"bisgo/errlog"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"io"
 	"net/http"
+	"strings"
+	"time"
 )
 
 type P2PServer struct {
@@ -31,28 +36,61 @@ func GetP2PServer() *P2PServer {
 
 func (s *P2PServer) Mux() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
+		// returning a 200 OK response regardless of message correctness, handling of invalid messages is internal
+		w.WriteHeader(http.StatusOK)
+
 		body, err := io.ReadAll(r.Body)
 		if err != nil {
-			http.Error(w, "Unable to read request body", http.StatusBadRequest)
+			errlog.Println(err)
 			return
 		}
 
 		var message messages.P2PServerMessasge
 		err = json.Unmarshal(body, &message)
 		if err != nil {
-			http.Error(w, "Invalid JSON format", http.StatusBadRequest)
+			errlog.Println(err)
 			return
 		}
 
-		switch message.Method {
-		case "create-transaction":
-			s.CreateTransaction(message.MessageID, message.Payload)
-		case "method2":
-		default:
-			http.Error(w, "Invalid method", http.StatusBadRequest)
-			return
+		// TODO: describe why it is needed
+		payload := make([]byte, len(message.Payload))
+		for i, v := range message.Payload {
+			payload[i] = byte(v)
 		}
 
-		w.WriteHeader(http.StatusOK)
+		go func() {
+			var err error
+
+			messageTypeLog(r, message.Method)
+
+			switch message.Method {
+			case "new-compliance-check":
+				err = s.AddComplianceCheck(message.MessageID, payload)
+			case "get-policies":
+				err = s.GetPolicies(message.MessageID, payload)
+			case "policies":
+				err = s.ReceivePolicies(message.MessageID, payload)
+			case "compliance-check-confirmation":
+				err = s.ConfirmComplianceCheck(message.MessageID, payload)
+			case "policy-check-result":
+				err = s.ProcessPolicyCheckResult(message.MessageID, payload)
+			case "mpc-start-signal":
+				err = s.ProcessMpcStartSignal(message.MessageID, payload)
+			default:
+				err = errors.New("invalid p2p method received")
+			}
+
+			if err != nil {
+				errlog.Println(err)
+			}
+		}()
 	})
+}
+
+func messageTypeLog(r *http.Request, method string) {
+	dateTime := strings.Split(time.Now().String(), ".")[0]
+	sender := r.RemoteAddr
+
+	fmt.Printf("\033[34m%v INFO\033[0m: [%v] %v\n", dateTime, sender, method)
 }

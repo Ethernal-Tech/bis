@@ -10,6 +10,7 @@ import (
 // It integrates custom handlers grouped into controllers and embeds a wide range of additional core functionalities.
 type WebServer struct {
 	*controller.HomeController
+	*controller.ComplianceCheckController
 	*controller.TransactionController
 	*controller.PolicyController
 	*controller.CBController
@@ -24,12 +25,13 @@ func init() {
 	var core *core.Core = core.CreateCore()
 
 	server = WebServer{
-		HomeController:        controller.CreateHomeController(core),
-		TransactionController: controller.CreateTransactionController(core),
-		PolicyController:      controller.CreatePolicyController(core),
-		CBController:          controller.CreateCBController(core),
-		APIController:         controller.CreateAPIController(core),
-		Core:                  core,
+		HomeController:            controller.CreateHomeController(core),
+		ComplianceCheckController: controller.CreateComplianceCheckController(core),
+		TransactionController:     controller.CreateTransactionController(core),
+		PolicyController:          controller.CreatePolicyController(core),
+		CBController:              controller.CreateCBController(core),
+		APIController:             controller.CreateAPIController(core),
+		Core:                      core,
 	}
 }
 

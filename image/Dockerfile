@@ -1,13 +1,11 @@
 # Use the official Golang image as a base
-FROM golang:1.19
+FROM golang:1.22
 
+COPY app /app/app
 COPY common /app/common
 COPY config /app/config
-COPY controller /app/controller
-COPY core /app/core
-COPY models /app/models
-COPY server /app/server
 COPY static /app/static
+COPY errlog /app/errlog
 COPY main.go /app
 COPY go.mod /app
 COPY go.sum /app
@@ -22,9 +20,6 @@ WORKDIR /app
 
 # Fetch the necessary releases using make
 RUN make fetch-releases-multiple-machines
-
-# Install ODBC library for GPJC API
-RUN apt-get update && apt-get install -y unixodbc unixodbc-dev
 
 # Accept build argument
 ARG DNS_NAME
