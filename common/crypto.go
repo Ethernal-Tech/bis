@@ -4,9 +4,7 @@ import (
 	"crypto/ecdsa"
 	"crypto/rand"
 
-	"github.com/ethereum/go-ethereum/common/math"
 	"github.com/ethereum/go-ethereum/crypto"
-	"github.com/ethereum/go-ethereum/crypto/secp256k1"
 	solsha3 "github.com/miguelmota/go-solidity-sha3"
 )
 
@@ -23,7 +21,7 @@ func KeyGen() *ecdsa.PrivateKey {
 func Sign(message string, key *ecdsa.PrivateKey) []byte {
 	// Turn the message into a 32-byte hash
 	hash := solsha3.SoliditySHA3(solsha3.String(message))
-	sig, err := secp256k1.Sign(hash, math.PaddedBigBytes(key.D, 32))
+	sig, err := crypto.Sign(hash, key)
 
 	if err != nil {
 		panic(err)
