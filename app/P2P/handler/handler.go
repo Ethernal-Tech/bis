@@ -338,6 +338,13 @@ func (h *P2PHandler) ConfirmComplianceCheck(messageID int, payload []byte) error
 			errlog.Println(err)
 			return returnErr
 		}
+
+		// TODO: a compliance check status manager call instead of a direct state change
+		err = h.DB.UpdateComplianceCheckStatus(complianceCheck.ComplianceCheckId, 1)
+		if err != nil {
+			errlog.Println(err)
+			return returnErr
+		}
 	}
 
 	go h.RulesEngine.Do(complianceCheckConfirmation.ComplianceCheckId, config.ResolveRuleEngineProofType())
