@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go Web Server</title>
+    <link rel="stylesheet" href="/app/web/static/styles/login-style.css">
+</head>
+<body>
+    <div class="body">
+        <div class="animation">
+            <div>
+                <img width="200px" height="52px" src="/app//web/static/images/mandala-logo.svg" alt="">
+            </div>
+            <video src="/app/web/static/images/login.webm" autoplay loop muted></video>
+            <div>
+
+            </div>
+        </div>
+        <div class="login">
+            <div class="login-container">
+                <div class="title">
+                    Welcome back
+                </div>
+                <form action="/login" method="POST">
+                <div class="username">
+                    Username
+                    <input name="username" type="text">
+                </div>
+                <div class="password">
+                    Password
+                    <input name="password" type="password">
+                </div>
+                <button href="">Log in</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

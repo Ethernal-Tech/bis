@@ -8,29 +8,32 @@ import (
 	"log"
 )
 
-func (wrapper *DBHandler) Login(username, password string) *models.BankEmployeeModel {
-	query := `SELECT be.Name, be.Username, be.Password, be.BankId, b.Name BankName, j.Name Jurisdiction
-				FROM [dbo].[BankEmployee] be
-				JOIN [dbo].[Bank] b ON be.BankId = b.GlobalIdentifier
-				JOIN [dbo].[Jurisdiction] j ON b.JurisdictionId = j.Id
-			  	WHERE be.Username = @p1 AND be.Password = @p2`
+// GetBankEmployee returns the bank employee with specified username and password.
+// If bank employee can't be found, GetBankEmployee returns [ErrBankEmployee404].
+func (h *DBHandler) GetBankEmployee(username string, password string) (models.NewBankEmployee, error) {
 
-	rows, err := wrapper.db.Query(query, sql.Named("p1", username), sql.Named("p2", password))
+	query := `SELECT Id, Name, Username, Password, BankId FROM BankEmployee WHERE username = @p1 AND password = @p2`
+
+	var bankEmployee models.NewBankEmployee
+	err := h.db.QueryRow(query,
+		sql.Named("p1", username),
+		sql.Named("p2", password)).Scan(&bankEmployee.Id,
+		&bankEmployee.Name,
+		&bankEmployee.Username,
+		&bankEmployee.Password,
+		&bankEmployee.BankId)
+
+	// if bank employee (row) doesn't exist, error [sql.ErrNoRows] appears
 	if err != nil {
-		log.Fatal(err)
-	}
-	defer rows.Close()
-
-	if rows.Next() {
-		var user models.BankEmployeeModel
-		if err := rows.Scan(&user.Name, &user.Username, &user.Password, &user.BankId, &user.BankName, &user.Country); err != nil {
-			log.Println("Error scanning row:", err)
-			return nil
+		if err == sql.ErrNoRows {
+			return models.NewBankEmployee{}, errlog.ErrBankEmployee404
 		}
-		return &user
+		// in case of another type of error, log
+		errlog.Println(err)
+		return models.NewBankEmployee{}, errors.New("unsuccessful obtainance of bank employee")
 	}
 
-	return nil
+	return bankEmployee, nil
 }
 
 func (wrapper *DBHandler) IsCentralBankEmployee(username string) bool {

@@ -17,7 +17,7 @@ func (server *WebServer) Routes() http.Handler {
 
 	// Home controller
 	{
-		router.HandlerFunc(http.MethodGet, "/", server.Index)
+		router.HandlerFunc(http.MethodGet, "/", server.Login)
 		router.HandlerFunc(http.MethodPost, "/login", server.Login)
 		router.HandlerFunc(http.MethodGet, "/logout", server.Logout)
 		router.HandlerFunc(http.MethodGet, "/home", server.Home)
