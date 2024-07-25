@@ -3,29 +3,37 @@ package controller
 import (
 	"bisgo/config"
 	"bisgo/errlog"
-	"log"
 	"net/http"
 	"text/template"
 )
 
-func (controller *HomeController) Index(w http.ResponseWriter, r *http.Request) {
-	if controller.SessionManager.GetString(r.Context(), "inside") == "yes" {
-		http.Redirect(w, r, "/home", http.StatusSeeOther)
+func (c *HomeController) Home(w http.ResponseWriter, r *http.Request) {
+	if c.SessionManager.GetString(r.Context(), "inside") != "yes" {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
 
 		return
 	}
 
-	ts, err := template.ParseFiles("./static/views/index.html")
+	viewData := map[string]any{}
+
+	viewData["bankName"] = c.SessionManager.GetString(r.Context(), "bankName")
+	viewData["jurisdiction"] = c.SessionManager.GetString(r.Context(), "jurisdiction")
+	viewData["isCentralBank"] = c.SessionManager.GetBool(r.Context(), "isCentralBank")
+
+	ts, err := template.ParseFiles("./app/web/static/views/home.html")
 	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error 1", 500)
+		errlog.Println(err)
+
+		http.Error(w, "Internal Server Error", 500)
 		return
 	}
 
-	err = ts.Execute(w, struct{}{})
+	err = ts.Execute(w, viewData)
 	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error 2", 500)
+		errlog.Println(err)
+
+		http.Error(w, "Internal Server Error", 500)
+		return
 	}
 }
 
@@ -64,18 +72,19 @@ func (c *HomeController) Login(w http.ResponseWriter, r *http.Request) {
 		user, err := c.DB.GetBankEmployee(r.Form.Get("username"), r.Form.Get("password"))
 		if err != nil {
 			if err == errlog.ErrBankEmployee404 {
-				http.Error(w, "Bank employee can't be found", 404)
+				http.Redirect(w, r, "/", http.StatusSeeOther)
+			} else {
+				errlog.Println(err)
+				http.Error(w, "Internal Server Error", 500)
 			}
 
-			errlog.Println(err)
-			http.Error(w, "Internal Server Error", 500)
 			return
 		}
 
 		if config.ResolveIsCentralBank() {
-			c.SessionManager.Put(r.Context(), "centralBankEmployee", "yes")
+			c.SessionManager.Put(r.Context(), "isCentralBank", "yes")
 		} else {
-			c.SessionManager.Put(r.Context(), "centralBankEmployee", "no")
+			c.SessionManager.Put(r.Context(), "isCentralBank", "no")
 		}
 
 		c.SessionManager.Put(r.Context(), "inside", "yes")
@@ -107,34 +116,8 @@ func (c *HomeController) Login(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (controller *HomeController) Logout(w http.ResponseWriter, r *http.Request) {
-	controller.SessionManager.Put(r.Context(), "inside", "no")
+func (c *HomeController) Logout(w http.ResponseWriter, r *http.Request) {
+	c.SessionManager.Put(r.Context(), "inside", "no")
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
-}
-
-func (controller *HomeController) Home(w http.ResponseWriter, r *http.Request) {
-	if controller.SessionManager.GetString(r.Context(), "inside") != "yes" {
-		http.Redirect(w, r, "/", http.StatusSeeOther)
-		return
-	}
-	viewData := map[string]any{}
-
-	viewData["username"] = controller.SessionManager.GetString(r.Context(), "username")
-	viewData["bankName"] = controller.SessionManager.GetString(r.Context(), "bankName")
-	viewData["country"] = controller.SessionManager.GetString(r.Context(), "country")
-	viewData["centralBankEmployee"] = controller.SessionManager.GetBool(r.Context(), "centralBankEmployee")
-
-	ts, err := template.ParseFiles("./static/views/home.html")
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error 1", 500)
-		return
-	}
-
-	err = ts.Execute(w, viewData)
-	if err != nil {
-		log.Println(err.Error())
-		http.Error(w, "Internal Server Error 2", 500)
-	}
 }

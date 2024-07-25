@@ -14,9 +14,15 @@ import (
 	"strings"
 )
 
+// ComplianceChecks handles a web POST "/compliancechecks" request. It responds with a view (HTML partial) containing all
+// compliance checks associated with the current bank, as well as all tools for their successful management.
+func (c *ComplianceCheckController) ComplianceChecks(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "./app/web/static/views/compliancechecks.html")
+}
+
 // AddComplianceCheck handles a web GET/POST "/addcompliancecheck" request. For a GET, it responds with a view for a new
 // compliance check creation. On the other hand, POST indicates confirmation and that a compliance check should be created.
-// As part of this process, a new compliance check is also sent over the p2p network to the beneficiary bank.
+// As part of this process, a new compliance check is also sent over p2p network to the beneficiary bank.
 func (c *ComplianceCheckController) AddComplianceCheck(w http.ResponseWriter, r *http.Request) {
 	if c.SessionManager.GetString(r.Context(), "inside") != "yes" {
 		http.Redirect(w, r, "/", http.StatusSeeOther)

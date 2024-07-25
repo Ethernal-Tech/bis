@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Go Web Server</title>
+    <link rel="stylesheet" href="/app/web/static/styles/home-style.css">
+    <link rel="stylesheet" href="/app/web/static/styles/compliancechecks-style.css">
+    <link rel="stylesheet" href="/app/web/static/styles/analytics-style.css">
+    <link rel="stylesheet" href="/app/web/static/styles/policies-style.css">
+    <script src="/app/web/static/javascripts/home-js.js"></script>
+</head>
+<body>
+    <div class="home-header">
+        <div>
+            <div class="home-hamburger">
+                <svg width="22px" height="22px" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#a9a9aa" d="M2.80762 14.9105V12.973H17.1918V14.9105H2.80762ZM2.80762 10.9584V9.02093H17.1918V10.9584H2.80762ZM2.80762 7.00635V5.06885H17.1918V7.00635H2.80762Z"/>
+                </svg>
+            </div>
+            <div class="home-separator"></div>
+            <div class="home-logo">
+                <img width="34px" src="/app/web/static/images/mandala-logo-short.svg" alt="">
+            </div>
+        </div>
+        <div>
+            <div class="home-bank-identifier">
+                {{.bankName}} - {{.jurisdiction}}
+            </div>
+            <div class="home-separator"></div>
+            <div id="home-user" class="home-user">
+                <svg xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px" width="26px" height="26px" fill="#ecebed" class="bi bi-person-circle" viewBox="0 0 16 16">
+                    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                    <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
+                </svg>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path fill="#ecebed" d="M10 12.3767L5.35229 7.72897H14.6477L10 12.3767Z"/>
+                </svg>                    
+            </div>
+        </div>
+        <div id="home-logout-window" class="home-logout-window">
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" style="margin-right: 8px" width="26px" height="26px" fill="#49494a" class="bi bi-person-circle" viewBox="0 0 16 16">
+                    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0"/>
+                    <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8m8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1"/>
+                </svg>
+                <div>
+                    {{.bankName}}
+                </div>
+            </div>
+            <div>                
+                <a class="home-logout" href="/logout">
+                    <svg width="22px" height="22px" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path fill="#49494a" d="M2.16667 15.5C1.70833 15.5 1.31597 15.3368 0.989583 15.0104C0.663194 14.684 0.5 14.2917 0.5 13.8333V2.16667C0.5 1.70833 0.663194 1.31597 0.989583 0.989583C1.31597 0.663194 1.70833 0.5 2.16667 0.5H8V2.16667H2.16667V13.8333H8V15.5H2.16667ZM11.3333 12.1667L10.1875 10.9583L12.3125 8.83333H5.5V7.16667H12.3125L10.1875 5.04167L11.3333 3.83333L15.5 8L11.3333 12.1667Z"/>
+                    </svg>
+                    <div>
+                        Logout
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="home-body">
+        <div class="home-side-bar">
+            <div class="home-views">
+                <div class="home-views-container">
+                    <div id="home-compliance-check-view">
+                        <div class="home-view-icon">
+                            <svg width="22px" height="22px" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                                <path fill="#a9a9aa" d="M6.35425 16.0235C4.91494 15.7892 3.70098 15.1086 2.71237 13.9817C1.72362 12.8547 1.22925 11.5275 1.22925 10C1.22925 8.47251 1.72015 7.14181 2.70196 6.00792C3.68362 4.87403 4.90105 4.19688 6.35425 3.97646V5.79355C5.31078 6.03146 4.48925 6.55098 3.88966 7.35209C3.28994 8.15334 2.99008 9.03598 2.99008 10C2.99008 10.964 3.28994 11.8467 3.88966 12.6479C4.48925 13.449 5.31078 13.9685 6.35425 14.2065V16.0235ZM12.2147 16.0833C10.5408 16.0833 9.11043 15.4899 7.92362 14.3029C6.73668 13.1161 6.14321 11.6818 6.14321 10C6.14321 8.3182 6.73668 6.88389 7.92362 5.69709C9.11043 4.51014 10.5408 3.91667 12.2147 3.91667C12.9438 3.91667 13.6577 4.04424 14.3561 4.29938C15.0545 4.55452 15.6849 4.92334 16.2474 5.40584L15.0001 6.6648C14.6148 6.35355 14.1777 6.11119 13.6886 5.93771C13.1997 5.76424 12.7124 5.67751 12.2265 5.67751C11.0288 5.67751 10.0089 6.09459 9.16696 6.92876C8.32501 7.76278 7.90404 8.77869 7.90404 9.97646C7.90404 11.182 8.32501 12.2078 9.16696 13.0538C10.0089 13.8996 11.0288 14.3225 12.2265 14.3225C12.7124 14.3225 13.1997 14.2323 13.6886 14.0519C14.1777 13.8715 14.6148 13.6326 15.0001 13.3352L16.2474 14.5942C15.6849 15.0767 15.0545 15.4455 14.3561 15.7006C13.6577 15.9558 12.9438 16.0833 12.2147 16.0833ZM16.7455 13.0254L15.6278 11.8958L16.742 10.7817H11.0382V9.21834H16.742L15.6278 8.10417L16.7455 6.97459L19.7709 10L16.7455 13.0254Z"/>
+                            </svg>
+                        </div>
+                        <div class="home-view-text">
+                            Compliance checks
+                        </div>                  
+                    </div>
+                    <div id="home-analytics-view">
+                        <div class="home-view-icon">
+                            <svg width="22px" height="22px" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path fill="#a9a9aa" d="M2.78711 17.2129V2.78708H17.2129V17.2129H2.78711ZM4.72461 13.6458V15.2754H15.2754V7.91041L10.0563 13.231L7.59794 10.7727L4.72461 13.6458ZM4.72461 11.461L7.59794 8.58791L10.0354 11.0046L15.2754 5.63958V4.72458H4.72461V11.461ZM4.72461 8.86875V6.47291V11.5254V8.46291V13.6458V10.6477V13.7102V8.86875ZM4.72461 11.461V4.72458V11.5254V8.46291V11.461ZM4.72461 13.6458V10.6477V13.7102V8.86875V15.2754V13.6458Z"/>
+                            </svg>  
+                        </div>
+                        <div class="home-view-text">
+                            Analytics
+                        </div>                       
+                    </div>
+                    <div id="home-rules-management-view">
+                        <div class="home-view-icon">
+                            <svg width="22px" height="22px" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path fill="#a9a9aa" d="M14.2192 18.0525L13.9575 16.8687C13.7528 16.815 13.5715 16.7397 13.4136 16.6429C13.2557 16.5461 13.1259 16.4435 13.0244 16.3352L11.8823 16.6921L11.1159 15.3704L11.9548 14.5644C11.9062 14.3666 11.8819 14.1783 11.8819 13.9996C11.8819 13.8208 11.9062 13.6395 11.9548 13.4556L11.1159 12.6702L11.8823 11.3604L13.0036 11.6848C13.1468 11.5487 13.2973 11.4376 13.4552 11.3517C13.6132 11.2658 13.7806 11.196 13.9575 11.1423L14.2192 9.97916H15.7427L16.0163 11.1423C16.1932 11.1821 16.3711 11.245 16.5498 11.3308C16.7286 11.4168 16.8826 11.5348 17.0119 11.6848L18.0798 11.3812L18.8786 12.691L18.0282 13.4556C18.0768 13.6395 18.1011 13.8208 18.1011 13.9996C18.1011 14.1783 18.0698 14.3735 18.0073 14.5852L18.8786 15.3704L18.0798 16.6921L16.9702 16.3352C16.8687 16.4574 16.739 16.5669 16.5811 16.6637C16.4232 16.7606 16.2349 16.8358 16.0163 16.8896L15.7219 18.0525H14.2192ZM2.78711 16.2129V1.78708H17.2129V8.88895C16.92 8.74979 16.6138 8.63083 16.2944 8.53208C15.975 8.43333 15.6353 8.37312 15.2754 8.35145V3.72458H4.72461V9.9502H8.00003C8.006 10.4544 8.17885 10.8807 8.51857 11.2292C8.85829 11.5776 9.2694 11.7667 9.7519 11.7962C9.45982 12.4867 9.32169 13.2284 9.33753 14.0215C9.35322 14.8145 9.51787 15.545 9.83148 16.2129H2.78711ZM15.0077 15.4275C15.393 15.4275 15.7236 15.2876 15.9996 15.0077C16.2756 14.7278 16.4136 14.3953 16.4136 14.01C16.4136 13.6247 16.2756 13.2941 15.9996 13.0181C15.7236 12.7421 15.393 12.6042 15.0077 12.6042C14.6225 12.6042 14.2899 12.7421 14.01 13.0181C13.7302 13.2941 13.5902 13.6247 13.5902 14.01C13.5902 14.3953 13.7302 14.7278 14.01 15.0077C14.2899 15.2876 14.6225 15.4275 15.0077 15.4275Z"/>
+                            </svg>      
+                        </div>
+                        <div class="home-view-text">
+                            Rules Management
+                        </div>               
+                    </div>
+                </div>
+            </div>
+            <div class="home-banks-list">
+                <div class="home-banks-list-title">
+                    
+                </div>
+            </div>
+            <div class="home-signature">
+                Powered by Ethernal-Tech
+            </div>
+        </div>
+        <div id="home-view" class="home-view">
+
+        </div>
+    </div>
+</body>
+</html>

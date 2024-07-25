@@ -13,6 +13,7 @@ type WebServer struct {
 	*controller.ComplianceCheckController
 	*controller.TransactionController
 	*controller.PolicyController
+	*controller.BankController
 	*controller.CBController
 	*controller.APIController
 	*core.Core
@@ -29,6 +30,7 @@ func init() {
 		ComplianceCheckController: controller.CreateComplianceCheckController(core),
 		TransactionController:     controller.CreateTransactionController(core),
 		PolicyController:          controller.CreatePolicyController(core),
+		BankController:            controller.CreateBankController(core),
 		CBController:              controller.CreateCBController(core),
 		APIController:             controller.CreateAPIController(core),
 		Core:                      core,

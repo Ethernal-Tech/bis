@@ -1,0 +1,15 @@
+.analytics-1 {
+    background-color: rgb(175, 102, 194);
+    margin: 0px auto;
+    margin-top: 200px;
+}
+
+.analytics-2 {
+    background-color: rgb(204, 195, 76);
+    margin: 0px auto;
+}
+
+.analytics-1, .analytics-2 {
+    width: 360px;
+    text-align: center;
+}

@@ -37,6 +37,7 @@ func (server *WebServer) Routes() http.Handler {
 
 	// Compliance check controller
 	{
+		router.HandlerFunc(http.MethodPost, "/compliancechecks", server.ComplianceChecks)
 		router.HandlerFunc(http.MethodGet, "/addcompliancecheck", server.AddComplianceCheck)
 		router.HandlerFunc(http.MethodPost, "/addcompliancecheck", server.AddComplianceCheck)
 		router.HandlerFunc(http.MethodGet, "/confirmcompliancecheck", server.ConfirmComplianceCheck)
@@ -45,16 +46,21 @@ func (server *WebServer) Routes() http.Handler {
 
 	// Policy controller
 	{
-		router.HandlerFunc(http.MethodGet, "/policies", server.ShowPolicies)
+		router.HandlerFunc(http.MethodPost, "/policies", server.Policies)
 		router.HandlerFunc(http.MethodGet, "/editpolicy", server.EditPolicy)
 		router.HandlerFunc(http.MethodPost, "/editpolicy", server.EditPolicy)
 		router.HandlerFunc(http.MethodGet, "/addpolicy", server.AddPolicyGetModel)
 	}
 
-	// Central bank controller
+	// Bank controller
 	{
-		router.HandlerFunc(http.MethodGet, "/analytics", server.ShowAnalytics)
+		router.HandlerFunc(http.MethodPost, "/analytics", server.Analytics)
 	}
+
+	// Central bank controller
+	// {
+	// 	router.HandlerFunc(http.MethodGet, "/analytics", server.ShowAnalytics)
+	// }
 
 	// API controller
 	{

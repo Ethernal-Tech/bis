@@ -24,6 +24,10 @@ type APIController struct {
 	*core.Core
 }
 
+type BankController struct {
+	*core.Core
+}
+
 type CBController struct {
 	*core.Core
 }
@@ -46,6 +50,10 @@ func CreatePolicyController(core *core.Core) *PolicyController {
 
 func CreateAPIController(core *core.Core) *APIController {
 	return &APIController{core}
+}
+
+func CreateBankController(core *core.Core) *BankController {
+	return &BankController{core}
 }
 
 func CreateCBController(core *core.Core) *CBController {

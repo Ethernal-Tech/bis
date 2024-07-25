@@ -8,6 +8,12 @@ import (
 	"text/template"
 )
 
+// Policies handles a web POST "/policies" request. It responds with a view (HTML partial) containing all
+// policies associated with the current bank, as well as all tools for their successful management.
+func (c *PolicyController) Policies(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "./app/web/static/views/policies.html")
+}
+
 func (controller *PolicyController) ShowPolicies(w http.ResponseWriter, r *http.Request) {
 	if controller.SessionManager.GetString(r.Context(), "inside") != "yes" {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
