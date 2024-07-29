@@ -82,9 +82,9 @@ func (c *HomeController) Login(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if config.ResolveIsCentralBank() {
-			c.SessionManager.Put(r.Context(), "isCentralBank", "yes")
+			c.SessionManager.Put(r.Context(), "isCentralBank", true)
 		} else {
-			c.SessionManager.Put(r.Context(), "isCentralBank", "no")
+			c.SessionManager.Put(r.Context(), "isCentralBank", false)
 		}
 
 		c.SessionManager.Put(r.Context(), "inside", "yes")

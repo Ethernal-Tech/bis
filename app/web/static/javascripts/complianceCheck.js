@@ -19,6 +19,19 @@ fetch("/compliancecheck", {
     partial.innerHTML = partialHTML
 })
 
+function showAdvancedFilter(){
+    var divToCheck = document.getElementById('compliance-check-advanced-filter');
+    if (divToCheck) {
+        var isVisible = window.getComputedStyle(divToCheck).display !== 'none';
+
+        if (isVisible) {
+            divToCheck.style.display = 'none';
+        } else {
+            divToCheck.style.display = 'flex';
+        }
+    }
+}
+
 
 // var calendarWindow = document.getElementById('calendar-window');
 // var calendarBtn = document.getElementById('calendarBtn');

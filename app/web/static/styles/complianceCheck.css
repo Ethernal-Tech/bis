@@ -59,21 +59,22 @@
 }
 
 .compliance-check-search-button:hover {
-    background-color: #E5E9EE; /* Lighter background on hover */
+    background-color: rgb(229, 233, 238); /* Lighter background on hover */
+}
+
+.compliance-check-filter-shadow {
+    box-shadow: 0 7px 15px -4px rgb(168, 171, 173); /* Shadow on the bottom */
 }
 
 .compliance-check-advanced-filter {
     /* background-color: green; */
     height: 64px;
-    display: flex;
+    display: none;
     gap: 8px;
     align-items: center;
     padding: 12px 24px 12px 24px;
     border-bottom: 1px solid #000;
-    box-shadow: 0 10px 19px -2px rgba(0, 0, 0, 0.5); /* Shadow on the bottom */
-    margin-bottom: 20px;
 }
-
 
 .compliance-check-advanced-filter-item {
     display: flex;
@@ -89,6 +90,7 @@
 .compliance-check-table {
     /* background-color: aquamarine; */
     height: 647px;
+    margin-top: 20px;
     /* overflow-x: auto; */
 }
 
