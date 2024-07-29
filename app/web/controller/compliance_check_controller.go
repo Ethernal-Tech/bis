@@ -8,16 +8,67 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"math/rand"
 	"net/http"
 	"strconv"
 	"strings"
+	"text/template"
 )
+
+// ComplianceCheckIndex returns a partial view with filters for users to filter compliance checks.
+func (c *ComplianceCheckController) ComplianceCheckIndex(w http.ResponseWriter, r *http.Request) {
+	if c.SessionManager.GetString(r.Context(), "inside") != "yes" {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+
+		return
+	}
+	http.ServeFile(w, r, "./app/web/static/views/complianceCheckIndex.html")
+}
 
 // ComplianceChecks handles a web POST "/compliancechecks" request. It responds with a view (HTML partial) containing all
 // compliance checks associated with the current bank, as well as all tools for their successful management.
-func (c *ComplianceCheckController) ComplianceChecks(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "./app/web/static/views/compliancechecks.html")
+func (c *ComplianceCheckController) ComplianceCheck(w http.ResponseWriter, r *http.Request) {
+	if c.SessionManager.GetString(r.Context(), "inside") != "yes" {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	var searchModel models.SearchModel
+	err := json.NewDecoder(r.Body).Decode(&searchModel)
+	if err != nil {
+		http.Error(w, "Error parsing JSON: "+err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	viewData := map[string]any{}
+	var transactions []models.TransactionModel
+	if c.SessionManager.GetBool(r.Context(), "isCentralBank") {
+		var countryId string
+		transactions, countryId = c.DB.GetCentralBankTransactions(c.SessionManager.Get(r.Context(), "bankId").(string), searchModel)
+		viewData["countryId"] = countryId
+	} else {
+		transactions = c.DB.GetCommercialBankTransactions(c.SessionManager.Get(r.Context(), "bankId").(string), searchModel)
+	}
+
+	viewData["bankName"] = c.SessionManager.GetString(r.Context(), "bankName")
+	viewData["transactions"] = transactions
+	viewData["country"] = c.SessionManager.GetString(r.Context(), "country")
+	viewData["isCentralBank"] = c.SessionManager.GetBool(r.Context(), "isCentralBank")
+
+	ts, err := template.ParseFiles("./app/web/static/views/complianceCheck.html")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error 1", 500)
+		return
+	}
+
+	err = ts.Execute(w, viewData)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error 2", 500)
+	}
+	// http.ServeFile(w, r, "./app/web/static/views/compliancecheck.html")
 }
 
 // AddComplianceCheck handles a web GET/POST "/addcompliancecheck" request. For a GET, it responds with a view for a new

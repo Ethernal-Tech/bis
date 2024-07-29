@@ -1,3 +1,23 @@
+/* .compliance-check-wrapper {
+    overflow: auto;
+    width: calc(100vw - 280px);
+    height: calc(100vh - 52px);
+} */
+
+/* .compliance-check-wrapper::-webkit-scrollbar {
+    width: 6px;
+    visibility: hidden;
+}
+
+.compliance-check-wrapper::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: #49494a;
+}
+
+.compliance-check-wrapper::-webkit-scrollbar:horizontal {
+    height: 10px;
+} */
+
 .compliance-check-header {
     /* background-color: red; */
     height: 64px;
@@ -50,7 +70,10 @@
     align-items: center;
     padding: 12px 24px 12px 24px;
     border-bottom: 1px solid #000;
+    box-shadow: 0 10px 19px -2px rgba(0, 0, 0, 0.5); /* Shadow on the bottom */
+    margin-bottom: 20px;
 }
+
 
 .compliance-check-advanced-filter-item {
     display: flex;
@@ -61,4 +84,34 @@
 
 .compliance-check-advanced-filter-item > span {
     margin-top: 3px;
+}
+
+.compliance-check-table {
+    /* background-color: aquamarine; */
+    height: 647px;
+    /* overflow-x: auto; */
+}
+
+.compliance-check-table table {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-collapse: collapse;
+}
+
+.compliance-check-table table tr {
+    border: 1px solid #ddd;
+    height: 56px;
+}
+
+.compliance-check-table table tr > :nth-child(1) {
+    padding-left: 24px;
+}
+
+.compliance-check-table table tr > :last-child {
+    padding-right: 8px;
+}
+
+.compliance-check-table table th,
+.compliance-check-table table td {
+    text-align: left;
 }

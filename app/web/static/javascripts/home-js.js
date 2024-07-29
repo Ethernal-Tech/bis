@@ -15,13 +15,14 @@ window.addEventListener('load', function() {
 
     view = document.getElementById('home-view')
 
-    fetch("/compliancechecks", {
-        method: 'POST',
+    fetch("/complianceCheckIndex", {
+        method: 'GET',
     })
     .then(response => response.text())
     .then(partialHTML => {
         view.innerHTML = ""
         view.innerHTML = partialHTML
+        loadScript('complianceCheck')
     })
 
     document.getElementById('home-compliance-check-view').addEventListener('click', function(){
@@ -58,3 +59,14 @@ window.addEventListener('load', function() {
     })
 })
 
+function loadScript(partial) {
+    const existingScript = document.getElementById('dynamicScript');
+    if (existingScript) {
+        existingScript.remove();
+    }
+
+    const script = document.createElement('script');
+    script.id = 'dynamicScript';
+    script.src = `/app/web/static/javascripts/${partial}.js`;
+    document.body.appendChild(script);
+}

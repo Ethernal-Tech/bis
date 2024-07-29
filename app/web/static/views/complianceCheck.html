@@ -1,0 +1,33 @@
+<div class="compliance-check-table">
+    <table>
+        <thead>
+            <tr>
+                <th>Originating bank</th>
+                <th>Originator</th>
+                <th>Beneficiary bank</th>
+                <th>Beneficiary</th>
+                <th>Currency</th>
+                <th>Amount</th>
+                <th>Status</th>
+                <th>Date created</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .transactions}}
+                <tr>
+                    <td>{{.OriginatorBank}}</td>
+                    <td>{{.SenderName}}</td>
+                    <td>{{.BeneficiaryBank}}</td>
+                    <td>{{.ReceiverName}}</td>
+                    <td>{{.Currency}}</td>
+                    <td>{{.Amount}}</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td>></td>
+                </tr>
+            {{end}}
+        </tbody>
+    </table>
+</div>    
+
