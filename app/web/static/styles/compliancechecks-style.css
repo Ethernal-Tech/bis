@@ -62,3 +62,34 @@
 .compliance-check-advanced-filter-item > span {
     margin-top: 3px;
 }
+
+#calendarBtn {
+    cursor: pointer;
+}
+
+.calendar-window {
+    position: absolute;
+    width: 300px; /* Adjust as needed */
+    height: 226px; /* Adjust as needed */
+    border-radius: 10px;
+    top: 190px;
+    right: 30px;
+    background-color: #ffffff;
+    display: none;
+    border: 1px solid #a9a9aa;
+    overflow: hidden; /* Prevent overflow */
+}
+
+#calendar {
+    height: 100%; /* Make sure calendar fills the parent div */
+    width: 100%;
+}
+
+.fc-daygrid-day-events { 
+    min-height: 0em !important;  
+    margin-bottom: 0rem !important;
+}
+
+.fc {
+    font-size: 12px !important;
+}

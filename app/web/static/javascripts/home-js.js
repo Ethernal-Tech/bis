@@ -22,6 +22,16 @@ window.addEventListener('load', function() {
     .then(partialHTML => {
         view.innerHTML = ""
         view.innerHTML = partialHTML
+
+        //add compliancechecks-js.js after compliancechecks.html is loaded
+        const script = document.createElement('script');
+        script.src = '/app/web/static/javascripts/compliancechecks-js.js';
+        script.defer = true;
+        script.onload = function() {
+            console.log('compliancechecks.js loaded successfully');
+        };
+        document.head.appendChild(script);
+        //*****************
     })
 
     document.getElementById('home-compliance-check-view').addEventListener('click', function(){
@@ -32,6 +42,16 @@ window.addEventListener('load', function() {
         .then(partialHTML => {
             view.innerHTML = ""
             view.innerHTML = partialHTML
+
+            //add compliancechecks-js.js after compliancechecks.html is loaded
+            const script = document.createElement('script');
+            script.src = '/app/web/static/javascripts/compliancechecks-js.js';
+            script.defer = true;
+            script.onload = function() {
+                console.log('compliancechecks.js loaded successfully');
+            };
+            document.head.appendChild(script);
+            //***************** 
         })
     })
     
