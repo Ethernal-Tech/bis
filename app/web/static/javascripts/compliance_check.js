@@ -1,23 +1,47 @@
 var data = {
-    value: "",
-    from: "",
-    to: "",
-    statusId: ""
+    Value: "",
+	OriginatingBank:[],
+	Originator: [],
+	BeneficiaryBank: [],
+	Beneficiary: [],
+	Currency: [],
+	AmountFrom: "",
+	AmountTo: "",
+	StatusId: "",
+	From: "",
+	To: ""
 }
+GetComplianceChecks()
 
-fetch("/compliancecheck", {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(data)
-})
-.then(response => response.text())
-.then(partialHTML => {
-    var partial = document.getElementById('compliance-check-partial')
-    partial.innerHTML = ""
-    partial.innerHTML = partialHTML
-})
+var searchField = document.getElementById('compliance-check-search-field');
+var timeout = null;
+
+searchField.addEventListener('input', function() {
+    if (timeout) {
+        clearTimeout(timeout);
+    }
+    timeout = setTimeout(function() {
+        data.Value = searchField.value;
+        GetComplianceChecks();
+        timeout = null;
+    }, 500);
+});
+
+function GetComplianceChecks() {
+    fetch("/compliancecheck", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.text())
+    .then(partialHTML => {
+        var partial = document.getElementById('compliance-check-partial')
+        partial.innerHTML = ""
+        partial.innerHTML = partialHTML
+    })
+}
 
 function showAdvancedFilter(){
     var divToCheck = document.getElementById('compliance-check-advanced-filter');
@@ -31,7 +55,6 @@ function showAdvancedFilter(){
         }
     }
 }
-
 
 /*****Calendar*****/
 var calendarWindow = document.getElementById('calendar-window');

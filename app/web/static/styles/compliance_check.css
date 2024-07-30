@@ -79,6 +79,13 @@
     padding: 8px 12px 8px 10px;
 }
 
+.compliance-check-advanced-filter-item:hover {
+    border: 0px solid transparent;
+    border-radius: 10px;
+    background-color: rgb(229, 233, 238);
+    cursor: pointer;
+}
+
 .compliance-check-advanced-filter-item > span {
     margin-top: 3px;
 }
@@ -99,6 +106,11 @@
 .compliance-check-table table tr {
     border: 1px solid #ddd;
     height: 56px;
+}
+
+.compliance-check-table table tbody tr:hover {
+    background-color: rgb(229, 233, 238);
+    cursor: pointer;
 }
 
 .compliance-check-table table tr > :nth-child(1) {

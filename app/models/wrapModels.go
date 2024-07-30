@@ -1,6 +1,8 @@
 package models
 
-import "time"
+import (
+	"time"
+)
 
 type BankEmployeeModel struct {
 	Name     string
@@ -62,8 +64,15 @@ type BankModel struct {
 }
 
 type SearchModel struct {
-	Value    string `json:"value"`
-	From     string `json:"from"`
-	To       string `json:"to"`
-	StatusId string `json:statusId`
+	Value           string   `json:"value"`
+	OriginatingBank []string `json:"originatingBank"`
+	Originator      []string `json:"originator"`
+	BeneficiaryBank []string `json:"beneficiaryBank"`
+	Beneficiary     []string `json:"beneficiary"`
+	Currency        []string `json:"currency"`
+	AmountFrom      string   `json:"amountFrom"`
+	AmountTo        string   `json:"amountTo"`
+	StatusId        string   `json:"statusId"`
+	From            string   `json:"from"`
+	To              string   `json:"to"`
 }
