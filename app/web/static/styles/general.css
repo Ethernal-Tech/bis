@@ -1,0 +1,123 @@
+:root{
+    --color-background-dim: #F5F3F3;
+    --color-background-light: #FFFFFF;
+    --color-background-dark: #221E20;
+    --color-text-strong: #002155;
+    --color-text-strong-dark: #FFFFFF;
+    --color-text-weak: #4D6488;
+    --color-text-placeholder: #B2BCCC;
+    --color-border-outline: #CCD3DD;
+    --color-border-outline-dark: #49494A;
+    --color-border-outline-disabled: #E5E9EE;
+    --color-border-accent-blue: #002155;
+    --color-border-accent-red: #AA322F;
+    --color-icon-strong: #002155;
+    --color-icon-weak: #4D6488;
+    --color-icon-weak-dark: #A9A9AA;
+    --color-icon-disabled: #ECEBED;
+    --color-icon-placeholder: #B2BCCC;
+    --color-accent-red: #AA322F;
+    --color-accent-blue: #002155;
+    --color-on-accent: #FFFFFF;
+    --color-container: #383536;
+    --color-container-white: #FFFFFF;
+    --color-container-white-pressed: #CCD3DD;
+    --color-container-white-hover: #E5E9EE;
+    --color-container-dim: #8090AA;
+    --color-state-error: #FBE6E5;
+    --color-state-on-error: #AA322F;
+    --color-state-success: #E1F1E7;
+    --color-state-on-success: #45A368;
+    --color-state-warning: #FBF5E5;
+    --color-state-on-warning: #AA870A;
+}
+
+* {
+    margin: 0px;
+    padding: 0px;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', 'SegoeUI', sans-serif;
+}
+
+.headline-1 {
+    font-weight: 600;
+    font-size: 24px;
+    line-height: 31.92px;
+    letter-spacing: -0.03em;
+}
+
+.headline-2 {
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 28px;
+    letter-spacing: -0.02em;
+}
+
+.headline-3 {
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 28px;
+    letter-spacing: -0.02em;
+}
+
+.input-label {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 18.62px;
+    letter-spacing: -0.02em; 
+}
+
+.small-label {
+    font-weight: 600;
+    font-size: 12px;
+    line-height: 12px;
+}
+
+.body-semibold {
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 14px;
+}
+
+.body-regular {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 14px;
+}
+
+.button-text {
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 21.28px;
+    letter-spacing: -0.03em;
+}
+
+.paragraph {
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 18.2px;
+}
+
+.icon-fill-weak-dark {
+    fill: var(--color-icon-weak-dark);
+}
+
+.icon-fill-strong {
+    fill: var(--color-icon-strong);
+}
+
+.icon-fill-container-dim {
+    fill: var(--color-container-dim);
+}
+
+.icon-fill-on-accent {
+    fill: var(--color-on-accent);
+}
+
+.text-strong {
+    color: var(--color-text-strong)
+}
+
+.text-strong-dark {
+    color: var(--color-text-strong-dark)
+}
