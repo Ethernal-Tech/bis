@@ -32,26 +32,25 @@ function showAdvancedFilter(){
     }
 }
 
+var calendarWindow = document.getElementById('calendar-window');
+var calendarBtn = document.getElementById('calendarBtn');
+var calendarEl = document.getElementById('calendar');
 
-// var calendarWindow = document.getElementById('calendar-window');
-// var calendarBtn = document.getElementById('calendarBtn');
-// var calendarEl = document.getElementById('calendar');
+var calendar = new FullCalendar.Calendar(calendarEl, {
+    initialView: 'dayGridMonth', 
+    height: '100%', 
+    aspectRatio: 1.5,
+    contentHeight: 'auto' 
+});
 
-// var calendar = new FullCalendar.Calendar(calendarEl, {
-//     initialView: 'dayGridMonth', 
-//     height: '100%', 
-//     aspectRatio: 1.5,
-//     contentHeight: 'auto' 
-// });
-
-// calendarBtn.addEventListener('click', function() {
-//     calendarWindow.style.display = 'flex';
-//     calendar.render(); 
+calendarBtn.addEventListener('click', function() {
+    calendarWindow.style.display = 'flex';
+    calendar.render(); 
     
-// });
+});
 
-// document.addEventListener('click', function(event) {
-//     if (!calendarWindow.contains(event.target) && !calendarBtn.contains(event.target)) {
-//         calendarWindow.style.display = 'none';
-//     }
-// });
+document.addEventListener('click', function(event) {
+    if (!calendarWindow.contains(event.target) && !calendarBtn.contains(event.target)) {
+        calendarWindow.style.display = 'none';
+    }
+});
