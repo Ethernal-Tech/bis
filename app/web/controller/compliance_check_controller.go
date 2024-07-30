@@ -44,17 +44,12 @@ func (c *ComplianceCheckController) ComplianceCheck(w http.ResponseWriter, r *ht
 	viewData := map[string]any{}
 	var transactions []models.TransactionModel
 	if c.SessionManager.GetBool(r.Context(), "isCentralBank") {
-		var countryId string
-		transactions, countryId = c.DB.GetCentralBankTransactions(c.SessionManager.Get(r.Context(), "bankId").(string), searchModel)
-		viewData["countryId"] = countryId
+		transactions, _ = c.DB.GetCentralBankTransactions(c.SessionManager.Get(r.Context(), "bankId").(string), searchModel)
 	} else {
 		transactions = c.DB.GetCommercialBankTransactions(c.SessionManager.Get(r.Context(), "bankId").(string), searchModel)
 	}
 
-	viewData["bankName"] = c.SessionManager.GetString(r.Context(), "bankName")
 	viewData["transactions"] = transactions
-	viewData["country"] = c.SessionManager.GetString(r.Context(), "country")
-	viewData["isCentralBank"] = c.SessionManager.GetBool(r.Context(), "isCentralBank")
 
 	ts, err := template.ParseFiles("./app/web/static/views/compliance_check.html")
 	if err != nil {
@@ -68,7 +63,6 @@ func (c *ComplianceCheckController) ComplianceCheck(w http.ResponseWriter, r *ht
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error 2", 500)
 	}
-	// http.ServeFile(w, r, "./app/web/static/views/compliancecheck.html")
 }
 
 // AddComplianceCheck handles a web GET/POST "/addcompliancecheck" request. For a GET, it responds with a view for a new
