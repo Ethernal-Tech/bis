@@ -23,7 +23,7 @@ func (c *ComplianceCheckController) ComplianceCheckIndex(w http.ResponseWriter, 
 
 		return
 	}
-	http.ServeFile(w, r, "./app/web/static/views/complianceCheckIndex.html")
+	http.ServeFile(w, r, "./app/web/static/views/compliance_check_index.html")
 }
 
 // ComplianceChecks handles a web POST "/compliancechecks" request. It responds with a view (HTML partial) containing all
@@ -56,7 +56,7 @@ func (c *ComplianceCheckController) ComplianceCheck(w http.ResponseWriter, r *ht
 	viewData["country"] = c.SessionManager.GetString(r.Context(), "country")
 	viewData["isCentralBank"] = c.SessionManager.GetBool(r.Context(), "isCentralBank")
 
-	ts, err := template.ParseFiles("./app/web/static/views/complianceCheck.html")
+	ts, err := template.ParseFiles("./app/web/static/views/compliance_check.html")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error 1", 500)

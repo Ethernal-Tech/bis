@@ -22,18 +22,18 @@ window.addEventListener('load', function() {
     .then(partialHTML => {
         view.innerHTML = ""
         view.innerHTML = partialHTML
-        loadScript('complianceCheck')
+        loadScript('compliance_check')
     })
 
     document.getElementById('home-compliance-check-view').addEventListener('click', function(){
-        fetch("/compliancechecks", {
-            method: 'POST',
+        fetch("/complianceCheckIndex", {
+            method: 'GET',
         })
         .then(response => response.text())
         .then(partialHTML => {
             view.innerHTML = ""
             view.innerHTML = partialHTML
-            loadScript('complianceCheck')
+            loadScript('compliance_check')
         })
     })
     

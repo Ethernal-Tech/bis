@@ -1,0 +1,146 @@
+/* .compliance-check-wrapper {
+    overflow: auto;
+    width: calc(100vw - 280px);
+    height: calc(100vh - 52px);
+} */
+/* .compliance-check-wrapper::-webkit-scrollbar {
+    width: 6px;
+    visibility: hidden;
+}
+.compliance-check-wrapper::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+    background-color: #49494a;
+}
+.compliance-check-wrapper::-webkit-scrollbar:horizontal {
+    height: 10px;
+} */
+.compliance-check-header {
+    /* background-color: red; */
+    height: 64px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 24px 12px 24px;
+    border-bottom: 1px solid #000;
+}
+
+.compliance-check-filter {
+    /* background-color: blue; */
+    height: 64px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 24px 12px 24px;
+    border-bottom: 1px solid #000;
+}
+
+.compliance-check-filter > :nth-child(1) {
+    display: flex;
+    gap: 10px;
+}
+
+.compliance-check-search-field {
+    width: 259px;
+    height: 40px;
+    border: 1px solid #000;
+    border-radius: 8px;
+}
+
+.compliance-check-search-button {
+    width: 85px;
+    height: 40px;
+    border: 1px solid #000;
+    border-radius: 8px;
+    cursor: pointer;  
+}
+
+.compliance-check-search-button:hover {
+    background-color: rgb(229, 233, 238);
+}
+
+.compliance-check-filter-shadow {
+    box-shadow: 0 7px 15px -4px rgb(168, 171, 173); /* Shadow on the bottom */
+}
+
+.compliance-check-advanced-filter {
+    /* background-color: green; */
+    height: 64px;
+    display: none;
+    gap: 8px;
+    align-items: center;
+    padding: 12px 24px 12px 24px;
+    border-bottom: 1px solid #000;
+}
+
+.compliance-check-advanced-filter-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px 8px 10px;
+}
+
+.compliance-check-advanced-filter-item > span {
+    margin-top: 3px;
+}
+
+.compliance-check-table {
+    /* background-color: aquamarine; */
+    height: 647px;
+    margin-top: 20px;
+    /* overflow-x: auto; */
+}
+
+.compliance-check-table table {
+    width: 100%;
+    border: 1px solid #ccc;
+    border-collapse: collapse;
+}
+
+.compliance-check-table table tr {
+    border: 1px solid #ddd;
+    height: 56px;
+}
+
+.compliance-check-table table tr > :nth-child(1) {
+    padding-left: 24px;
+}
+
+.compliance-check-table table tr > :last-child {
+    padding-right: 8px;
+}
+
+.compliance-check-table table th,
+.compliance-check-table table td {
+    text-align: left;
+}
+
+#calendarBtn {
+    cursor: pointer;
+}
+
+.calendar-window {
+    position: absolute;
+    width: 300px;
+    height: 226px;
+    border-radius: 10px;
+    top: 190px;
+    right: 30px;
+    background-color: #ffffff;
+    display: none;
+    border: 1px solid #a9a9aa;
+    overflow: hidden;
+}
+
+#calendar {
+    height: 100%;
+    width: 100%;
+}
+
+.fc-daygrid-day-events { 
+    min-height: 0em !important;  
+    margin-bottom: 0rem !important;
+}
+
+.fc {
+    font-size: 12px !important;
+}

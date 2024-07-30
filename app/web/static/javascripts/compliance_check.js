@@ -32,6 +32,8 @@ function showAdvancedFilter(){
     }
 }
 
+
+/*****Calendar*****/
 var calendarWindow = document.getElementById('calendar-window');
 var calendarBtn = document.getElementById('calendarBtn');
 var calendarEl = document.getElementById('calendar');
@@ -46,7 +48,6 @@ var calendar = new FullCalendar.Calendar(calendarEl, {
 calendarBtn.addEventListener('click', function() {
     calendarWindow.style.display = 'flex';
     calendar.render(); 
-    
 });
 
 document.addEventListener('click', function(event) {
