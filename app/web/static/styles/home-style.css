@@ -186,7 +186,7 @@
     align-items: center;
 }
 
-.home-view {
+ .home-view {
     overflow: auto;
     width: calc(100vw - 280px);
     height: calc(100vh - 52px);
@@ -201,3 +201,7 @@
     border-radius: 4px;
     background-color: #49494a;
 }
+
+.home-view::-webkit-scrollbar:horizontal {
+    height: 10px;
+} 
