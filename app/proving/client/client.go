@@ -157,6 +157,7 @@ func (c *ProvingClient) sendNonInteractiveProofRequest(complianceCheckId string,
 		return returnErr
 	}
 
+	// TODO: Remove moq, added for testing because it saves time
 	moq := true
 	if moq {
 		publicSanctionsList = [][]int{{1, 2, 3}, {4, 5, 6}}

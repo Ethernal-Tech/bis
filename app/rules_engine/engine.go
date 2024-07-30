@@ -10,9 +10,12 @@ import (
 	"bisgo/common"
 	"bisgo/config"
 	"bisgo/errlog"
+	"bytes"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 	"time"
@@ -373,10 +376,50 @@ func (e *RulesEngine) doNonInteractive(complianceCheck models.ComplianceCheck, p
 }
 
 func (e *RulesEngine) doNonInteractiveAML(complianceCheck models.ComplianceCheck, policyID int) {
-	err := e.provingClient.SendProofRequest("noninteractive", complianceCheck.Id, policyID, "")
-	if err != nil {
-		errlog.Println(err)
+	// Instead of calling the proover we will moq it and send result after 5 sec so we can do
+	// tesing and development faster
+	// TODO: Remove later
+
+	time.Sleep(5 * time.Second)
+
+	requestData := models.NonInteractiveComplianceCheckProofResponse{
+		ID:                   "",
+		SanctionedCheckInput: models.NonInteractiveSanctionedCheckInput{},
+		SanctionedCheckOutput: models.NonInteractiveSanctionedCheckOutput{
+			ComplianceCheckID:    complianceCheck.Id,
+			PolicyID:             fmt.Sprintf("%d", policyID),
+			ParticipantsListHash: []int{1, 2, 3},
+			PubSanctionsListHash: []int{4, 5, 6},
+			NotSanctioned:        true,
+			Proof:                []int{7, 8, 9, 10},
+		},
+		Status: "Done",
 	}
+
+	jsonData, err := json.Marshal(requestData)
+	if err != nil {
+		fmt.Println("Error marshalling request data:", err)
+		return
+	}
+
+	// Make the HTTP POST request
+	resp, err := http.Post("http://0.0.0.0:4000/proof/noninteractive", "application/json", bytes.NewBuffer(jsonData))
+	if err != nil {
+		fmt.Println("Error making POST request:", err)
+		return
+	}
+	defer resp.Body.Close()
+
+	// Check the response status code
+	if resp.StatusCode != http.StatusOK {
+		fmt.Println("Non-OK HTTP status:", resp.StatusCode)
+		return
+	}
+
+	// err := e.provingClient.SendProofRequest("noninteractive", complianceCheck.Id, policyID, "")
+	// if err != nil {
+	// 	errlog.Println(err)
+	// }
 }
 
 func (e *RulesEngine) doNonInteractiveAMT(complianceCheck models.ComplianceCheck, policyID int) {

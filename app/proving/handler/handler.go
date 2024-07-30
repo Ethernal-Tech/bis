@@ -7,7 +7,9 @@ import (
 	"bisgo/common"
 	"bisgo/config"
 	"bisgo/errlog"
+	"encoding/hex"
 	"encoding/json"
+	"fmt"
 	"reflect"
 	"strconv"
 	"strings"
@@ -88,18 +90,18 @@ func (h *ProvingHandler) HandleInteractiveProof(body []byte) {
 
 func (h *ProvingHandler) HandleNonInteractiveProof(body []byte) {
 
-	// Remove the leading and trailing quotes
-	trimmedBody := strings.Trim(string(body), "\"")
+	// // Remove the leading and trailing quotes
+	// trimmedBody := strings.Trim(string(body), "\"")
 
-	// Unescape the JSON string
-	unescapedBody, err := strconv.Unquote("\"" + trimmedBody + "\"")
-	if err != nil {
-		errlog.Println(err)
-		return
-	}
+	// // Unescape the JSON string
+	// unescapedBody, err := strconv.Unquote("\"" + trimmedBody + "\"")
+	// if err != nil {
+	// 	errlog.Println(err)
+	// 	return
+	// }
 
 	var messageData models.NonInteractiveComplianceCheckProofResponse
-	if err := json.Unmarshal([]byte(unescapedBody), &messageData); err != nil {
+	if err := json.Unmarshal(body, &messageData); err != nil {
 		errlog.Println(err)
 		return
 	}
@@ -122,6 +124,17 @@ func (h *ProvingHandler) HandleNonInteractiveProof(body []byte) {
 	if err != nil {
 		errlog.Println(err)
 		return
+	}
+
+	// TODO: Remove, needed for smart contract testing
+	{ // testing
+		fmt.Println(messageData.SanctionedCheckOutput.Proof[0:4])
+		fmt.Println(common.IntArrayToHexString(messageData.SanctionedCheckOutput.Proof[0:4]))
+		b := make([]byte, 0)
+		for i := 0; i < 4; i++ {
+			b = append(b, byte(messageData.SanctionedCheckOutput.Proof[i]))
+		}
+		fmt.Println(hex.EncodeToString(b))
 	}
 
 	result := 0
