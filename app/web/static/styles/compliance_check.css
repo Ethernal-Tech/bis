@@ -114,7 +114,13 @@
     text-align: left;
 }
 
-#calendarBtn {
+.datesRange {
+    border-radius: 8px;
+    border: 1px solid #000;
+    width: 120px;
+    height: 40px;
+    text-align: center;
+    align-content: center;
     cursor: pointer;
 }
 
@@ -131,9 +137,13 @@
     overflow: hidden;
 }
 
-#calendar {
+.calendar {
     height: 100%;
     width: 100%;
+}
+
+.fc {
+    font-size: 12px !important;
 }
 
 .fc-daygrid-day-events { 
@@ -141,6 +151,11 @@
     margin-bottom: 0rem !important;
 }
 
-.fc {
-    font-size: 12px !important;
-}
+.fc-daygrid-day {
+    cursor: pointer; 
+  }
+  
+  .fc-daygrid-day.fc-daygrid-day-selected {
+    background-color: #e3f2fd; 
+    cursor: pointer; 
+  }
