@@ -4,13 +4,13 @@ window.addEventListener('load', function() {
     user = document.getElementById("home-user")
     logoutWindow = document.getElementById("home-logout-window")
     document.addEventListener('click', function(event){
-        if (!logoutWindow.contains(event.target) && !user.contains(event.target)) {
-            logoutWindow.style.display = "none"
-        }
+    if (!logoutWindow.contains(event.target) && !user.contains(event.target)) {
+        logoutWindow.classList.remove("visible");
+    }
     })
 
-    user.addEventListener('click', function(){
-        logoutWindow.style.display = "flex"
+    user.addEventListener('click', function(e){
+        logoutWindow.classList.toggle("visible");
     })
 
     view = document.getElementById('home-view')

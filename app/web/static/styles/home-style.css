@@ -1,6 +1,6 @@
 .home-header {
     background-color: var(--color-background-dark);
-    height: 52px;
+    height: 48px;
     border-bottom: 1px solid var(--color-border-outline-dark);
     display: flex;
     justify-content: space-between;
@@ -19,6 +19,7 @@
 
 .home-logo {
     width: 32px;
+    height: 32px;
 }
 
 .home-header > div:nth-child(2) {
@@ -28,7 +29,6 @@
 }
 
 .home-bank-identifier {
-    flex: 12;
     display: flex;
     justify-content: flex-end;
 }
@@ -40,7 +40,6 @@
 }
 
 .home-user {
-    flex: 2;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -50,7 +49,7 @@
 
 .home-logout-window {
     position: absolute;
-    width: 230px;
+    min-width: 230px;
     height: 124px;
     border-radius: 12px;
     top: 60px;
@@ -80,6 +79,7 @@
 .home-logout {
     text-decoration: none;
     display: flex;
+    align-items: center;
     width: 100%;
     padding: 16px 16px 24px 16px;
     gap: 12px;
@@ -92,7 +92,7 @@
 .home-side-bar {
     background-color: var(--color-background-dark);
     width: 240px;
-    height: calc(100vh - 52px);
+    height: calc(100vh - 48px);
     display: flex;
     flex-direction: column;
     position: relative;
@@ -113,7 +113,7 @@
     width: 100%;
 }
 
-.home-views-container > div {
+.home-icon-with-text {
     cursor: pointer;
     display: flex;
     width: 100%;
@@ -127,12 +127,7 @@
     background-color: var(--color-container);
 }
 
-.home-view-icon {
-    display: flex;
-    align-items: center;
-}
-
-.home-view-text {
+.home-icon-with-text > div {
     display: flex;
     align-items: center;
 }
@@ -147,17 +142,27 @@
     margin-left: 25px;
 }
 
-.home-signature {
-    flex: 1;
+.home-footer {
+    padding: 10px 12px 10px 12px;
+}
+
+.home-footer-icon-with-text {
     display: flex;
     justify-content: center;
+    align-items: center;
+    padding: 10px 12px 10px 10px;
+    gap: 4px;
+}
+
+.home-footer-icon-with-text > div {
+    display: flex;
     align-items: center;
 }
 
 .home-view {
     overflow: auto;
     width: calc(100vw - 240px);
-    height: calc(100vh - 52px);
+    height: calc(100vh - 48px);
 }
 
 .home-view::-webkit-scrollbar {
@@ -172,4 +177,8 @@
 
 .home-view::-webkit-scrollbar:horizontal {
     height: 10px;
-} 
+}
+
+.visible {
+    display: flex;
+}
