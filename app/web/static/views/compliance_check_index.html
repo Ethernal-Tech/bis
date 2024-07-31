@@ -10,7 +10,7 @@
 <div class="compliance-check-filter-shadow">
     <div class="compliance-check-filter">
         <div>
-            <input class="compliance-check-search-field">
+            <input id="compliance-check-search-field" class="compliance-check-search-field">
             <button onclick="showAdvancedFilter()" class="compliance-check-search-button">
                 <svg width="14" height="10" viewBox="0 0 14 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M5 9.5V8H9V9.5H5ZM2 5.75V4.25H12V5.75H2ZM0 2V0.5H14V2H0Z" fill="#002155"/>
@@ -18,12 +18,12 @@
                 Filters
             </button>
         </div>
-        <div id="calendarBtn">Calendar</div>
+        <div id="datesRange" class="datesRange">Calendar</div>
     </div>
     
     <div id="calendar-window" class="calendar-window">
-        <div id="calendar"></div>
-    </div>
+        <div id="calendar" class="calendar"></div>
+    </div> 
 
     <div id="compliance-check-advanced-filter" class="compliance-check-advanced-filter">
         <div class="compliance-check-advanced-filter-item">

@@ -1,23 +1,47 @@
 var data = {
-    value: "",
-    from: "",
-    to: "",
-    statusId: ""
+    Value: "",
+	OriginatingBank:[],
+	Originator: [],
+	BeneficiaryBank: [],
+	Beneficiary: [],
+	Currency: [],
+	AmountFrom: "",
+	AmountTo: "",
+	StatusId: "",
+	From: "",
+	To: ""
 }
+GetComplianceChecks()
 
-fetch("/compliancecheck", {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(data)
-})
-.then(response => response.text())
-.then(partialHTML => {
-    var partial = document.getElementById('compliance-check-partial')
-    partial.innerHTML = ""
-    partial.innerHTML = partialHTML
-})
+var searchField = document.getElementById('compliance-check-search-field');
+var timeout = null;
+
+searchField.addEventListener('input', function() {
+    if (timeout) {
+        clearTimeout(timeout);
+    }
+    timeout = setTimeout(function() {
+        data.Value = searchField.value;
+        GetComplianceChecks();
+        timeout = null;
+    }, 500);
+});
+
+function GetComplianceChecks() {
+    fetch("/compliancecheck", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.text())
+    .then(partialHTML => {
+        var partial = document.getElementById('compliance-check-partial')
+        partial.innerHTML = ""
+        partial.innerHTML = partialHTML
+    })
+}
 
 function showAdvancedFilter(){
     var divToCheck = document.getElementById('compliance-check-advanced-filter');
@@ -32,18 +56,38 @@ function showAdvancedFilter(){
     }
 }
 
-
 /*****Calendar*****/
 var calendarWindow = document.getElementById('calendar-window');
-var calendarBtn = document.getElementById('calendarBtn');
+var calendarBtn = document.getElementById('datesRange');
 var calendarEl = document.getElementById('calendar');
 
 var calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: 'dayGridMonth', 
     height: '100%', 
     aspectRatio: 1.5,
-    contentHeight: 'auto' 
+    contentHeight: 'auto',
+    selectable: true, 
+    select: function(info) {
+        var startDate = info.startStr;
+        var start = new Date(startDate);
+        var endDate = info.endStr;
+        var end = new Date(endDate);
+        end.setDate(end.getDate() - 1);
+        endDate = end.toISOString().split('T')[0];
+
+        var formattedStartDate = formatDate(startDate);
+        var formattedEndDate = formatDate(endDate);
+
+        document.getElementById('datesRange').innerText = `${formattedStartDate} - ${formattedEndDate}`;
+        calendarWindow.style.display = 'none';
+    }
 });
+
+function formatDate(dateStr) {
+    const options = { day: '2-digit', month: 'short' };
+    const date = new Date(dateStr);
+    return date.toLocaleDateString('en-US', options);
+  }
 
 calendarBtn.addEventListener('click', function() {
     calendarWindow.style.display = 'flex';
