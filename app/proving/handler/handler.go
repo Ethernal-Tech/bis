@@ -64,8 +64,37 @@ func (h *ProvingHandler) HandleInteractiveProof(body []byte) {
 		return
 	}
 
+	// If the SL MPC solution is used
+	if config.ResolveMPCImplementation() == "SL" {
+		// Originator must notify BB about the result
+		// and push the signed result to it
+		if check.OriginatorBankId == config.ResolveMyGlobalIdentifier() {
+			policy, err := h.DB.GetPolicyById(policyID)
+			if err != nil {
+				errlog.Println(err)
+				return
+			}
+
+			// notify beneficiary bank
+			policyCheckResult := common.PolicyCheckResultDTO{
+				ComplianceCheckId: check.Id,
+				Code:              policy.PolicyType.Code,
+				Name:              policy.PolicyType.Name,
+				Owner:             policy.Policy.Owner,
+				Result:            result,
+				Proof:             messageData.Value,
+			}
+
+			_, err = h.P2PClient.Send(check.BeneficiaryBankId, "policy-check-result", policyCheckResult, 0)
+			if err != nil {
+				errlog.Println(err)
+				return
+			}
+		}
+	}
+
 	if check.BeneficiaryBankId == config.ResolveMyGlobalIdentifier() && config.ResolveCBGlobalIdentifier() != "" {
-		// notify cetntra bank
+		// notify cetntral bank
 		policy, err := h.DB.GetPolicyById(policyID)
 		if err != nil {
 			errlog.Println(err)

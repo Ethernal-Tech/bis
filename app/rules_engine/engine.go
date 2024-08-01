@@ -211,10 +211,12 @@ func (e *RulesEngine) interactiveSanctionCheckList(complianceCheck models.Compli
 	} else {
 		// beneficiary bank (server side of the SCL MPC protocol)
 
-		err := e.provingClient.SendProofRequest("interactive", complianceCheck.Id, policy.Policy.Id, "")
-		if err != nil {
-			errlog.Println(err)
-			return
+		if config.ResolveMPCImplementation() != "SL" {
+			err := e.provingClient.SendProofRequest("interactive", complianceCheck.Id, policy.Policy.Id, "")
+			if err != nil {
+				errlog.Println(err)
+				return
+			}
 		}
 
 		signal := common.MPCStartSignalDTO{
@@ -222,7 +224,7 @@ func (e *RulesEngine) interactiveSanctionCheckList(complianceCheck models.Compli
 			VMAddress:         e.provingClient.GetVMAddress(),
 		}
 
-		_, err = e.p2pClient.Send(complianceCheck.OriginatorBankId, "mpc-start-signal", signal, 0)
+		_, err := e.p2pClient.Send(complianceCheck.OriginatorBankId, "mpc-start-signal", signal, 0)
 		if err != nil {
 			errlog.Println(err)
 			return

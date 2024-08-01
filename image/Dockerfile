@@ -15,35 +15,30 @@ COPY image/gpjc_scripts /app/gpjc_scripts
 COPY ca.crt /app
 COPY ca.key /app
 
+COPY wrapper-api /app/wrapper-api
+
+# Copy the entrypoint script into the container
+COPY image/entrypoint.sh /usr/local/bin/entrypoint.sh
+
+# Make the entrypoint script executable
+RUN chmod +x /usr/local/bin/entrypoint.sh
+
 # Set the working directory inside the container
 WORKDIR /app
 
-# Fetch the necessary releases using make
-RUN make fetch-releases-multiple-machines
-
 # Accept build argument
 ARG DNS_NAME
+ARG MPC_IMPLEMENTATION
 
 # Set the environment variable
 ENV DNS_NAME=${DNS_NAME}
+ENV MPC_IMPLEMENTATION=${MPC_IMPLEMENTATION}
 
-# Make the scripts executable
-RUN chmod +x /app/gpjc_scripts/certs_script.sh
-
-# Run the scripts
-RUN /app/gpjc_scripts/certs_script.sh
-
-RUN mv /app/ca.crt /app/private-join-and-compute && \
-    mv /app/ca.key /app/private-join-and-compute && \
-    mv /app/client.crt /app/private-join-and-compute && \
-    mv /app/client.csr /app/private-join-and-compute && \
-    mv /app/client.key /app/private-join-and-compute && \
-    mv /app/server.crt /app/private-join-and-compute && \
-    mv /app/server.csr /app/private-join-and-compute && \
-    mv /app/server.key /app/private-join-and-compute
+# Set the entrypoint
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 
 # Expose the port that the app listens on
 EXPOSE 4000
 
-# Run the application
-CMD /app/gpjc-api ${DNS_NAME} Ethernal123 & go run .
+# Default command, will be run if not overridden in 'docker run'
+CMD go run .

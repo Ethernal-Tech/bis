@@ -22,6 +22,7 @@ type ProvingClient struct {
 	gpjcPort             string
 	db                   *DB.DBHandler
 	sanctionsListManager *manager.SanctionListManager
+	SLWrapperApiUrl      string
 }
 
 var client ProvingClient
@@ -33,6 +34,7 @@ func init() {
 		gpjcPort:             config.ResolveGpjcPort(),
 		db:                   DB.GetDBHandler(),
 		sanctionsListManager: manager.CreateSanctionListManager(),
+		SLWrapperApiUrl:      config.ResolveSLMPCWrapperURL(),
 	}
 }
 
@@ -45,7 +47,11 @@ func (c *ProvingClient) GetGpjcApiAddress() string {
 }
 
 func (c *ProvingClient) GetVMAddress() string {
-	return strings.Join([]string{c.gpjcApiAddress, c.gpjcPort}, ":")
+	if config.ResolveMPCImplementation() != "SL" {
+		return strings.Join([]string{c.gpjcApiAddress, c.gpjcPort}, ":")
+	} else {
+		return config.ResolveSLMPCWrapperURL()
+	}
 }
 
 func (c *ProvingClient) SendProofRequest(proofType string, complianceCheckId string, policyId int, targetedServer string) error {
@@ -68,8 +74,13 @@ func (c *ProvingClient) SendProofRequest(proofType string, complianceCheckId str
 func (c *ProvingClient) sendInteractiveProofRequest(complianceCheckId string, policyId int, targetedServer string) error {
 	returnErr := errors.New("unsucessful send of interactive proof request")
 
-	gpjcApiURL := strings.Join([]string{c.gpjcApiAddress, c.gpjcApiPort}, ":")
-	targetUrl := strings.Join([]string{"http:/", gpjcApiURL}, "/")
+	var targetUrl string
+	if config.ResolveMPCImplementation() != "SL" {
+		gpjcApiURL := strings.Join([]string{c.gpjcApiAddress, c.gpjcApiPort}, ":")
+		targetUrl = strings.Join([]string{"http:/", gpjcApiURL}, "/")
+	} else {
+		targetUrl = strings.Join([]string{"http:/", c.SLWrapperApiUrl, "api", "start-scl"}, "/")
+	}
 
 	complianceCheck, err := c.db.GetComplianceCheckById(complianceCheckId)
 	if err != nil {
@@ -90,12 +101,24 @@ func (c *ProvingClient) sendInteractiveProofRequest(complianceCheckId string, po
 	}
 
 	var payload []byte
-	if targetedServer == "" {
-		targetUrl = strings.Join([]string{targetUrl, "api", "start-server"}, "/")
-		payload = []byte(fmt.Sprintf(`{"compliance_check_id": "%s", "policy_id": "%d"}`, complianceCheckId, policyId))
+	if config.ResolveMPCImplementation() != "SL" {
+		// google/private-join-and-compute
+		if targetedServer == "" {
+			targetUrl = strings.Join([]string{targetUrl, "api", "start-server"}, "/")
+			payload = []byte(fmt.Sprintf(`{"compliance_check_id": "%s", "policy_id": "%d"}`, complianceCheckId, policyId))
+		} else {
+			targetUrl = strings.Join([]string{targetUrl, "api", "start-client"}, "/")
+			payload = []byte(fmt.Sprintf(`{"compliance_check_id": "%s", "policy_id": "%d", "participants": ["%s", "%s"], "to": "%s"}`, complianceCheckId, policyId, originator.Name, beneficiary.Name, targetedServer))
+		}
 	} else {
-		targetUrl = strings.Join([]string{targetUrl, "api", "start-client"}, "/")
-		payload = []byte(fmt.Sprintf(`{"compliance_check_id": "%s", "policy_id": "%d", "participants": ["%s", "%s"], "to": "%s"}`, complianceCheckId, policyId, originator.Name, beneficiary.Name, targetedServer))
+		payload = []byte(fmt.Sprintf(`{
+		"compliance_check_id": "%s",
+		"policy_id": "%d",
+		"participants": ["%s", "%s"],
+		"participating_bank_address": "%s",
+		"initiator": true,
+    	"session_id": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]}`,
+			complianceCheckId, policyId, originator.Name, beneficiary.Name, targetedServer))
 	}
 
 	request, err := http.NewRequest("POST", targetUrl, bytes.NewBuffer(payload))
@@ -116,7 +139,7 @@ func (c *ProvingClient) sendInteractiveProofRequest(complianceCheckId string, po
 	}
 
 	if response.StatusCode != 200 {
-		errlog.Println(errors.New("gpjc not started successfully"))
+		errlog.Println(errors.New("MPC not started successfully"))
 		return returnErr
 	}
 

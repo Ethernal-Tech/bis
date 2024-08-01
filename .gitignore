@@ -27,7 +27,7 @@ gpjc-api
 ca.crt
 ca.key
 /playwright-tests
-*.sh
 launch.json
 
 /mandala-p2p-client
+/wrapper-api

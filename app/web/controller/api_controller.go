@@ -171,7 +171,6 @@ func (controller *APIController) GetPolicy(w http.ResponseWriter, r *http.Reques
 	policies := controller.DB.GetPolicy(uint64(policyId))
 
 	jsonData, err := json.Marshal(policies)
-
 	if err != nil {
 		http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)
 		return
@@ -179,6 +178,40 @@ func (controller *APIController) GetPolicy(w http.ResponseWriter, r *http.Reques
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
+	_, err = w.Write(jsonData)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error", 500)
+	}
+}
+
+func (controller *APIController) SanctionedEntities(w http.ResponseWriter, r *http.Request) {
+	_, err := controller.SanctionListManager.GetNewestSanctionsList()
+	if err != nil {
+		errlog.Println(err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	list, err := controller.SanctionListManager.LoadSanctionList()
+	if err != nil {
+		http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)
+		return
+	}
+
+	var result []string = make([]string, len(list))
+	for i, slice := range list {
+		result[i] = slice[0]
+	}
+
+	jsonData, err := json.Marshal(result)
+	if err != nil {
+		http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)
+		return
+	}
+
 	_, err = w.Write(jsonData)
 	if err != nil {
 		log.Println(err.Error())

@@ -32,6 +32,7 @@ services:
       dockerfile: image/Dockerfile
       args:
         - DNS_NAME=sgc
+        - MPC_IMPLEMENTATION=GPJC
     container_name: sgc
     environment:
       - DB_ADDRESS=sql-database-sgc
@@ -45,6 +46,12 @@ services:
       - GPJC_PUBLISH_ADDR=0.0.0.0:4000
       - MY_GLOBAL_IDENTIFIER=YYYYYYYYYYYYYYYYYYYY
       - JURISDICTION_CODE=SG
+      # Required for SL MPC implementation
+      - CHANNEL_CAPACITY=1000
+      - API_PUBLISH_ENDPOINT=http://0.0.0.0:4000/proof/interactive
+      - API_RETRIEVE_ENDPOINT=http://0.0.0.0:4000/api/sanctioned-entities
+      - WRAPPER_ENDPOINT_URL=sgc:9090
+      - SIGNING_PRIVATE_KEY=
     ports:
       - "4001:4000"
     depends_on:
@@ -84,6 +91,7 @@ services:
       dockerfile: image/Dockerfile
       args:
         - DNS_NAME=myc
+        - MPC_IMPLEMENTATION=GPJC
     container_name: myc
     environment:
       - DB_ADDRESS=sql-database-myc
@@ -98,6 +106,12 @@ services:
       - GPJC_API_ADDRESS=myc
       - GPJC_PORT=10501
       - GPJC_PUBLISH_ADDR=0.0.0.0:4000
+      # Required for SL MPC implementation
+      - CHANNEL_CAPACITY=1000
+      - API_PUBLISH_ENDPOINT=http://0.0.0.0:4000/proof/interactive
+      - API_RETRIEVE_ENDPOINT=http://0.0.0.0:4000/api/sanctioned-entities
+      - WRAPPER_ENDPOINT_URL=myc:9090
+      - SIGNING_PRIVATE_KEY=
     ports:
       - "4002:4000"
     depends_on:
@@ -137,6 +151,7 @@ services:
       dockerfile: image/Dockerfile
       args:
         - DNS_NAME=bnm
+        - MPC_IMPLEMENTATION=GPJC
     container_name: bnm
     environment:
       - DB_ADDRESS=sql-database-bnm
@@ -149,6 +164,12 @@ services:
       - IS_CENTRAL_BANK=true
       - P2P_NODE_ADDRESS=http://bnm-p2p:80/passthrough
       - MY_GLOBAL_IDENTIFIER=549300NROGNBV2T1GS07
+      # Required for SL MPC implementation
+      - CHANNEL_CAPACITY=1000
+      - API_PUBLISH_ENDPOINT=http://0.0.0.0:4000/proof/interactive
+      - API_RETRIEVE_ENDPOINT=http://0.0.0.0:4000/api/sanctioned-entities
+      - WRAPPER_ENDPOINT_URL=localhost:9090
+      - SIGNING_PRIVATE_KEY=
     ports:
       - "4003:4000"
     depends_on:

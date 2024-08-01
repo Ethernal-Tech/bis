@@ -135,3 +135,11 @@ func ResolveRuleEngineProofType() string {
 
 	return env_var
 }
+
+func ResolveMPCImplementation() string {
+	return os.Getenv("MPC_IMPLEMENTATION")
+}
+
+func ResolveSLMPCWrapperURL() string {
+	return os.Getenv("WRAPPER_ENDPOINT_URL")
+}

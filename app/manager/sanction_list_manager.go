@@ -89,22 +89,9 @@ func (*SanctionListManager) GetNewestSanctionsList() (string, error) {
 
 // LoadSanctionListForNoninteractiveCheck reads a sanctions list csv file where each row contains only one string element and returns a slice of strings.
 // additionally, it hashes the elements in the result using SHA-256.
-func (*SanctionListManager) LoadSanctionListForNoninteractiveCheck() ([][]int, error) {
-	dir := "./sanction-lists"
-	filePath := path.Join(dir, "UN_List.csv")
-
-	// Open the CSV file
-	file, err := os.Open(filePath)
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	// Create a new CSV reader
-	reader := csv.NewReader(file)
-
+func (s *SanctionListManager) LoadSanctionListForNoninteractiveCheck() ([][]int, error) {
 	// Read all the records from the CSV file
-	records, err := reader.ReadAll()
+	records, err := s.LoadSanctionList()
 	if err != nil {
 		return nil, err
 	}
@@ -130,6 +117,29 @@ func (*SanctionListManager) LoadSanctionListForNoninteractiveCheck() ([][]int, e
 	}
 
 	return result, nil
+}
+
+func (*SanctionListManager) LoadSanctionList() ([][]string, error) {
+	dir := "./sanction-lists"
+	filePath := path.Join(dir, "UN_List.csv")
+
+	// Open the CSV file
+	file, err := os.Open(filePath)
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	// Create a new CSV reader
+	reader := csv.NewReader(file)
+
+	// Read all the records from the CSV file
+	records, err := reader.ReadAll()
+	if err != nil {
+		return nil, err
+	}
+
+	return records, nil
 }
 
 func saveCSV(records [][]string, date string) (string, error) {

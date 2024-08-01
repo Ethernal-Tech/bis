@@ -60,6 +60,7 @@ func (server *WebServer) Routes() http.Handler {
 	{
 		router.HandlerFunc(http.MethodPost, "/api/getbeneficiarybankpolicies", server.GetBeneficiaryBankPolicies)
 		router.HandlerFunc(http.MethodPost, "/api/getpolicy", server.GetPolicy)
+		router.HandlerFunc(http.MethodGet, "/api/sanctioned-entities", server.SanctionedEntities)
 	}
 
 	return DenyAccessToHTML(server.SessionManager.LoadAndSave(router))
