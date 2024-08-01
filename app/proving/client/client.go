@@ -50,7 +50,7 @@ func (c *ProvingClient) GetVMAddress() string {
 	if config.ResolveMPCImplementation() != "SL" {
 		return strings.Join([]string{c.gpjcApiAddress, c.gpjcPort}, ":")
 	} else {
-		return config.ResolveSLMPCWrapperURL()
+		return c.SLWrapperApiUrl
 	}
 }
 

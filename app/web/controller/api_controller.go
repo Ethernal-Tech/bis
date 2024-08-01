@@ -185,8 +185,12 @@ func (controller *APIController) GetPolicy(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-func (controller *APIController) SanctionedEntities(w http.ResponseWriter, r *http.Request) {
-	_, err := controller.SanctionListManager.GetNewestSanctionsList()
+// SanctionedEntities handles web API call ("/api/sanctioned-entities") for obtaining the
+// sanctioned entities. As a result it responds with a list of sanctioned entities names.
+// It internally sends a request to the external DB to query last version of the public sanctions list
+// and saves it locally.
+func (c *APIController) SanctionedEntities(w http.ResponseWriter, r *http.Request) {
+	_, err := c.SanctionListManager.GetNewestSanctionsList()
 	if err != nil {
 		errlog.Println(err)
 		return
@@ -195,7 +199,7 @@ func (controller *APIController) SanctionedEntities(w http.ResponseWriter, r *ht
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	list, err := controller.SanctionListManager.LoadSanctionList()
+	list, err := c.SanctionListManager.LoadSanctionList()
 	if err != nil {
 		http.Error(w, "Failed to encode JSON", http.StatusInternalServerError)
 		return
