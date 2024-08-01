@@ -15,34 +15,44 @@
     height: 10px;
 } */
 .compliance-check-header {
-    /* background-color: red; */
+    background-color: var(--color-background-light);
     height: 64px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 12px 24px 12px 24px;
-    border-bottom: 1px solid #000;
+    border-bottom: 1px solid var(--color-border-outline-disabled);
+}
+
+.compliance-check-icon-with-text {
+    display: flex;
+    gap: 4px;
+}
+
+.compliance-check-icon-with-text > div {
+    display: flex;
+    align-items: center;
 }
 
 .compliance-check-filter {
-    /* background-color: blue; */
+    background-color: var(--color-background-light);
     height: 64px;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 12px 24px 12px 24px;
-    border-bottom: 1px solid #000;
+    border-bottom: 1px solid var(--color-border-outline-disabled);
 }
 
 .compliance-check-filter > :nth-child(1) {
     display: flex;
-    gap: 10px;
+    gap: 8px;
 }
 
 .compliance-check-search-field {
     width: 259px;
     height: 40px;
-    border: 1px solid #000;
+    border: 1px solid var(--color-border-outline);
     border-radius: 8px;
     padding: 10px 12px 10px 10px;
 }
@@ -52,15 +62,20 @@
 }
 
 .compliance-check-search-button {
+    background-color: var(--color-background-light);
     width: 85px;
     height: 40px;
-    border: 1px solid #000;
+    border: 1px solid var(--color-border-outline);
     border-radius: 8px;
-    cursor: pointer;  
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px 12px 10px 10px;
 }
 
 .compliance-check-search-button:hover {
-    background-color: rgb(229, 233, 238);
+    background-color: var(--color-container-white-hover); /* Lighter background on hover */
 }
 
 .compliance-check-filter-shadow {
@@ -68,13 +83,11 @@
 }
 
 .compliance-check-advanced-filter {
-    /* background-color: green; */
-    height: 64px;
-    display: none;
+    display: flex;
     gap: 8px;
     align-items: center;
     padding: 12px 24px 12px 24px;
-    border-bottom: 1px solid #000;
+    border-bottom: 1px solid var(--color-border-outline-disabled);
 }
 
 .compliance-check-advanced-filter-item {
@@ -194,8 +207,15 @@
     text-align: left;
 }
 
-#calendarBtn {
+.datesRange {
+    border-radius: 8px;
+    border: 1px solid var(--color-border-outline);
+    width: 120px;
+    height: 40px;
+    text-align: center;
+    align-content: center;
     cursor: pointer;
+    padding: 10px 8px 10px 8px;
 }
 
 .calendar-window {
@@ -211,9 +231,13 @@
     overflow: hidden;
 }
 
-#calendar {
+.calendar {
     height: 100%;
     width: 100%;
+}
+
+.fc {
+    font-size: 12px !important;
 }
 
 .fc-daygrid-day-events { 
@@ -221,6 +245,11 @@
     margin-bottom: 0rem !important;
 }
 
-.fc {
-    font-size: 12px !important;
-}
+.fc-daygrid-day {
+    cursor: pointer; 
+  }
+  
+  .fc-daygrid-day.fc-daygrid-day-selected {
+    background-color: #e3f2fd; 
+    cursor: pointer; 
+  }
