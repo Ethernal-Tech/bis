@@ -13,21 +13,6 @@ var data = {
 }
 GetComplianceChecks()
 
-var searchField = document.getElementById('compliance-check-search-field');
-var timeout = null;
-
-searchField.addEventListener('input', function() {
-    if (timeout) {
-        clearTimeout(timeout);
-    }
-    timeout = setTimeout(function() {
-        data.Value = searchField.value;
-        GetComplianceChecks();
-        timeout = null;
-        populateFilters()
-    }, 500);
-});
-
 function GetComplianceChecks() {
     fetch("/compliancecheck", {
         method: 'POST',
@@ -45,19 +30,6 @@ function GetComplianceChecks() {
     })
 }
 
-function showAdvancedFilter(){
-    var divToCheck = document.getElementById('compliance-check-advanced-filter');
-    if (divToCheck) {
-        var isVisible = window.getComputedStyle(divToCheck).display !== 'none';
-
-        if (isVisible) {
-            divToCheck.style.display = 'none';
-        } else {
-            divToCheck.style.display = 'flex';
-        }
-    }
-}
-
 /******* FILTER START  *********/
 function openPopup(triggerElement, popupId) {
     var popup = document.getElementById(popupId);
@@ -66,7 +38,7 @@ function openPopup(triggerElement, popupId) {
     var isVisible = popup.style.display === 'block';
 
     // Hide all popups if not clicking on an already visible one
-    document.querySelectorAll('.popup-container').forEach(function(p) {
+    document.querySelectorAll('.popup-container, .popup-container-amount').forEach(function(p) {
         p.style.display = 'none';
     });
 
@@ -81,7 +53,7 @@ function openPopup(triggerElement, popupId) {
 
 // Hide the popup when clicking outside of it
 document.addEventListener('click', function(event) {
-    var popups = document.querySelectorAll('.popup-container');
+    var popups = document.querySelectorAll('.popup-container, .popup-container-amount');
     var triggers = document.querySelectorAll('.compliance-check-advanced-filter-item');
 
     // Check if click is outside any popup or trigger
@@ -107,17 +79,26 @@ document.addEventListener('click', function(event) {
 var table;
 var filterColumns;
 var filters;
+var searchField;
+var fromAmountField;
+var toAmountField;
 
 function populateFilters() {
     table = document.getElementById('compliance-check-table');
-    filterColumns = [0, 1, 2, 3, 4];
+    filterColumns = [0, 1, 2, 3, 4, 6];
     filters = [
         document.getElementById('originating-bank-list'),
         document.getElementById('originator-list'),
         document.getElementById('beneficiary-bank-list'),
         document.getElementById('beneficiary-list'),
-        document.getElementById('currency-list')
+        document.getElementById('currency-list'),
+        document.getElementById('status-list'),
     ];
+    
+    searchField = document.getElementById('compliance-check-search-field');
+    fromAmountField = document.getElementById('from-amount');
+    toAmountField = document.getElementById('to-amount');
+
     const uniqueValues = filterColumns.map(() => []);
 
     Array.from(table.tBodies[0].rows).forEach(row => {
@@ -152,23 +133,55 @@ function populateFilters() {
             checkbox.addEventListener('change', filterTable);
         });
     });
+
+    // Attach event listener to search field
+    searchField.addEventListener('input', filterTable);
+    fromAmountField.addEventListener('input', filterTable);
+    toAmountField.addEventListener('input', filterTable);
 }
 
 function filterTable() {
     const selectedValues = filters.map(filter => {
         return Array.from(filter.querySelectorAll('input[type="checkbox"]:checked')).map(checkbox => checkbox.value);
     });
+    const searchValue = searchField.value.toLowerCase();
+    const fromAmount = parseFloat(fromAmountField.value) || -Infinity;
+    const toAmount = parseFloat(toAmountField.value) || Infinity;
 
     Array.from(table.tBodies[0].rows).forEach(row => {
-        const shouldShow = filterColumns.every((colIndex, filterIndex) => {
+        const matchesFilters = filterColumns.every((colIndex, filterIndex) => {
             const cell = row.cells[colIndex];
             return selectedValues[filterIndex].length === 0 || selectedValues[filterIndex].includes(cell.textContent);
         });
-        row.style.display = shouldShow ? "" : "none";
+
+        const matchesSearch = filterColumns.slice(0, 4).some(colIndex => {
+            const cell = row.cells[colIndex];
+            return cell.textContent.toLowerCase().includes(searchValue);
+        });
+
+        const amountCell = row.cells[5];
+        const amount = parseFloat(amountCell.textContent) || 0;
+        const matchesAmount = amount >= fromAmount && amount <= toAmount;
+
+        row.style.display = matchesFilters && matchesSearch && matchesAmount ? "" : "none";
     });
 }
-
 /******* FILTER END  *********/
+
+
+function showAdvancedFilter(){
+    var divToCheck = document.getElementById('compliance-check-advanced-filter');
+    if (divToCheck) {
+        var isVisible = window.getComputedStyle(divToCheck).display !== 'none';
+
+        if (isVisible) {
+            divToCheck.style.display = 'none';
+        } else {
+            divToCheck.style.display = 'flex';
+        }
+    }
+}
+
 
 
 /*****Calendar*****/

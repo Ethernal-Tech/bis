@@ -83,7 +83,7 @@
 }
 
 .compliance-check-advanced-filter {
-    display: flex;
+    display: none;
     gap: 8px;
     align-items: center;
     padding: 12px 24px 12px 24px;
@@ -131,6 +131,37 @@
 
 .popup-container > input:focus {
     outline: none;
+}
+
+.popup-container-amount {
+    position: absolute;
+    width: 438px;
+    max-height: 260px;
+    background-color: white;
+    border: 1px solid #CCD3DD;
+    border-radius: 8px;
+    padding: 16px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+}
+
+.popup-container-amount > div > input {
+    width: 195px;
+    height: 40px;
+    background-color: white;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 10px 12px 10px 10px;
+}
+
+.popup-container-amount > div > input:focus {
+    outline: none;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 .popup-list {

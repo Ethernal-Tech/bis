@@ -117,8 +117,11 @@
                 Amount
             </span>
         </div>
-        <div id="amount-popup" class="popup-container" style="display: none;">
-            <input type="text" id="amount-search" placeholder="Search" />
+        <div id="amount-popup" class="popup-container-amount" style="display: none;">
+            <div>
+                <input type="number" id="from-amount" placeholder="From" />
+                <input type="number" id="to-amount" placeholder="To" />
+            </div>
         </div>
 
         <div onclick="openPopup(this, 'status-popup')" class="compliance-check-advanced-filter-item">
@@ -131,7 +134,7 @@
             </span>
         </div>
         <div id="status-popup" class="popup-container" style="display: none;">
-            <input type="text" id="status-search" placeholder="Search" />
+            <ul id="status-list" class="popup-list" multiple></ul>
         </div>
 
     </div>

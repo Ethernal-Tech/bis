@@ -24,6 +24,18 @@ func convertTxStatusDBtoPR(transaction *models.TransactionModel) *models.Transac
 	return transaction
 }
 
+func convertTxStatus(transaction *models.TransactionModel) *models.TransactionModel {
+	switch transaction.Status {
+	case "TransactionCreated", "PoliciesApplied", "ComplianceProofRequested", "ComplianceCheckPassed", "AssetSent":
+		transaction.Status = "Pending"
+	case "TransactionCompleted":
+		transaction.Status = "Successful"
+	case "TransactionCanceled", "ProofInvalid":
+		transaction.Status = "Failed"
+	}
+	return transaction
+}
+
 //nolint:unused
 func convertTxStatusPRtoDB(transaction *models.TransactionModel) *models.TransactionModel {
 	switch transaction.Status {
