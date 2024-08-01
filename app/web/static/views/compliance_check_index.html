@@ -10,7 +10,7 @@
 <div class="compliance-check-filter-shadow">
     <div class="compliance-check-filter">
         <div>
-            <input id="compliance-check-search-field" class="compliance-check-search-field">
+            <input id="compliance-check-search-field" class="compliance-check-search-field" placeholder="Search">
             <button onclick="showAdvancedFilter()" class="compliance-check-search-button">
                 <svg width="14" height="10" viewBox="0 0 14 10" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M5 9.5V8H9V9.5H5ZM2 5.75V4.25H12V5.75H2ZM0 2V0.5H14V2H0Z" fill="#002155"/>
@@ -26,7 +26,7 @@
     </div>
 
     <div id="compliance-check-advanced-filter" class="compliance-check-advanced-filter">
-        <div class="compliance-check-advanced-filter-item">
+        <div onclick="openPopup(this, 'originating-bank-popup')" class="compliance-check-advanced-filter-item">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="24" height="24" rx="5" fill="#8090AA"/>
                 <mask id="mask0_1462_62652" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="4" y="4" width="16" height="16">
@@ -38,7 +38,12 @@
             </svg>
             <span>Originating bank</span>
         </div>
-        <div class="compliance-check-advanced-filter-item">
+        <div id="originating-bank-popup" class="popup-container" style="display: none;">
+            <input type="text" id="originating-bank-search" placeholder="Search" />
+            <ul id="originating-bank-list" class="popup-list"></ul>
+        </div>
+
+        <div onclick="openPopup(this, 'originator-popup')" class="compliance-check-advanced-filter-item">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="24" height="24" rx="5" fill="#8090AA"/>
                 <mask id="mask0_1462_54413" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="4" y="4" width="16" height="16">
@@ -50,7 +55,12 @@
             </svg>                 
             <span>Originator</span>
         </div>
-        <div class="compliance-check-advanced-filter-item">
+        <div id="originator-popup" class="popup-container" style="display: none;">
+            <input type="text" id="originator-search" placeholder="Search" />
+            <ul id="originator-list" class="popup-list" multiple></ul>
+        </div>
+
+        <div onclick="openPopup(this, 'beneficiary-bank-popup')" class="compliance-check-advanced-filter-item">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="24" height="24" rx="5" fill="#8090AA"/>
                 <mask id="mask0_1462_62652" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="4" y="4" width="16" height="16">
@@ -62,7 +72,12 @@
             </svg>
             <span>Beneficiary bank</span>
         </div>
-        <div class="compliance-check-advanced-filter-item">
+        <div id="beneficiary-bank-popup" class="popup-container" style="display: none;">
+            <input type="text" id="beneficiary-bank-search" placeholder="Search" />
+            <ul id="beneficiary-bank-list" class="popup-list" multiple></ul>
+        </div>
+
+        <div onclick="openPopup(this, 'beneficiary-popup')" class="compliance-check-advanced-filter-item">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="24" height="24" rx="5" fill="#8090AA"/>
                 <mask id="mask0_1462_51165" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="4" y="4" width="16" height="16">
@@ -74,7 +89,12 @@
             </svg>            
             <span>Beneficiary</span>
         </div>
-        <div class="compliance-check-advanced-filter-item">
+        <div id="beneficiary-popup" class="popup-container" style="display: none;">
+            <input type="text" id="beneficiary-search" placeholder="Search" />
+            <ul id="beneficiary-list" class="popup-list" multiple></ul>
+        </div>
+
+        <div onclick="openPopup(this, 'currency-popup')" class="compliance-check-advanced-filter-item">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="24" height="24" rx="5" fill="#8090AA"/>
                 <mask id="mask0_1462_1812" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="4" y="4" width="16" height="16">
@@ -86,7 +106,12 @@
             </svg>        
             <span>Currency</span>
         </div>
-        <div class="compliance-check-advanced-filter-item">
+        <div id="currency-popup" class="popup-container" style="display: none;">
+            <input type="text" id="currency-search" placeholder="Search" />
+            <ul id="currency-list" class="popup-list" multiple></ul>
+        </div>
+
+        <div onclick="openPopup(this, 'amount-popup')" class="compliance-check-advanced-filter-item">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="24" height="24" rx="5" fill="#8090AA"/>
                 <mask id="mask0_1462_37485" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="4" y="4" width="16" height="16">
@@ -98,7 +123,11 @@
             </svg>  
             <span>Amount</span>
         </div>
-        <div class="compliance-check-advanced-filter-item">
+        <div id="amount-popup" class="popup-container" style="display: none;">
+            <input type="text" id="amount-search" placeholder="Search" />
+        </div>
+
+        <div onclick="openPopup(this, 'status-popup')" class="compliance-check-advanced-filter-item">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <rect width="24" height="24" rx="5" fill="#8090AA"/>
                 <mask id="mask0_1462_34144" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="4" y="4" width="16" height="16">
@@ -110,6 +139,10 @@
             </svg>     
             <span>Status</span>
         </div>
+        <div id="status-popup" class="popup-container" style="display: none;">
+            <input type="text" id="status-search" placeholder="Search" />
+        </div>
+
     </div>
 </div>
 
