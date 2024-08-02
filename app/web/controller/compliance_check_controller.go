@@ -146,7 +146,7 @@ func (c *ComplianceCheckController) AddComplianceCheck(w http.ResponseWriter, r 
 
 		// Query OB's applicable policies so they can be sent and displayed
 		// for the BB's compliance check history
-		obApplicablePolicies, err := c.DB.GetAppliedPolicies(config.ResolveJurisdictionCode(), transactionTypeId)
+		obApplicablePolicies, err := []models.PolicyAndItsType{}, nil /*c.DB.GetAppliedPolicies(config.ResolveJurisdictionCode(), transactionTypeId)*/
 		if err != nil {
 			errlog.Println(err)
 

@@ -182,12 +182,12 @@ function addSeparators(event) {
 
 function getPolicies() {
     data = {
-        BeneficiaryBankGlobalIdentifier: beneficiaryBank.value,
-        TransactionTypeId: transactionType.value
+        "bb_gid": beneficiaryBank.value,
+        "tx_type": transactionType.value
     }
 
     showLoader()
-    fetch("api/getbeneficiarybankpolicies", {
+    fetch("api/getpolicies", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
