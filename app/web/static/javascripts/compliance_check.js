@@ -183,47 +183,30 @@ function showAdvancedFilter(){
 }
 
 
+var startDate = null;
+var endDate = null;   
 
-/*****Calendar*****/
-var calendarWindow = document.getElementById('calendar-window');
-var calendarBtn = document.getElementById('datesRange');
-var calendarEl = document.getElementById('calendar');
-
-var calendar = new FullCalendar.Calendar(calendarEl, {
-    initialView: 'dayGridMonth', 
-    height: '100%', 
-    aspectRatio: 1.5,
-    contentHeight: 'auto',
-    selectable: true, 
-    select: function(info) {
-        var startDate = info.startStr;
-        var start = new Date(startDate);
-        var endDate = info.endStr;
-        var end = new Date(endDate);
-        end.setDate(end.getDate() - 1);
-        endDate = end.toISOString().split('T')[0];
-
-        var formattedStartDate = formatDate(startDate);
-        var formattedEndDate = formatDate(endDate);
-
-        document.getElementById('datesRange').innerText = `${formattedStartDate} - ${formattedEndDate}`;
-        calendarWindow.style.display = 'none';
+flatpickr("#calendar", {
+    mode: "range",
+    showMonths: 2, 
+    onChange: function(selectedDates) {
+    if (selectedDates.length === 2) {
+        startDate = selectedDates[0];
+        endDate = selectedDates[1];
+        updateDatesRange();
+    }
     }
 });
 
-function formatDate(dateStr) {
-    const options = { day: '2-digit', month: 'short' };
-    const date = new Date(dateStr);
-    return date.toLocaleDateString('en-US', options);
-  }
-
-calendarBtn.addEventListener('click', function() {
-    calendarWindow.style.display = 'flex';
-    calendar.render(); 
-});
-
-document.addEventListener('click', function(event) {
-    if (!calendarWindow.contains(event.target) && !calendarBtn.contains(event.target)) {
-        calendarWindow.style.display = 'none';
+function updateDatesRange() {
+    if (startDate && endDate) {
+    var formattedStartDate = formatDate(startDate);
+    var formattedEndDate = formatDate(endDate);
+    document.getElementById('calendar').innerText = formattedStartDate + ' - ' + formattedEndDate;
     }
-});
+}
+
+function formatDate(date) {
+    const options = { day: 'numeric', month: 'short' };
+    return date.toLocaleDateString('en-GB', options);
+}
