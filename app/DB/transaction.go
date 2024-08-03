@@ -131,6 +131,7 @@ func (wrapper *DBHandler) GetCommercialBankTransactions(bankId string, searchMod
 						,t.Currency
 						,t.Amount
 						,s.Name
+						,CONVERT(VARCHAR, ct.CreatedDate, 23)
 					FROM [dbo].[Transaction] t
 					JOIN CreatedTransactions ct ON t.Id = ct.TransactionId
 					JOIN LatestStatus ls ON t.Id = ls.TransactionId AND ls.rn = 1
@@ -156,11 +157,11 @@ func (wrapper *DBHandler) GetCommercialBankTransactions(bankId string, searchMod
 	transactions := []models.TransactionModel{}
 	for rows.Next() {
 		var trnx models.TransactionModel
-		if err := rows.Scan(&trnx.Id, &trnx.OriginatorBank, &trnx.BeneficiaryBank, &trnx.SenderGlobalIdentifier, &trnx.ReceiverGlobalIdentifier, &trnx.SenderName, &trnx.ReceiverName, &trnx.Currency, &trnx.Amount, &trnx.Status); err != nil {
+		if err := rows.Scan(&trnx.Id, &trnx.OriginatorBank, &trnx.BeneficiaryBank, &trnx.SenderGlobalIdentifier, &trnx.ReceiverGlobalIdentifier, &trnx.SenderName, &trnx.ReceiverName, &trnx.Currency, &trnx.Amount, &trnx.Status, &trnx.CreatedAt); err != nil {
 			log.Println("Error scanning row:", err)
 			return nil
 		}
-		trnx = *convertTxStatusDBtoPR(&trnx)
+		trnx = *convertTxStatus(&trnx)
 		transactions = append(transactions, trnx)
 	}
 	return transactions
