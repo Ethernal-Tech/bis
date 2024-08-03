@@ -2,29 +2,29 @@
     <table id="compliance-check-table">
         <thead>
             <tr>
-                <th>Originating bank</th>
-                <th>Originator</th>
-                <th>Beneficiary bank</th>
-                <th>Beneficiary</th>
-                <th>Currency</th>
-                <th>Amount</th>
-                <th>Status</th>
-                <th>Date created</th>
+                <th class="body-regular text-weak">Originating bank</th>
+                <th class="body-regular text-weak">Originator</th>
+                <th class="body-regular text-weak">Beneficiary bank</th>
+                <th class="body-regular text-weak">Beneficiary</th>
+                <th class="body-regular text-weak">Currency</th>
+                <th class="body-regular text-weak text-align-right">Amount</th>
+                <th class="body-regular text-weak">Status</th>
+                <th class="body-regular text-weak">Date created</th>
                 <th></th>
             </tr>
         </thead>
         <tbody>
             {{range .transactions}}
                 <tr>
-                    <td>{{.OriginatorBank}}</td>
-                    <td>{{.SenderName}}</td>
-                    <td>{{.BeneficiaryBank}}</td>
-                    <td>{{.ReceiverName}}</td>
-                    <td>{{.Currency}}</td>
-                    <td>{{.Amount}}</td>
+                    <td class="body-semibold text-strong">{{.OriginatorBank}}</td>
+                    <td class="body-semibold text-strong">{{.SenderName}}</td>
+                    <td class="body-semibold text-strong">{{.BeneficiaryBank}}</td>
+                    <td class="body-semibold text-strong">{{.ReceiverName}}</td>
+                    <td class="body-semibold text-strong">{{.Currency}}</td>
+                    <td class="body-semibold text-strong text-align-right">{{.Amount}}</td>
                     <td>-</td>
                     <td>-</td>
-                    <td>></td>
+                    <td class="text-align-right">></td>
                 </tr>
             {{end}}
         </tbody>

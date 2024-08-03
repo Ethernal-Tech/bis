@@ -75,11 +75,11 @@
 }
 
 .compliance-check-search-button:hover {
-    background-color: var(--color-container-white-hover); /* Lighter background on hover */
+    background-color: var(--color-container-white-hover);
 }
 
 .compliance-check-filter-shadow {
-    box-shadow: 0 7px 15px -4px rgb(168, 171, 173); /* Shadow on the bottom */
+    box-shadow: 0px 4px 2px 0px #0000000A;
 }
 
 .compliance-check-advanced-filter {
@@ -88,6 +88,7 @@
     align-items: center;
     padding: 12px 24px 12px 24px;
     border-bottom: 1px solid var(--color-border-outline-disabled);
+    background-color: var(--color-background-light);
 }
 
 .compliance-check-advanced-filter-item {
@@ -172,25 +173,30 @@
 }
 
 .compliance-check-table {
-    /* background-color: aquamarine; */
     height: 647px;
     margin-top: 20px;
-    /* overflow-x: auto; */
 }
 
 .compliance-check-table table {
     width: 100%;
-    border: 1px solid #ccc;
     border-collapse: collapse;
 }
 
 .compliance-check-table table tr {
-    border: 1px solid #ddd;
+    border-bottom: 1px solid var(--color-border-outline-disabled);
     height: 56px;
 }
 
+.compliance-check-table table thead tr {
+    background-color: var(--color-container-white);
+}
+
+.compliance-check-table table tbody tr {
+    background-color: var(--color-background-light);
+}
+
 .compliance-check-table table tbody tr:hover {
-    background-color: rgb(229, 233, 238);
+    background-color: var(--color-container-white-hover);
     cursor: pointer;
 }
 
@@ -198,13 +204,20 @@
     padding-left: 24px;
 }
 
-.compliance-check-table table tr > :last-child {
-    padding-right: 8px;
-}
 
 .compliance-check-table table th,
 .compliance-check-table table td {
+    padding: 0px 16px 0px 16px;
     text-align: left;
+}
+.compliance-check-table table tr > :nth-child(1),
+.compliance-check-table table tr > :last-child {
+    padding-left: 24px;
+}
+
+.compliance-check-table table th.text-align-right,
+.compliance-check-table table td.text-align-right {
+    text-align: right;
 }
 
 .datesRange {
