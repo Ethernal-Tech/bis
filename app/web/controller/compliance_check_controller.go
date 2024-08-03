@@ -14,9 +14,10 @@ import (
 	"strings"
 )
 
-// AddComplianceCheck handles a web GET/POST "/addcompliancecheck" request. For a GET, it responds with a view for a new
-// compliance check creation. On the other hand, POST indicates confirmation and that a compliance check should be created.
-// As part of this process, a new compliance check is also sent over the p2p network to the beneficiary bank.
+// AddComplianceCheck handles a web GET/POST "/addcompliancecheck" request. For a GET, it responds with a view
+// for a new compliance check creation. On the other hand, POST indicates confirmation and that a compliance
+// check should be created. As part of this process, a new compliance check is also sent over the p2p network
+// to the beneficiary bank.
 func (c *ComplianceCheckController) AddComplianceCheck(w http.ResponseWriter, r *http.Request) {
 	if c.SessionManager.GetString(r.Context(), "inside") != "yes" {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
@@ -77,10 +78,9 @@ func (c *ComplianceCheckController) AddComplianceCheck(w http.ResponseWriter, r 
 			return
 		}
 
-		// TODO: potentially handle loan
 		min := 1000000
 		max := 9999999
-		loanID := rand.Intn(max-min) + min
+		loanId := rand.Intn(max-min) + min
 
 		originatorId, err := c.DB.CreateOrGetBankClient(data.OriginatorGlobalIdentifier, data.OriginatorName, "", originatorBankGlobalIdentifier)
 		if err != nil {
@@ -106,7 +106,7 @@ func (c *ComplianceCheckController) AddComplianceCheck(w http.ResponseWriter, r 
 			Currency:          data.Currency,
 			Amount:            amount,
 			TransactionTypeId: transactionTypeId,
-			LoanId:            loanID,
+			LoanId:            loanId,
 		}
 
 		complianceCheckId, err := c.DB.AddComplianceCheck(complianceCheck)
@@ -127,7 +127,6 @@ func (c *ComplianceCheckController) AddComplianceCheck(w http.ResponseWriter, r 
 			}
 		}
 
-		// TODO: a compliance check status manager call instead of a direct state change
 		err = c.DB.UpdateComplianceCheckStatus(complianceCheckId, 1)
 		if err != nil {
 			errlog.Println(err)
@@ -144,56 +143,77 @@ func (c *ComplianceCheckController) AddComplianceCheck(w http.ResponseWriter, r 
 			return
 		}
 
-		// Query OB's applicable policies so they can be sent and displayed
-		// for the BB's compliance check history
-		obApplicablePolicies, err := []models.PolicyAndItsType{}, nil /*c.DB.GetAppliedPolicies(config.ResolveJurisdictionCode(), transactionTypeId)*/
+		allPolicies, err := c.DB.GetRoutePolicies(config.ResolveMyGlobalIdentifier(), data.BeneficiaryBankGlobalIdentifier, transactionTypeId)
 		if err != nil {
 			errlog.Println(err)
 
 			http.Error(w, "Internal Server Error", 500)
 			return
 		}
-		obPolicies := make([]common.PolicyDTO, 0)
 
-		if len(obApplicablePolicies) > 0 {
-			beneficiaryJurisdiction, err := c.DB.GetBankJurisdiction(data.BeneficiaryBankGlobalIdentifier)
-			if err != nil {
-				errlog.Println(err)
+		// a flag indicating whether a private policy exists
+		// private policies are never send individually (nor their details disclosed),
+		// but are grouped into one private policy
+		privatePolicy := false
 
-				http.Error(w, "Internal Server Error", 500)
-				return
+		var policies []common.PolicyDTO
+
+		for _, policy := range allPolicies {
+			if policy.IsPrivate {
+				privatePolicy = true
+				continue
 			}
 
-			for _, obPolicy := range obApplicablePolicies {
-				if obPolicy.Policy.BeneficiaryJurisdictionId == beneficiaryJurisdiction.Id {
-					obPolicies = append(obPolicies, common.PolicyDTO{
-						Code:   obPolicy.PolicyType.Code,
-						Name:   obPolicy.PolicyType.Name,
-						Params: obPolicy.Policy.Parameters,
-						Owner:  obPolicy.Policy.Owner,
-					})
+			// only policies owned by the originating bank or its central bank are sent
+			if policy.Owner == config.ResolveMyGlobalIdentifier() || policy.Owner == config.ResolveCBGlobalIdentifier() {
+
+				policyType, err := c.DB.GetPolicyTypeById(policy.PolicyTypeId)
+				if err != nil {
+					errlog.Println(err)
+
+					http.Error(w, "Internal Server Error", 500)
+					return
 				}
+
+				policies = append(policies, common.PolicyDTO{
+					Code:   policyType.Code,
+					Name:   policyType.Name,
+					Params: policy.Parameters,
+					Owner:  policy.Owner,
+				})
 			}
 		}
 
-		complianceCheckDTO := common.ComplianceCheckDTO{
-			ComplianceCheckId:               complianceCheckId,
-			OriginatorGlobalIdentifier:      data.OriginatorGlobalIdentifier,
-			OriginatorName:                  data.OriginatorName,
-			BeneficiaryGlobalIdentifier:     data.BeneficiaryGlobalIdentifier,
-			BeneficiaryName:                 data.BeneficiaryName,
-			OriginatorBankGlobalIdentifier:  originatorBankGlobalIdentifier,
-			BeneficiaryBankGlobalIdentifier: data.BeneficiaryBankGlobalIdentifier,
-			PaymentType:                     "",
-			TransactionType:                 transactionType.Code,
-			Amount:                          amount,
-			Currency:                        data.Currency,
-			SwiftBICCode:                    "",
-			LoanId:                          loanID,
-			OBApplicabePolicies:             obPolicies,
+		// grouping private policies into one
+		if privatePolicy {
+			policies = append(policies, common.PolicyDTO{
+				Code:   "Other",
+				Name:   "Internal Checks",
+				Params: "",
+				Owner:  config.ResolveMyGlobalIdentifier(),
+			})
 		}
 
-		_, err = c.P2PClient.Send(data.BeneficiaryBankGlobalIdentifier, "new-compliance-check", complianceCheckDTO, 0)
+		dto := common.ComplianceCheckAndPoliciesDTO{
+			ComplianceCheck: common.ComplianceCheckDTO{
+				ComplianceCheckId:               complianceCheckId,
+				OriginatorGlobalIdentifier:      data.OriginatorGlobalIdentifier,
+				OriginatorName:                  data.OriginatorName,
+				BeneficiaryGlobalIdentifier:     data.BeneficiaryGlobalIdentifier,
+				BeneficiaryName:                 data.BeneficiaryName,
+				OriginatorBankGlobalIdentifier:  originatorBankGlobalIdentifier,
+				BeneficiaryBankGlobalIdentifier: data.BeneficiaryBankGlobalIdentifier,
+				PaymentType:                     "",
+				TransactionType:                 transactionType.Code,
+				Amount:                          amount,
+				Currency:                        data.Currency,
+				SwiftBICCode:                    "",
+				LoanId:                          loanId,
+			},
+			Policies: policies,
+		}
+
+		_, err = c.P2PClient.Send(data.BeneficiaryBankGlobalIdentifier, "new-compliance-check", dto, 0)
 		if err != nil {
 			errlog.Println(err)
 

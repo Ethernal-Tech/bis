@@ -32,51 +32,48 @@ func CreateP2PHandler(core *core.Core) *P2PHandler {
 func (h *P2PHandler) AddComplianceCheck(messageID int, payload []byte) error {
 	returnErr := errors.New("p2p handler method AddComplianceCheck failed to execute properly")
 
-	var complianceCheck common.ComplianceCheckDTO
-	err := json.Unmarshal(payload, &complianceCheck)
+	var data common.ComplianceCheckAndPoliciesDTO
+	err := json.Unmarshal(payload, &data)
 	if err != nil {
 		errlog.Println(err)
 		return returnErr
 	}
 
-	transactionType, err := h.DB.GetTransactionTypeByCode(complianceCheck.TransactionType)
+	transactionType, err := h.DB.GetTransactionTypeByCode(data.ComplianceCheck.TransactionType)
 	if err != nil {
 		errlog.Println(err)
 		return returnErr
 	}
 
 	// create a new user (originator) if needed
-	originatorId, err := h.DB.CreateOrGetBankClient(complianceCheck.OriginatorGlobalIdentifier, complianceCheck.OriginatorName, "", complianceCheck.OriginatorBankGlobalIdentifier)
+	originatorId, err := h.DB.CreateOrGetBankClient(data.ComplianceCheck.OriginatorGlobalIdentifier, data.ComplianceCheck.OriginatorName, "", data.ComplianceCheck.OriginatorBankGlobalIdentifier)
 	if err != nil {
 		errlog.Println(err)
 		return returnErr
 	}
 
 	// create a new user (beneficiary) if needed
-	beneficiaryId, err := h.DB.CreateOrGetBankClient(complianceCheck.BeneficiaryGlobalIdentifier, complianceCheck.BeneficiaryName, "", complianceCheck.BeneficiaryBankGlobalIdentifier)
+	beneficiaryId, err := h.DB.CreateOrGetBankClient(data.ComplianceCheck.BeneficiaryGlobalIdentifier, data.ComplianceCheck.BeneficiaryName, "", data.ComplianceCheck.BeneficiaryBankGlobalIdentifier)
 	if err != nil {
 		errlog.Println(err)
 		return returnErr
 	}
 
-	// Insert potentialy sent policies by OB in the DB
-	if len(complianceCheck.OBApplicabePolicies) > 0 {
-		originatorJurisdiction, err := h.DB.GetBankJurisdiction(complianceCheck.OriginatorBankGlobalIdentifier)
+	// insert potentially sent policies
+	if len(data.Policies) > 0 {
+		originatorJurisdiction, err := h.DB.GetBankJurisdiction(data.ComplianceCheck.OriginatorBankGlobalIdentifier)
 		if err != nil {
 			errlog.Println(err)
 			return returnErr
 		}
 
-		beneficiaryJurisdiction, err := h.DB.GetBankJurisdiction(complianceCheck.BeneficiaryBankGlobalIdentifier)
+		beneficiaryJurisdiction, err := h.DB.GetBankJurisdiction(data.ComplianceCheck.BeneficiaryBankGlobalIdentifier)
 		if err != nil {
 			errlog.Println(err)
 			return returnErr
 		}
 
-		for _, policy := range complianceCheck.OBApplicabePolicies {
-			if policy.Owner == config.ResolveMyGlobalIdentifier() {
-				continue
-			}
+		for _, policy := range data.Policies {
 
 			policyTypeId, err := h.DB.CreateOrGetPolicyType(policy.Code, policy.Name)
 			if err != nil {
@@ -84,7 +81,9 @@ func (h *P2PHandler) AddComplianceCheck(messageID int, payload []byte) error {
 				return returnErr
 			}
 
-			_, _, err = h.DB.CreateOrUpdatePolicy(policyTypeId, policy.Owner, transactionType.Id, beneficiaryJurisdiction.Id, originatorJurisdiction.Id, beneficiaryJurisdiction.Id, policy.Params, 0)
+			// policy enforcing jurisdiction is set to the originator jurisdiction since the policies inserted
+			// here are only those imposed by the originator
+			_, _, err = h.DB.CreateOrUpdatePolicy(policyTypeId, policy.Owner, transactionType.Id, originatorJurisdiction.Id, originatorJurisdiction.Id, beneficiaryJurisdiction.Id, policy.Params, 0)
 			if err != nil {
 				errlog.Println(err)
 				return returnErr
@@ -93,23 +92,22 @@ func (h *P2PHandler) AddComplianceCheck(messageID int, payload []byte) error {
 	}
 
 	_, err = h.DB.AddComplianceCheck(models.ComplianceCheck{
-		Id:                complianceCheck.ComplianceCheckId,
-		OriginatorBankId:  complianceCheck.OriginatorBankGlobalIdentifier,
-		BeneficiaryBankId: complianceCheck.BeneficiaryBankGlobalIdentifier,
+		Id:                data.ComplianceCheck.ComplianceCheckId,
+		OriginatorBankId:  data.ComplianceCheck.OriginatorBankGlobalIdentifier,
+		BeneficiaryBankId: data.ComplianceCheck.BeneficiaryBankGlobalIdentifier,
 		SenderId:          originatorId,
 		ReceiverId:        beneficiaryId,
-		Currency:          complianceCheck.Currency,
-		Amount:            complianceCheck.Amount,
+		Currency:          data.ComplianceCheck.Currency,
+		Amount:            data.ComplianceCheck.Amount,
 		TransactionTypeId: transactionType.Id,
-		LoanId:            complianceCheck.LoanId,
+		LoanId:            data.ComplianceCheck.LoanId,
 	})
 	if err != nil {
 		errlog.Println(err)
 		return returnErr
 	}
 
-	// TODO: a compliance check status manager call instead of a direct state change
-	err = h.DB.UpdateComplianceCheckStatus(complianceCheck.ComplianceCheckId, 1)
+	err = h.DB.UpdateComplianceCheckStatus(data.ComplianceCheck.ComplianceCheckId, 1)
 	if err != nil {
 		errlog.Println(err)
 		return returnErr
@@ -196,7 +194,7 @@ func (h *P2PHandler) GetPolicies(messageID int, payload []byte) error {
 	var response common.PolicyResponseDTO
 
 	// a flag indicating whether a private policy exists
-	// private policies are never returned individually (nor are their details disclosed),
+	// private policies are never send individually (nor their details disclosed),
 	// but are grouped into one private policy
 	privatePolicy := false
 
@@ -255,9 +253,10 @@ func (h *P2PHandler) ReceivePolicies(messageID int, payload []byte) error {
 	return nil
 }
 
-// ConfirmComplianceCheck p2p handler method, as the name suggests, confirms a selected compliance check and starts the
-// rules engine for an originator bank and beneficiary central bank. It is invoked when a "compliance-check-confirmation"
-// message arrives from a p2p network. Additionally, it also aligns the central bank with the rest of the system.
+// ConfirmComplianceCheck p2p handler method, as the name suggests, confirms a selected compliance check
+// and starts the rules engine for an originator bank and beneficiary central bank. It is invoked when a
+// "compliance-check-confirmation" message arrives from a p2p network. Additionally, it also aligns the
+// central bank with the rest of the system.
 func (h *P2PHandler) ConfirmComplianceCheck(messageID int, payload []byte) error {
 	returnErr := errors.New("p2p handler method ConfirmComplianceCheck failed to execute properly")
 
@@ -272,8 +271,9 @@ func (h *P2PHandler) ConfirmComplianceCheck(messageID int, payload []byte) error
 	complianceCheck := complianceCheckConfirmation.Data.ComplianceCheck
 	policies := complianceCheckConfirmation.Data.Policies
 
-	// since the central bank may not be aware of the compliance check and the information about it, it is necessary to carry
-	// out its alignment with the rest of the system (commercial banks), the following needs to be done:
+	// since the central bank may not be aware of the compliance check and the information about it,
+	// it is necessary to carry out its alignment with the rest of the system (commercial banks),
+	// the following needs to be done:
 	// 1. potentially create (if needed) originator (sender)
 	// 2. potentially create (if needed) beneficiary (receiver)
 	// 3. potentially create (if needed) policy types

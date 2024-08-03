@@ -32,20 +32,19 @@ type TransactionDTO struct {
 }
 
 type ComplianceCheckDTO struct {
-	ComplianceCheckId               string      `json:"compliance_check_id"`
-	OriginatorGlobalIdentifier      string      `json:"originator_lei"`
-	OriginatorName                  string      `json:"originator_name"`
-	BeneficiaryGlobalIdentifier     string      `json:"beneficiary_lei"`
-	BeneficiaryName                 string      `json:"beneficiary_name"`
-	OriginatorBankGlobalIdentifier  string      `json:"originator_bank"`
-	BeneficiaryBankGlobalIdentifier string      `json:"beneficiary_bank"`
-	PaymentType                     string      `json:"payment_type"`
-	TransactionType                 string      `json:"tx_type"`
-	Amount                          int         `json:"amount"`
-	Currency                        string      `json:"currency"`
-	SwiftBICCode                    string      `json:"swift_code"`
-	LoanId                          int         `json:"loan_id"`
-	OBApplicabePolicies             []PolicyDTO `json:"ob_policies"`
+	ComplianceCheckId               string `json:"compliance_check_id"`
+	OriginatorGlobalIdentifier      string `json:"originator_lei"`
+	OriginatorName                  string `json:"originator_name"`
+	BeneficiaryGlobalIdentifier     string `json:"beneficiary_lei"`
+	BeneficiaryName                 string `json:"beneficiary_name"`
+	OriginatorBankGlobalIdentifier  string `json:"originator_bank"`
+	BeneficiaryBankGlobalIdentifier string `json:"beneficiary_bank"`
+	PaymentType                     string `json:"payment_type"`
+	TransactionType                 string `json:"tx_type"`
+	Amount                          int    `json:"amount"`
+	Currency                        string `json:"currency"`
+	SwiftBICCode                    string `json:"swift_code"`
+	LoanId                          int    `json:"loan_id"`
 }
 
 type PolicyRequestDTO struct {
@@ -71,6 +70,11 @@ type ComplianceCheckConfirmationDTO struct {
 }
 
 type ComplianceCheckConfirmationData struct {
+	ComplianceCheck ComplianceCheckDTO `json:"compliance_check"`
+	Policies        []PolicyDTO        `json:"policies"`
+}
+
+type ComplianceCheckAndPoliciesDTO struct {
 	ComplianceCheck ComplianceCheckDTO `json:"compliance_check"`
 	Policies        []PolicyDTO        `json:"policies"`
 }

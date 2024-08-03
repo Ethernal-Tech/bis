@@ -11,8 +11,8 @@ import (
 	"strconv"
 )
 
-// GetPolicies handles the web API call to "/api/getpolicies" for retrieving applicable policies
-// for a given transaction type and beneficiary jurisdiction.
+// GetPolicies handles the web API call to "/api/getpolicies" for retrieving applicable policies for a given transaction
+// type and beneficiary jurisdiction.
 //
 // Input, JSON object containing:
 //   - bb_gid : string // beneficiary commercial bank global id
@@ -23,8 +23,8 @@ import (
 //   - Beneficiary commercial bank policies
 //   - Beneficiary central bank policies
 //
-// GetPolicies internally sends a request over a p2p network to the beneficiary commerical bank
-// with the intention of obtaining policies of the beneficiary side.
+// GetPolicies internally sends a request over a p2p network to the beneficiary commerical bank with the intention of
+// obtaining policies of the beneficiary side.
 func (c *APIController) GetPolicies(w http.ResponseWriter, r *http.Request) {
 	if c.SessionManager.GetString(r.Context(), "inside") != "yes" {
 		http.Redirect(w, r, "/", http.StatusSeeOther)

@@ -11,9 +11,9 @@ import (
 
 // TODO: currently it works with the "transaction" table, modify it to work with the "compliance check" table when that change is made in the database
 
-// AddComplianceCheck creates a new compliance check and returns its id.
-// Compliance check id is actually its SHA-256 hash. AddComplianceCheck internally
-// ties up the newly created compliance check with the applicable policies for it.
+// AddComplianceCheck creates a new compliance check and returns its id. Compliance check id is actually its
+// SHA-256 hash. Method also internally ties up the newly created compliance check with the all applicable
+// policies for it.
 func (h *DBHandler) AddComplianceCheck(complianceCheck models.ComplianceCheck) (string, error) {
 	returnErr := errors.New("unsuccessful creation of compliance check")
 
@@ -48,7 +48,7 @@ func (h *DBHandler) AddComplianceCheck(complianceCheck models.ComplianceCheck) (
 	}
 
 	// get all applicable policies for compliance check
-	polices, err := h.GetPolicies(complianceCheck.OriginatorBankId, complianceCheck.BeneficiaryBankId, complianceCheck.TransactionTypeId)
+	polices, err := h.GetRoutePolicies(complianceCheck.OriginatorBankId, complianceCheck.BeneficiaryBankId, complianceCheck.TransactionTypeId)
 	if err != nil {
 		errlog.Println(err)
 
@@ -112,8 +112,8 @@ func (h *DBHandler) UpdateComplianceCheckStatus(id string, status int) error {
 	return nil
 }
 
-// GetAllSuccessfulComplianceChecks returns all successful compliance checks that the given entity has with entities from the given jurisdiction.
-// Method works in two modes:
+// GetAllSuccessfulComplianceChecks returns all successful compliance checks that the given entity has with
+// entities from the given jurisdiction. Method works in two modes:
 //
 // 1. mode = 1
 //   - entityId - denotes the id of the beneficiary
