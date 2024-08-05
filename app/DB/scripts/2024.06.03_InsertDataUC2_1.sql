@@ -86,35 +86,35 @@ SET IDENTITY_INSERT [dbo].[Status] ON
 INSERT [dbo].[Status]
     ([Id], [Name])
 VALUES
-    (1, N'TransactionCreated')
+    (1, N'Compliance check created')
 INSERT [dbo].[Status]
     ([Id], [Name])
 VALUES
-    (2, N'PoliciesApplied')
+    (2, N'Policies applied')
 INSERT [dbo].[Status]
     ([Id], [Name])
 VALUES
-    (3, N'ComplianceProofRequested')
+    (3, N'Compliance proof requested')
 INSERT [dbo].[Status]
     ([Id], [Name])
 VALUES
-    (4, N'ComplianceCheckPassed')
+    (4, N'Compliance proof generation failed')
 INSERT [dbo].[Status]
     ([Id], [Name])
 VALUES
-    (5, N'ProofInvalid')
+    (5, N'Compliance prrof generation succeeded')
 INSERT [dbo].[Status]
     ([Id], [Name])
 VALUES
-    (6, N'AssetSent')
+    (6, N'Compliance proof attached to the selected settlement asset')
 INSERT [dbo].[Status]
     ([Id], [Name])
 VALUES
-    (7, N'TransactionCompleted')
+    (7, N'Settlement asset transferred to the beneficiary bank')
 INSERT [dbo].[Status]
     ([Id], [Name])
 VALUES
-    (8, N'TransactionCanceled')
+    (8, N'Assets released to the client')
 SET IDENTITY_INSERT [dbo].[Status] OFF
 GO
 SET IDENTITY_INSERT [dbo].[TransactionType] ON

@@ -6,6 +6,17 @@ import (
 	"errors"
 )
 
+// ComplianceCheckStateManager manages the states of a compliance check during its lifecycle. All possible states of
+// the compliance check are shown below. The order in which they are displayed also defines the possible transitions
+// between states. States:
+// 1. Compliance check created
+// 2. Policies applied
+// 3. Compliance proof requested
+// 4.1. (actual 4.) Compliance proof generation failed (END - last state!)
+// 4.2. (actual 5.) Compliance prrof generation succeeded
+// 5. (actual 6.) Compliance proof attached to the selected settlement asset
+// 6. (actual 7.) Settlement asset transferred to the beneficiary bank
+// 7. (actual 8.) Assets released to the client
 type ComplianceCheckStateManager struct{}
 
 func CreateComplianceCheckStateManager() *ComplianceCheckStateManager {
