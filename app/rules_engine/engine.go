@@ -287,6 +287,7 @@ func (e *RulesEngine) interactiveCapitalFlowManagement(complianceCheck models.Co
 
 	// convert the amount from the currency of the originatory's country to the beneficiary's currency
 	totalIncomingAmount *= ratio
+	totalOutcomingAmount *= ratio
 
 	amount := totalIncomingAmount - totalOutcomingAmount
 

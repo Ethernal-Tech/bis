@@ -14,7 +14,7 @@ services:
     volumes:
       - ./app/DB/scripts/:/docker-entrypoint-initdb/scripts/
     command: >
-      /bin/bash -c " /opt/mssql/bin/sqlservr & sleep 30 &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.03_CreateBISdb1.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.03_InsertData1.sql &&  wait"
+      /bin/bash -c " /opt/mssql/bin/sqlservr & sleep 30 &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.03_CreateBISdb1.sql &&  /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.03_InsertData1.sql && /opt/mssql-tools/bin/sqlcmd -S localhost -U SA -P Ethernal123 -i /docker-entrypoint-initdb/scripts/2024.06.05_SGCPolicy.sql &&  wait"
     healthcheck:
       test:
         [
