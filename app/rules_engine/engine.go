@@ -37,7 +37,7 @@ func init() {
 		db:                          DB.GetDBHandler(),
 		provingClient:               provingclient.GetProvingClient(),
 		p2pClient:                   p2pclient.GetP2PClient(),
-		complianceCheckStateManager: manager.CreateComplianceCheckStateManager(),
+		complianceCheckStateManager: manager.GetComplianceCheckStateManager(),
 	}
 }
 

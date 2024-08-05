@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"bisgo/app/manager"
 	"bisgo/app/models"
 	"bisgo/app/proving/core"
 	"bisgo/common"
@@ -17,11 +16,10 @@ import (
 
 type ProvingHandler struct {
 	*core.Core
-	*manager.ComplianceCheckStateManager
 }
 
 func CreateProvingHandler(core *core.Core) *ProvingHandler {
-	return &ProvingHandler{core, manager.CreateComplianceCheckStateManager()}
+	return &ProvingHandler{core}
 }
 
 func (h *ProvingHandler) HandleInteractiveProof(body []byte) {

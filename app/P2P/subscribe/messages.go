@@ -16,7 +16,7 @@ const (
 	SCLServerStarted MessageType = iota
 )
 
-// map that contains "all" received messages classified by its type
+// map that contains "all" received messages classified by its type,
 // "all" in the context of possible message types that can be subscibed to
 var messages map[MessageType][]any
 var mutMess sync.Mutex

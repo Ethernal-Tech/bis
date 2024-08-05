@@ -11,20 +11,22 @@ import (
 // Core is the central component of the system.
 // It encapsulates and manages all core functionalities of the system.
 type Core struct {
-	DB                  *DB.DBHandler
-	SessionManager      *webmanager.SessionManager
-	SanctionListManager *manager.SanctionListManager
-	P2PClient           *p2pclient.P2PClient
-	RulesEngine         *engine.RulesEngine
+	DB                          *DB.DBHandler
+	SessionManager              *webmanager.SessionManager
+	SanctionListManager         *manager.SanctionListManager
+	ComplianceCheckStateManager *manager.ComplianceCheckStateManager
+	P2PClient                   *p2pclient.P2PClient
+	RulesEngine                 *engine.RulesEngine
 }
 
 // CreateCore function initializes and returns a new instance of the Core component.
 func CreateCore() *Core {
 	return &Core{
-		DB:                  DB.GetDBHandler(),
-		SessionManager:      webmanager.CreateSessionManager(),
-		SanctionListManager: manager.CreateSanctionListManager(),
-		P2PClient:           p2pclient.GetP2PClient(),
-		RulesEngine:         engine.GetRulesEngine(),
+		DB:                          DB.GetDBHandler(),
+		SessionManager:              webmanager.CreateSessionManager(),
+		SanctionListManager:         manager.CreateSanctionListManager(),
+		ComplianceCheckStateManager: manager.GetComplianceCheckStateManager(),
+		P2PClient:                   p2pclient.GetP2PClient(),
+		RulesEngine:                 engine.GetRulesEngine(),
 	}
 }

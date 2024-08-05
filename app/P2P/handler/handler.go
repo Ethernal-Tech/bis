@@ -4,7 +4,6 @@ import (
 	"bisgo/app/P2P/core"
 	"bisgo/app/P2P/messages"
 	"bisgo/app/P2P/subscribe"
-	"bisgo/app/manager"
 	"bisgo/app/models"
 	"bisgo/common"
 	"bisgo/config"
@@ -16,11 +15,10 @@ import (
 
 type P2PHandler struct {
 	*core.Core
-	*manager.ComplianceCheckStateManager
 }
 
 func CreateP2PHandler(core *core.Core) *P2PHandler {
-	return &P2PHandler{core, manager.CreateComplianceCheckStateManager()}
+	return &P2PHandler{core}
 }
 
 // TODO: if an error occurs, the channel should be closed so that the listener does not wait forever

@@ -102,7 +102,7 @@ VALUES
 INSERT [dbo].[Status]
     ([Id], [Name])
 VALUES
-    (5, N'Compliance prrof generation succeeded')
+    (5, N'Compliance proof generation succeeded')
 INSERT [dbo].[Status]
     ([Id], [Name])
 VALUES

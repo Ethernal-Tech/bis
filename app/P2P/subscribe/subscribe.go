@@ -7,7 +7,7 @@ import (
 	"sync"
 )
 
-// Subscription contains all the necessary parameters to define a single subscription
+// Subscription contains all the necessary parameters to define a single subscription.
 type Subscription struct {
 	// unique subscription identifier
 	id int
