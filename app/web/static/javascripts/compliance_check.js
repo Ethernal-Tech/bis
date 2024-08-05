@@ -102,6 +102,8 @@ var filters;
 var searchField;
 var fromAmountField;
 var toAmountField;
+var startDate = null;
+var endDate = null;  
 
 function populateFilters() {
     table = document.getElementById('compliance-check-table');
@@ -198,11 +200,15 @@ function filterTable() {
         const amount = parseFloat(amountCell.textContent) || 0;
         const matchesAmount = amount >= fromAmount && amount <= toAmount;
 
-        row.style.display = matchesFilters && matchesSearch && matchesAmount ? "" : "none";
+        const dateCell = row.cells[7];
+        const rowDate = new Date(dateCell.textContent);
+        rowDate.setHours(0, 0, 0, 0);
+        const matchesDate = (!startDate || !endDate) || (rowDate >= startDate && rowDate <= endDate);
+
+        row.style.display = matchesFilters && matchesSearch && matchesAmount && matchesDate ? "" : "none";
     });
 }
 /******* FILTER END  *********/
-
 
 function showAdvancedFilter(){
     var divToCheck = document.getElementById('compliance-check-advanced-filter');
@@ -215,29 +221,26 @@ function showAdvancedFilter(){
             divToCheck.style.display = 'flex';
         }
     }
-}
-
-
-var startDate = null;
-var endDate = null;   
+} 
 
 flatpickr("#calendar", {
     mode: "range",
     showMonths: 2, 
     onChange: function(selectedDates) {
-    if (selectedDates.length === 2) {
-        startDate = selectedDates[0];
-        endDate = selectedDates[1];
-        updateDatesRange();
-    }
+        if (selectedDates.length === 2) {
+            startDate = selectedDates[0];
+            endDate = selectedDates[1];
+            filterTable();
+            updateDatesRange();
+        }
     }
 });
 
 function updateDatesRange() {
     if (startDate && endDate) {
-    var formattedStartDate = formatDate(startDate);
-    var formattedEndDate = formatDate(endDate);
-    document.getElementById('calendar').innerText = formattedStartDate + ' - ' + formattedEndDate;
+        var formattedStartDate = formatDate(startDate);
+        var formattedEndDate = formatDate(endDate);
+        document.getElementById('calendar').innerText = formattedStartDate + ' - ' + formattedEndDate;
     }
 }
 
