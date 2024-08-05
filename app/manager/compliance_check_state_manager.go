@@ -45,27 +45,27 @@ type ComplianceCheckStateManager struct {
 	// database handler with all SQL wrapper methods
 	db *DB.DBHandler
 
-	// map containing all registered details for all "still active" compliance checks,
+	// map containing all registered descriptions for all "still active" compliance checks,
 	// "still active" compliance checks are those that are not in state 4 or state 8
-	details registeredDetails
+	descriptions registeredDescriptions
 
-	// synchronization primitive used for data-race-free access to the details map
-	mutDet sync.Mutex
+	// synchronization primitive used for data-race-free access to the descriptions map
+	mutDesc sync.Mutex
 }
 
-// registeredDetails type can be used to register details for the compliance check states, it consists of
-// two nested maps with the following meanings:
+// registeredDescriptions type can be used to register descriptions for the compliance check states, it
+// consists of two nested maps with the following meanings:
 //  1. map[string]map (key - compliance check id, value - map 2)
 //  2. map[ComplianceCheckState]string (key - concrete state, value - text details)
-type registeredDetails map[string]map[ComplianceCheckState]string
+type registeredDescriptions map[string]map[ComplianceCheckState]string
 
 var complianceCheckStateManager ComplianceCheckStateManager
 
 func init() {
 	complianceCheckStateManager = ComplianceCheckStateManager{
-		db:      DB.GetDBHandler(),
-		details: registeredDetails{},
-		mutDet:  sync.Mutex{},
+		db:           DB.GetDBHandler(),
+		descriptions: registeredDescriptions{},
+		mutDesc:      sync.Mutex{},
 	}
 }
 
@@ -76,8 +76,53 @@ func GetComplianceCheckStateManager() *ComplianceCheckStateManager {
 	return &complianceCheckStateManager
 }
 
-func (m *ComplianceCheckStateManager) RegisterDetails(complianceCheckId string, state ComplianceCheckState, details string) {
+// RegisterDescription registers the description for a given compliance check and passed state. The registered
+// description will be used (and recorded in the database) during the transition of the compliance check to the
+// given state (using [*ComplianceCheckStateManager.Transition]). If the compliance check is in state 4 or 8,
+// registration is rejected and false is returned. In the remaining states, registration will succeed and method
+// returns true. However, be careful that registering a description for a state that the compliance check has
+// already reached will have no effect. If the passed compliance check (complianceCheckId) does not exist, an
+// error will be returned. The method is data-race-free. It can be used concurrently by multiple goroutines.
+// However, a race condition may occur if the method is used for the same compliance check without synchronization.
+// This is not the case for any two different compliance checks. In that case, everything is race-free.
+func (m *ComplianceCheckStateManager) RegisterDescription(complianceCheckId string, state ComplianceCheckState, description string) (bool, error) {
+	returnErr := errors.New("failed to register compliance check description")
 
+	// although the compliance check itself is not required and used in method, the given invocation
+	// is necessary to check whether the compliance check exists in the system
+	_, err := m.db.GetComplianceCheckById(complianceCheckId)
+	if err != nil {
+		errlog.Println(err)
+		return false, returnErr
+	}
+
+	states, err := m.db.GetAllComplianceCheckStates(complianceCheckId)
+	if err != nil {
+		errlog.Println(err)
+		return false, returnErr
+	}
+
+	// registration can't be performed for compliance checks that are in state (4) or (8)
+	for _, state := range states {
+		if state.StateId == 4 || state.StateId == 8 {
+			return false, nil
+		}
+	}
+
+	m.mutDesc.Lock()
+
+	// if there were no previous registrations for the given compliance check, it is necessary
+	// to create a new map
+	_, ok := m.descriptions[complianceCheckId]
+	if !ok {
+		m.descriptions[complianceCheckId] = map[ComplianceCheckState]string{}
+	}
+
+	m.descriptions[complianceCheckId][state] = description
+
+	m.mutDesc.Unlock()
+
+	return true, nil
 }
 
 func (*ComplianceCheckStateManager) UpdateComplianceCheckPolicyStatus(db *DB.DBHandler, complianceCheckID string, policyID int, isFailed bool, description string) error {

@@ -75,8 +75,9 @@ type NewStatus struct {
 
 type NewTransactionHistory struct {
 	TransactionId string
-	StatusId      int
+	StateId       int
 	Date          time.Time
+	Description   string
 }
 
 type NewPolicyType struct {

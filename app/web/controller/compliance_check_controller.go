@@ -127,7 +127,7 @@ func (c *ComplianceCheckController) AddComplianceCheck(w http.ResponseWriter, r 
 			}
 		}
 
-		err = c.DB.UpdateComplianceCheckStatus(complianceCheckId, 1)
+		err = c.DB.UpdateComplianceCheckState(complianceCheckId, 1)
 		if err != nil {
 			errlog.Println(err)
 

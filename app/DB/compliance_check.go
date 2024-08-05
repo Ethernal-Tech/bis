@@ -96,13 +96,13 @@ func (h *DBHandler) GetComplianceCheckById(id string) (models.ComplianceCheck, e
 	return complianceCheck, nil
 }
 
-// UpdateComplianceCheckStatus updates the status of compliance check with the given id.
-func (h *DBHandler) UpdateComplianceCheckStatus(id string, status int) error {
-	query := `INSERT INTO TransactionHistory (TransactionId, StatusId, Date) VALUES (@p1, @p2, @p3)`
+// UpdateComplianceCheckState updates the state of compliance check with the given id.
+func (h *DBHandler) UpdateComplianceCheckState(id string, state int) error {
+	query := `INSERT INTO TransactionHistory (TransactionId, StateId, Date) VALUES (@p1, @p2, @p3)`
 
 	_, err := h.db.Exec(query,
 		sql.Named("p1", id),
-		sql.Named("p2", status),
+		sql.Named("p2", state),
 		sql.Named("p3", time.Now()))
 	if err != nil {
 		errlog.Println(err)
@@ -204,4 +204,39 @@ complianceCheck:
 	}
 
 	return successfulComplianceChecks, nil
+}
+
+// GetAllComplianceCheckStates returns all states that the compliance check with the given id was in.
+func (h *DBHandler) GetAllComplianceCheckStates(id string) ([]models.NewTransactionHistory, error) {
+	returnErr := errors.New("unsuccessful obtainance of compliance check states")
+
+	query := `SELECT TransactionId, StateId, Date, Description FROM TransactionHistory WHERE TransactionId = @p1`
+
+	rows, err := h.db.Query(query, sql.Named("p1", id))
+	if err != nil {
+		errlog.Println(err)
+		return nil, returnErr
+	}
+
+	defer rows.Close()
+
+	states := []models.NewTransactionHistory{}
+
+	// loop through the compliance check state history and append to the states list (slice)
+	for rows.Next() {
+		var state models.NewTransactionHistory
+		err := rows.Scan(&state.TransactionId,
+			&state.StateId,
+			&state.Date,
+			&state.Description)
+
+		if err != nil {
+			errlog.Println(err)
+			return nil, returnErr
+		}
+
+		states = append(states, state)
+	}
+
+	return states, nil
 }
