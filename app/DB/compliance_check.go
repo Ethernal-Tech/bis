@@ -73,9 +73,9 @@ func (h *DBHandler) AddComplianceCheck(complianceCheck models.ComplianceCheck) (
 
 // GetComplianceCheckById returns the compliance check with the given id.
 func (h *DBHandler) GetComplianceCheckById(id string) (models.ComplianceCheck, error) {
-	query := `SELECT Id, OriginatorBankId, BeneficiaryBankId, SenderId, ReceiverId, Currency, Amount, TransactionTypeId, LoanId
-              FROM [Transaction]
-              WHERE Id = @p1`
+	query := `SELECT Id, OriginatorBankId, BeneficiaryBankId, SenderId, 
+				ReceiverId,  Currency, Amount, TransactionTypeId, LoanId 
+				FROM [Transaction] WHERE Id = @p1`
 
 	var complianceCheck models.ComplianceCheck
 	err := h.db.QueryRow(query,

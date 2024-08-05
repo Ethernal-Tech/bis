@@ -226,8 +226,8 @@ func (c *ComplianceCheckController) AddComplianceCheck(w http.ResponseWriter, r 
 }
 
 // ConfirmComplianceCheck handles a web GET/POST "/confirmcompliancecheck" request. For a GET, it responds with
-// a view with all the information related to the compliance check and an option to confirm. On the other hand,
-// POST means confirmation and that other participants in the system (originator and central bank) should be
+// a view containing all the information related to the compliance check and confirm option. On the other hand
+// POST means confirmation and that other participants in the system (originator and central banks) should be
 // notified. It is done by sending a confirmation message over a p2p network. When this message is send to the
 // central bank, in order for alignment with commercial banks, the message additionally contains information
 // related to the compliance check as well as the policies that are applied.
@@ -306,7 +306,7 @@ func (c *ComplianceCheckController) ConfirmComplianceCheck(w http.ResponseWriter
 		}
 
 		// a flag indicating whether a private policy exists
-		// private policies are never returned individually (nor are their details disclosed),
+		// private policies are never send individually (nor their details disclosed),
 		// but are grouped into one private policy
 		privatePolicy := false
 
@@ -340,7 +340,7 @@ func (c *ComplianceCheckController) ConfirmComplianceCheck(w http.ResponseWriter
 		if config.ResolveCBGlobalIdentifier() != "" {
 			_, err = c.P2PClient.Send(config.ResolveCBGlobalIdentifier(), "compliance-check-confirmation", common.ComplianceCheckConfirmationDTO{
 				ComplianceCheckId: complianceCheck.Id,
-				Data: common.ComplianceCheckConfirmationData{
+				Data: common.ComplianceCheckAndPoliciesDTO{
 					ComplianceCheck: common.ComplianceCheckDTO{
 						ComplianceCheckId:               complianceCheck.Id,
 						OriginatorGlobalIdentifier:      originator.GlobalIdentifier,

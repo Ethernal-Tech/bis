@@ -65,13 +65,8 @@ type PolicyDTO struct {
 }
 
 type ComplianceCheckConfirmationDTO struct {
-	ComplianceCheckId string                          `json:"compliance_check_id"`
-	Data              ComplianceCheckConfirmationData `json:"data"`
-}
-
-type ComplianceCheckConfirmationData struct {
-	ComplianceCheck ComplianceCheckDTO `json:"compliance_check"`
-	Policies        []PolicyDTO        `json:"policies"`
+	ComplianceCheckId string                        `json:"compliance_check_id"`
+	Data              ComplianceCheckAndPoliciesDTO `json:"data"`
 }
 
 type ComplianceCheckAndPoliciesDTO struct {

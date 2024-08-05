@@ -35,11 +35,11 @@ func init() {
 	mutSub[SCLServerStarted] = &sync.Mutex{}
 }
 
-// Subscribe function allows you to subscribe to messages of a given type. Since the looking message may have already be in the
-// system, matchFunc parameter defines a function that will perform the check (read more about matchFunc in the [FindMessage]
-// documentation). Return value of the Subscribe function is the subscription itself. It contains a channel (NotifyCh) to which
-// messages will be sent upon arrival in the system. If the message is already in the system (checked via matchFunc), it will be
-// in the channel buffer before the return.
+// Subscribe function allows you to subscribe to messages of a given type. Since the looking message may have
+// already be in the system, matchFunc parameter defines a function that will perform the check (read more about
+// matchFunc in the [FindMessage] documentation). Return value of the Subscribe function is the subscription itself.
+// It contains a channel (NotifyCh) to which messages will be sent upon arrival in the system. If the message is
+// already in the system (checked via matchFunc), it will be in the channel buffer before the return.
 func Subscribe(messageType MessageType, matchFunc func([]any) (any, bool)) (Subscription, error) {
 	subscription, err := subscribe(messageType)
 	if err != nil {
@@ -105,7 +105,7 @@ func unsubscribe(messageType MessageType, subscription Subscription) error {
 	return nil
 }
 
-// StoreAndNotify stores the message and notifies (send a copy of the message to) all subscribers to the given message type.
+// StoreAndNotify stores the message and notifies (send a message copy to) all subscribers to the given message type.
 func StoreAndNotify(messageType MessageType, message any) error {
 	err := StoreMessage(messageType, message)
 	if err != nil {

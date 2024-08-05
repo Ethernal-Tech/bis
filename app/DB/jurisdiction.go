@@ -16,7 +16,7 @@ func (h *DBHandler) GetBankJurisdiction(bankId string) (models.Jurisdiction, err
 	err := h.db.QueryRow(query, sql.Named("p1", bankId)).Scan(&jurisdiction.Id, &jurisdiction.Name)
 	if err != nil {
 		errlog.Println(err)
-		return models.Jurisdiction{}, errors.New("unsuccessful obtain of bank jurisdiction")
+		return models.Jurisdiction{}, errors.New("unsuccessful obtainance of bank jurisdiction")
 	}
 
 	return jurisdiction, nil

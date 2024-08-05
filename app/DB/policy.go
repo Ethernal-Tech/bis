@@ -315,9 +315,12 @@ func (h *DBHandler) GetPoliciesByComplianceCheckId(complianceCheckId string) ([]
 	returnErr := errors.New("unsuccessful obtainance of policies")
 
 	// query to obtain all policies
-	query := `SELECT p.Id, p.PolicyTypeId, p.Owner, pt.Code, pt.Name, p.TransactionTypeId, p.PolicyEnforcingJurisdictionId, p.OriginatingJurisdictionId, p.BeneficiaryJurisdictionId, p.Parameters, p.IsPrivate, p.Latest 
-				FROM TransactionPolicy tp, Policy p, PolicyType pt 
-				WHERE tp.PolicyId = p.Id AND p.PolicyTypeId = pt.Id AND tp.TransactionId = @p1`
+	query := `SELECT p.Id, p.PolicyTypeId, p.Owner, pt.Code, pt.Name, 
+				p.TransactionTypeId, p.PolicyEnforcingJurisdictionId, 
+				p.OriginatingJurisdictionId, p.BeneficiaryJurisdictionId, 
+				p.Parameters, p.IsPrivate, p.Latest FROM TransactionPolicy tp, 
+				Policy p, PolicyType pt WHERE tp.PolicyId = p.Id AND 
+				p.PolicyTypeId = pt.Id AND tp.TransactionId = @p1`
 	rows, err := h.db.Query(query, sql.Named("p1", complianceCheckId))
 	if err != nil {
 		errlog.Println(err)

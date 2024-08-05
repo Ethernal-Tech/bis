@@ -255,25 +255,25 @@ func (h *P2PHandler) ReceivePolicies(messageID int, payload []byte) error {
 
 // ConfirmComplianceCheck p2p handler method, as the name suggests, confirms a selected compliance check
 // and starts the rules engine for an originator bank and beneficiary central bank. It is invoked when a
-// "compliance-check-confirmation" message arrives from a p2p network. Additionally, it also aligns the
+// "compliance-check-confirmation" message arrives from the p2p network. Additionally, it also aligns the
 // central bank with the rest of the system.
 func (h *P2PHandler) ConfirmComplianceCheck(messageID int, payload []byte) error {
 	returnErr := errors.New("p2p handler method ConfirmComplianceCheck failed to execute properly")
 
-	var complianceCheckConfirmation common.ComplianceCheckConfirmationDTO
+	var confirmation common.ComplianceCheckConfirmationDTO
 
-	err := json.Unmarshal(payload, &complianceCheckConfirmation)
+	err := json.Unmarshal(payload, &confirmation)
 	if err != nil {
 		errlog.Println(err)
 		return returnErr
 	}
 
-	complianceCheck := complianceCheckConfirmation.Data.ComplianceCheck
-	policies := complianceCheckConfirmation.Data.Policies
+	complianceCheck := confirmation.Data.ComplianceCheck
+	policies := confirmation.Data.Policies
 
 	// since the central bank may not be aware of the compliance check and the information about it,
 	// it is necessary to carry out its alignment with the rest of the system (commercial banks),
-	// the following needs to be done:
+	// the following tasks need to be done:
 	// 1. potentially create (if needed) originator (sender)
 	// 2. potentially create (if needed) beneficiary (receiver)
 	// 3. potentially create (if needed) policy types
@@ -281,12 +281,14 @@ func (h *P2PHandler) ConfirmComplianceCheck(messageID int, payload []byte) error
 	// 5. create compliance check
 	if config.ResolveIsCentralBank() {
 
+		// task (1)
 		originatorId, err := h.DB.CreateOrGetBankClient(complianceCheck.OriginatorGlobalIdentifier, complianceCheck.OriginatorName, "", complianceCheck.OriginatorBankGlobalIdentifier)
 		if err != nil {
 			errlog.Println(err)
 			return returnErr
 		}
 
+		// task (2)
 		beneficiaryId, err := h.DB.CreateOrGetBankClient(complianceCheck.BeneficiaryGlobalIdentifier, complianceCheck.BeneficiaryName, "", complianceCheck.BeneficiaryBankGlobalIdentifier)
 		if err != nil {
 			errlog.Println(err)
@@ -316,19 +318,28 @@ func (h *P2PHandler) ConfirmComplianceCheck(messageID int, payload []byte) error
 				continue
 			}
 
+			// task (3)
 			policyTypeId, err := h.DB.CreateOrGetPolicyType(policy.Code, policy.Name)
 			if err != nil {
 				errlog.Println(err)
 				return returnErr
 			}
 
-			_, _, err = h.DB.CreateOrUpdatePolicy(policyTypeId, policy.Owner, transactionType.Id, beneficiaryJurisdiction.Id, originatorJurisdiction.Id, beneficiaryJurisdiction.Id, policy.Params, 0)
+			ownerJurisdiction, err := h.DB.GetBankJurisdiction(policy.Owner)
+			if err != nil {
+				errlog.Println(err)
+				return returnErr
+			}
+
+			// task (4)
+			_, _, err = h.DB.CreateOrUpdatePolicy(policyTypeId, policy.Owner, transactionType.Id, ownerJurisdiction.Id, originatorJurisdiction.Id, beneficiaryJurisdiction.Id, policy.Params, 0)
 			if err != nil {
 				errlog.Println(err)
 				return returnErr
 			}
 		}
 
+		// task (5)
 		_, err = h.DB.AddComplianceCheck(models.ComplianceCheck{
 			Id:                complianceCheck.ComplianceCheckId,
 			OriginatorBankId:  complianceCheck.OriginatorBankGlobalIdentifier,
@@ -346,7 +357,7 @@ func (h *P2PHandler) ConfirmComplianceCheck(messageID int, payload []byte) error
 		}
 	}
 
-	go h.RulesEngine.Do(complianceCheckConfirmation.ComplianceCheckId, config.ResolveRuleEngineProofType())
+	go h.RulesEngine.Do(confirmation.ComplianceCheckId, config.ResolveRuleEngineProofType())
 
 	return nil
 }
@@ -410,8 +421,8 @@ func (h *P2PHandler) ProcessPolicyCheckResult(messageID int, payload []byte) err
 	return nil
 }
 
-// ProcessMpcStartSignal p2p handler method processes the MPC start signal. It is invoked
-// when a "mpc-start-signal" message arrives from a p2p network.
+// ProcessMpcStartSignal p2p handler method processes the MPC start signal. It is invoked when a
+// "mpc-start-signal" message arrives from a p2p network.
 func (h *P2PHandler) ProcessMpcStartSignal(messageID int, payload []byte) error {
 	returnErr := errors.New("p2p handler method ProcessMpcStartSignal failed to execute properly")
 
