@@ -175,6 +175,8 @@ function populateFilters() {
 
     fromAmountField.addEventListener('input', filterTable);
     toAmountField.addEventListener('input', filterTable);
+
+    addSearchOnFilters()
 }
 
 function filterTable() {
@@ -247,4 +249,86 @@ function updateDatesRange() {
 function formatDate(date) {
     const options = { day: 'numeric', month: 'short' };
     return date.toLocaleDateString('en-GB', options);
+}
+
+function addSearchOnFilters() {
+    const originatingBankcSearchInput = document.getElementById('originating-bank-search');
+    const originatingBankList = document.getElementById('originating-bank-list');
+    
+    originatingBankcSearchInput.addEventListener('input', function() {
+        const searchTerm = originatingBankcSearchInput.value.toLowerCase();
+        
+        Array.from(originatingBankList.children).forEach(li => {
+            const text = li.textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+                li.style.display = '';
+            } else {
+                li.style.display = 'none';
+            }
+        });
+    });
+
+    const originatorSearchInput = document.getElementById('originator-search');
+    const originatorList = document.getElementById('originator-list');
+    
+    originatorSearchInput.addEventListener('input', function() {
+        const searchTerm = originatorSearchInput.value.toLowerCase();
+        
+        Array.from(originatorList.children).forEach(li => {
+            const text = li.textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+                li.style.display = '';
+            } else {
+                li.style.display = 'none';
+            }
+        });
+    });
+
+    const beneficiaryBankSearchInput = document.getElementById('beneficiary-bank-search');
+    const beneficiaryBankList = document.getElementById('beneficiary-bank-list');
+    
+    beneficiaryBankSearchInput.addEventListener('input', function() {
+        const searchTerm = beneficiaryBankSearchInput.value.toLowerCase();
+        
+        Array.from(beneficiaryBankList.children).forEach(li => {
+            const text = li.textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+                li.style.display = '';
+            } else {
+                li.style.display = 'none';
+            }
+        });
+    });
+
+    const beneficiarySearchInput = document.getElementById('beneficiary-search');
+    const beneficiaryList = document.getElementById('beneficiary-list');
+    
+    beneficiarySearchInput.addEventListener('input', function() {
+        const searchTerm = beneficiarySearchInput.value.toLowerCase();
+        
+        Array.from(beneficiaryList.children).forEach(li => {
+            const text = li.textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+                li.style.display = '';
+            } else {
+                li.style.display = 'none';
+            }
+        });
+    });
+
+    const currencySearchInput = document.getElementById('currency-search');
+    const currencyList = document.getElementById('currency-list');
+    
+    currencySearchInput.addEventListener('input', function() {
+        const searchTerm = currencySearchInput.value.toLowerCase();
+        
+        Array.from(currencyList.children).forEach(li => {
+            const text = li.textContent.toLowerCase();
+            if (text.includes(searchTerm)) {
+                li.style.display = '';
+            } else {
+                li.style.display = 'none';
+            }
+        });
+    });
 }
