@@ -26,8 +26,28 @@ function GetComplianceChecks() {
         var partial = document.getElementById('compliance-check-partial')
         partial.innerHTML = ""
         partial.innerHTML = partialHTML
+        populateStatuses()
         populateFilters()
     })
+}
+
+function populateStatuses() {
+    var statuses = document.querySelectorAll('.compliance-check-status');
+    statuses.forEach((status) => {
+        switch (status.textContent.trim()) {
+            case 'Failed':
+                status.classList.add('state-error');
+              break;
+            case 'Successful':
+                status.classList.add('state-success');
+              break;
+            case 'Pending':
+                status.classList.add('state-pending');
+              break;
+            default:
+              break;
+          }
+      });
 }
 
 /******* FILTER START  *********/
@@ -121,7 +141,7 @@ function populateFilters() {
             filters[index].insertAdjacentHTML('beforeend', 
                 `<div class="popup-filter-item">
                     <input type="checkbox" id="filter-${index}-${value}" value="${value}">
-                    <label for="filter-${index}-${value}">${value}</label>
+                    <label class="body-semibold text-strong" for="filter-${index}-${value}">${value}</label>
                 </div>`
             );
         });
@@ -136,6 +156,21 @@ function populateFilters() {
 
     // Attach event listener to search field
     searchField.addEventListener('input', filterTable);
+    var searchElements = document.querySelectorAll('.compliance-check-search');
+    searchElements.forEach(search => {
+        var icons = search.querySelectorAll('svg path');
+        var input = search.querySelector('input');
+
+        input.addEventListener('focus', () => {
+            icons.forEach(svg => svg.classList.remove('icon-stroke-placeholder'));
+            icons.forEach(svg => svg.classList.add('icon-stroke-strong'));
+        })
+        input.addEventListener('blur', () => {
+            icons.forEach(svg => svg.classList.remove('icon-stroke-strong'));
+            icons.forEach(svg => svg.classList.add('icon-stroke-placeholder'));
+        })
+    })
+
     fromAmountField.addEventListener('input', filterTable);
     toAmountField.addEventListener('input', filterTable);
 }

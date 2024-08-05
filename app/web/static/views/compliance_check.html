@@ -22,9 +22,17 @@
                     <td class="body-semibold text-strong">{{.ReceiverName}}</td>
                     <td class="body-semibold text-strong">{{.Currency}}</td>
                     <td class="body-semibold text-strong text-align-right">{{.Amount}}</td>
-                    <td>{{.Status}}</td>
-                    <td>{{.CreatedAt}}</td>
-                    <td class="text-align-right">></td>
+                    <td>
+                        <span class="compliance-check-status small-label">
+                            {{.Status}}
+                        </span>
+                    </td>
+                    <td class="body-semibold text-strong">{{.CreatedAt}}</td>
+                    <td class="text-align-right">
+                        <svg class="vertical-align-middle" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path class="icon-fill-strong" d="M10.875 10L6.9375 6.0625L8 5L13 10L8 15L6.9375 13.9375L10.875 10Z"/>
+                        </svg>
+                    </td>
                 </tr>
             {{end}}
         </tbody>

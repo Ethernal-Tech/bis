@@ -114,10 +114,35 @@
     fill: var(--color-on-accent);
 }
 
+.icon-stroke-placeholder {
+    stroke: var(--color-icon-placeholder);
+    stroke-width: 1.5px;
+}
+
+.icon-stroke-strong {
+    stroke: var(--color-icon-strong);
+    stroke-width: 1.5px;
+}
+
 .text-strong {
     color: var(--color-text-strong)
 }
 
 .text-strong-dark {
     color: var(--color-text-strong-dark)
+}
+
+.state-error {
+    background-color: var(--color-state-error);
+    color: var(--color-state-on-error);
+}
+
+.state-success {
+    background-color: var(--color-state-success);
+    color: var(--color-state-on-success);
+}
+
+.state-pending {
+    background-color: var(--color-state-pending);
+    color: var(--color-state-on-pending);
 }
