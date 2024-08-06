@@ -14,7 +14,7 @@ var data = {
 GetComplianceChecks()
 
 function GetComplianceChecks() {
-    fetch("/compliancecheck", {
+    fetch("/compliancechecks", {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -345,4 +345,17 @@ function createNewComplianceCheck() {
         loadScript('add_compliance_check')
     })
 
+}
+
+function openComplianceCheckDetails(hash) {
+    var view = document.getElementById('home-view')
+    fetch("/compliancecheckdetails", {
+        method: 'GET',
+    })
+    .then(response => response.text())
+    .then(partialHTML => {
+        view.innerHTML = ""
+        view.innerHTML = partialHTML
+        loadScript('compliance_check_details')
+    })
 }

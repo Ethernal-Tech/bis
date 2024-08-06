@@ -42,7 +42,7 @@ func (c *ComplianceCheckController) ComplianceCheckIndex(w http.ResponseWriter, 
 
 // ComplianceChecks handles a web POST "/compliancechecks" request. It responds with a view (HTML partial) containing all
 // compliance checks associated with the current bank, as well as all tools for their successful management.
-func (c *ComplianceCheckController) ComplianceCheck(w http.ResponseWriter, r *http.Request) {
+func (c *ComplianceCheckController) ComplianceChecks(w http.ResponseWriter, r *http.Request) {
 	if c.SessionManager.GetString(r.Context(), "inside") != "yes" {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
@@ -65,7 +65,7 @@ func (c *ComplianceCheckController) ComplianceCheck(w http.ResponseWriter, r *ht
 
 	viewData["transactions"] = transactions
 
-	ts, err := template.ParseFiles("./app/web/static/views/compliance_check.html")
+	ts, err := template.ParseFiles("./app/web/static/views/compliance_checks.html")
 	if err != nil {
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error 1", 500)
@@ -278,6 +278,28 @@ func (c *ComplianceCheckController) AddComplianceCheck(w http.ResponseWriter, r 
 		}
 
 		http.Redirect(w, r, "/home", http.StatusSeeOther)
+	}
+}
+
+func (c *ComplianceCheckController) ComplianceCheckDetails(w http.ResponseWriter, r *http.Request) {
+	if c.SessionManager.GetString(r.Context(), "inside") != "yes" {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+
+		return
+	}
+	viewData := map[string]any{}
+
+	ts, err := template.ParseFiles("./app/web/static/views/compliance_check_details.html")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error 1", 500)
+		return
+	}
+
+	err = ts.Execute(w, viewData)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error 2", 500)
 	}
 }
 

@@ -6,8 +6,9 @@
     <title>Go Web Server</title>
     <link rel="stylesheet" href="/app/web/static/styles/general.css">
     <link rel="stylesheet" href="/app/web/static/styles/home.css">
-    <link rel="stylesheet" href="/app/web/static/styles/compliance_check.css">
+    <link rel="stylesheet" href="/app/web/static/styles/compliance_checks.css">
     <link rel="stylesheet" href="/app/web/static/styles/add_compliance_check.css">
+    <link rel="stylesheet" href="/app/web/static/styles/compliance_check_details.css">
     <link rel="stylesheet" href="/app/web/static/styles/analytics-style.css">
     <link rel="stylesheet" href="/app/web/static/styles/policies-style.css">
     
@@ -72,16 +73,18 @@
                             Compliance checks
                         </div>                  
                     </div>
-                    <div id="home-analytics-view" class="home-icon-with-text">
-                        <div>
-                            <svg width="20px" height="20px" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <path class="icon-fill-weak-dark" d="M2.78711 17.2129V2.78708H17.2129V17.2129H2.78711ZM4.72461 13.6458V15.2754H15.2754V7.91041L10.0563 13.231L7.59794 10.7727L4.72461 13.6458ZM4.72461 11.461L7.59794 8.58791L10.0354 11.0046L15.2754 5.63958V4.72458H4.72461V11.461ZM4.72461 8.86875V6.47291V11.5254V8.46291V13.6458V10.6477V13.7102V8.86875ZM4.72461 11.461V4.72458V11.5254V8.46291V11.461ZM4.72461 13.6458V10.6477V13.7102V8.86875V15.2754V13.6458Z"/>
-                            </svg>  
+                    {{ if .isCentralBank}}
+                        <div id="home-analytics-view" class="home-icon-with-text">
+                            <div>
+                                <svg width="20px" height="20px" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path class="icon-fill-weak-dark" d="M2.78711 17.2129V2.78708H17.2129V17.2129H2.78711ZM4.72461 13.6458V15.2754H15.2754V7.91041L10.0563 13.231L7.59794 10.7727L4.72461 13.6458ZM4.72461 11.461L7.59794 8.58791L10.0354 11.0046L15.2754 5.63958V4.72458H4.72461V11.461ZM4.72461 8.86875V6.47291V11.5254V8.46291V13.6458V10.6477V13.7102V8.86875ZM4.72461 11.461V4.72458V11.5254V8.46291V11.461ZM4.72461 13.6458V10.6477V13.7102V8.86875V15.2754V13.6458Z"/>
+                                </svg>  
+                            </div>
+                            <div class="body-semibold text-strong-dark">
+                                Analytics
+                            </div>                       
                         </div>
-                        <div class="body-semibold text-strong-dark">
-                            Analytics
-                        </div>                       
-                    </div>
+                    {{end}}
                     <div id="home-rules-management-view" class="home-icon-with-text">
                         <div>
                             <svg width="20px" height="20px" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">

@@ -38,9 +38,10 @@ func (server *WebServer) Routes() http.Handler {
 	// Compliance check controller
 	{
 		router.HandlerFunc(http.MethodGet, "/complianceCheckIndex", server.ComplianceCheckIndex)
-		router.HandlerFunc(http.MethodPost, "/compliancecheck", server.ComplianceCheck)
+		router.HandlerFunc(http.MethodPost, "/compliancechecks", server.ComplianceChecks)
 		router.HandlerFunc(http.MethodGet, "/addcompliancecheck", server.AddComplianceCheck)
 		router.HandlerFunc(http.MethodPost, "/addcompliancecheck", server.AddComplianceCheck)
+		router.HandlerFunc(http.MethodGet, "/compliancecheckdetails", server.ComplianceCheckDetails)
 		router.HandlerFunc(http.MethodGet, "/confirmcompliancecheck", server.ConfirmComplianceCheck)
 		router.HandlerFunc(http.MethodPost, "/confirmcompliancecheck", server.ConfirmComplianceCheck)
 	}

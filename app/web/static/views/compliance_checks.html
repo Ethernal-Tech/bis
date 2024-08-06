@@ -15,7 +15,7 @@
         </thead>
         <tbody>
             {{range .transactions}}
-                <tr>
+                <tr onclick="openComplianceCheckDetails('{{.Id}}')">
                     <td class="body-semibold text-strong">{{.OriginatorBank}}</td>
                     <td class="body-semibold text-strong">{{.SenderName}}</td>
                     <td class="body-semibold text-strong">{{.BeneficiaryBank}}</td>

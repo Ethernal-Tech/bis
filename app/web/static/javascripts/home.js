@@ -22,7 +22,7 @@ window.addEventListener('load', function() {
     .then(partialHTML => {
         view.innerHTML = ""
         view.innerHTML = partialHTML
-        loadScript('compliance_check')
+        loadScript('compliance_checks')
     })
 
     document.getElementById('home-compliance-check-view').addEventListener('click', function(){
@@ -33,21 +33,24 @@ window.addEventListener('load', function() {
         .then(partialHTML => {
             view.innerHTML = ""
             view.innerHTML = partialHTML
-            loadScript('compliance_check')
+            loadScript('compliance_checks')
         })
     })
     
-    document.getElementById('home-analytics-view').addEventListener('click', function(){
-        fetch("/analytics", {
-            method: 'POST',
+    var sideBarAnalytics = document.getElementById('home-analytics-view')
+    if (sideBarAnalytics) {
+        sideBarAnalytics.addEventListener('click', function(){
+            fetch("/analytics", {
+                method: 'POST',
+            })
+            .then(response => response.text())
+            .then(partialHTML => {
+                view.innerHTML = ""
+                view.innerHTML = partialHTML
+            })
         })
-        .then(response => response.text())
-        .then(partialHTML => {
-            view.innerHTML = ""
-            view.innerHTML = partialHTML
-        })
-    })
-    
+    }
+
     document.getElementById('home-rules-management-view').addEventListener('click', function(){
         fetch("/policies", {
             method: 'POST',
