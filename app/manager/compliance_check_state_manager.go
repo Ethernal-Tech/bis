@@ -85,15 +85,22 @@ func GetComplianceCheckStateManager() *ComplianceCheckStateManager {
 
 // RegisterDescription registers the description for a given compliance check and passed state. The registered
 // description will be used (and recorded in the database) during the transition of the compliance check to the
-// given state (using [*ComplianceCheckStateManager.Transition]). If the compliance check is in state 4 or 8,
-// registration is rejected and false is returned. In the remaining states, registration will succeed and method
-// returns true. However, be careful that registering a description for a state that the compliance check has
-// already reached will have no effect. If the passed compliance check (complianceCheckId) does not exist, an
-// error will be returned. The method is data-race-free. It can be used concurrently by multiple goroutines.
-// However, a race condition may occur if the method is used for the same compliance check without synchronization.
-// This is not the case for any two different compliance checks. In that case, everything is race-free.
+// given state (using [*ComplianceCheckStateManager.Transition]). A list of available states can be found in the
+// documentation for [ComplianceCheckStateManager]. If the compliance check is in state 4 or 8, registration is
+// rejected and false is returned. In the remaining states, registration will succeed and method returns true.
+// However, be careful that registering a description for a state that the compliance check has already reached
+// will have no effect. If the passed compliance check (complianceCheckId) or state does not exist, an error will
+// be returned. The method is data-race-free. It can be used concurrently by multiple goroutines. However, a race
+// condition may occur if the method is used for the same compliance check without synchronization. This is not
+// the case for any two different compliance checks. In that case, everything is race-free.
 func (m *ComplianceCheckStateManager) RegisterDescription(complianceCheckId string, state ComplianceCheckState, description string) (bool, error) {
 	returnErr := errors.New("failed to register compliance check description")
+
+	// input state must be one defined by the [ComplianceCheckStateManager] doc
+	if state < ComplianceCheckCreated || state > AssetsReleased {
+		errlog.Println(errors.New("unknown compliance check state"))
+		return false, returnErr
+	}
 
 	// although the compliance check itself is not required and used in method, the given invocation
 	// is necessary to check whether the compliance check exists in the system
