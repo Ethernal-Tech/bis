@@ -12,7 +12,14 @@ type ComplianceCheckState int
 
 // concrete states
 const (
-	ComplianceCheckCreated ComplianceCheckState = iota
+	// ErrState represents the value that is returned when the transition didn't succeed,
+	// it is not a real state, that is, not part of the state machine
+	ErrState ComplianceCheckState = iota - 1
+
+	// internally used state (not a real state)
+	zeroState
+
+	ComplianceCheckCreated
 	PoliciesApplied
 	ComplianceProofRequested
 	ComplianceProofGenerationFailed
@@ -125,44 +132,105 @@ func (m *ComplianceCheckStateManager) RegisterDescription(complianceCheckId stri
 	return true, nil
 }
 
-func (*ComplianceCheckStateManager) UpdateComplianceCheckPolicyStatus(db *DB.DBHandler, complianceCheckID string, policyID int, isFailed bool, description string) error {
-	returnErr := errors.New("failed to update compliance check policy status")
-	if isFailed {
-		db.UpdateTransactionPolicyStatus(complianceCheckID, policyID, 2, description)
-	} else {
-		db.UpdateTransactionPolicyStatus(complianceCheckID, policyID, 1, description)
-	}
+// add return current state method
 
-	statuses, err := db.GetTransactionPolicyStatuses(complianceCheckID)
+func (m *ComplianceCheckStateManager) Transition(complianceCheckId string) (ComplianceCheckState, bool, error) {
+	returnErr := errors.New("unsuccessful transition of the compliance check state")
+
+	// although the compliance check itself is not required and used in method, the given invocation
+	// is necessary to check whether the compliance check exists in the system
+	_, err := m.db.GetComplianceCheckById(complianceCheckId)
 	if err != nil {
 		errlog.Println(err)
-		return returnErr
+		return ErrState, false, returnErr
 	}
 
-	noOfPassed := 0
-	noOfCompleted := 0
-	for _, status := range statuses {
-		if status.Status == 1 {
-			noOfPassed += 1
-			noOfCompleted += 1
-		} else if status.Status == 2 {
-			noOfCompleted += 1
-			db.UpdateTransactionState(complianceCheckID, 5)
-			db.UpdateTransactionState(complianceCheckID, 8)
+	states, err := m.db.GetAllComplianceCheckStates(complianceCheckId)
+	if err != nil {
+		errlog.Println(err)
+		return ErrState, false, returnErr
+	}
+
+	currentState := zeroState
+	for _, state := range states {
+		if currentState < ComplianceCheckState(state.StateId) {
+			currentState = ComplianceCheckState(state.StateId)
 		}
 	}
 
-	if noOfPassed == len(statuses) {
-		db.UpdateTransactionState(complianceCheckID, 4)
-		db.UpdateTransactionState(complianceCheckID, 7)
-		// TODO: Notify CB about the compliance check completion
-		// if !config.ResovleIsCentralBank() {
-		// }
-	} else if noOfCompleted == len(statuses) {
-		// TODO: Notify CB about the compliance check completion
-		// if !config.ResovleIsCentralBank() {
-		// }
+	var deleteDescriptions bool
+
+	// state machine
+	switch currentState {
+	case zeroState, ComplianceCheckCreated, PoliciesApplied:
+		m.mutDesc.Lock()
+		description := m.descriptions[complianceCheckId][currentState+1]
+		m.mutDesc.Unlock()
+
+		err := m.db.AddComplianceCheckState(complianceCheckId, int(currentState+1), description)
+		if err != nil {
+			errlog.Println(err)
+			return ErrState, false, returnErr
+		}
+
+	case ComplianceProofRequested:
+		policies, err := m.db.GetPoliciesByComplianceCheckId(complianceCheckId)
+		if err != nil {
+			errlog.Println(err)
+			return ErrState, false, returnErr
+		}
+
+		var allPassed = true
+
+		for _, policy := range policies {
+			status, err := m.db.GetPolicyStatus(complianceCheckId, policy.Policy.Id)
+			if err != nil {
+				errlog.Println(err)
+				return ErrState, false, returnErr
+			}
+
+			if status == 0 {
+				allPassed = false
+			} else if status == 2 {
+				deleteDescriptions = true
+
+				m.mutDesc.Lock()
+				description := m.descriptions[complianceCheckId][ComplianceProofGenerationFailed]
+				m.mutDesc.Unlock()
+
+				err := m.db.AddComplianceCheckState(complianceCheckId, int(ComplianceProofGenerationFailed), description)
+				if err != nil {
+					errlog.Println(err)
+					return ErrState, false, returnErr
+				}
+
+				break
+			}
+		}
+
+		if allPassed {
+			m.mutDesc.Lock()
+			description := m.descriptions[complianceCheckId][ComplianceProofGenerationSucceeded]
+			m.mutDesc.Unlock()
+
+			err := m.db.AddComplianceCheckState(complianceCheckId, int(ComplianceProofGenerationSucceeded), description)
+			if err != nil {
+				errlog.Println(err)
+				return ErrState, false, returnErr
+			}
+		} else {
+			return currentState, false, returnErr
+		}
+	case ComplianceProofGenerationFailed, AssetsReleased:
+		return currentState, false, nil
+	case ComplianceProofGenerationSucceeded:
 	}
 
-	return nil
+	if deleteDescriptions {
+		m.mutDesc.Lock()
+		delete(m.descriptions, complianceCheckId)
+		m.mutDesc.Unlock()
+	}
+
+	return currentState + 1, true, nil
 }
