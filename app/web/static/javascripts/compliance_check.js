@@ -332,3 +332,17 @@ function addSearchOnFilters() {
         });
     });
 }
+
+function createNewComplianceCheck() {
+    var view = document.getElementById('home-view')
+    fetch("/addcompliancecheck", {
+        method: 'GET',
+    })
+    .then(response => response.text())
+    .then(partialHTML => {
+        view.innerHTML = ""
+        view.innerHTML = partialHTML
+        loadScript('add_compliance_check')
+    })
+
+}

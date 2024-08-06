@@ -23,7 +23,21 @@ func (c *ComplianceCheckController) ComplianceCheckIndex(w http.ResponseWriter, 
 
 		return
 	}
-	http.ServeFile(w, r, "./app/web/static/views/compliance_check_index.html")
+	viewData := map[string]any{}
+	viewData["isCentralBank"] = c.SessionManager.GetBool(r.Context(), "isCentralBank")
+
+	ts, err := template.ParseFiles("./app/web/static/views/compliance_check_index.html")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error 1", 500)
+		return
+	}
+
+	err = ts.Execute(w, viewData)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error 2", 500)
+	}
 }
 
 // ComplianceChecks handles a web POST "/compliancechecks" request. It responds with a view (HTML partial) containing all
@@ -76,9 +90,20 @@ func (c *ComplianceCheckController) AddComplianceCheck(w http.ResponseWriter, r 
 	}
 
 	if r.Method == http.MethodGet {
+		viewData := map[string]any{}
 
-		// TODO: add logic together with a new addcompliancecheck view
-		// TODO: modify json names for marshal/unmarshal
+		ts, err := template.ParseFiles("./app/web/static/views/add_compliance_check.html")
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error 1", 500)
+			return
+		}
+
+		err = ts.Execute(w, viewData)
+		if err != nil {
+			log.Println(err.Error())
+			http.Error(w, "Internal Server Error 2", 500)
+		}
 
 	} else if r.Method == http.MethodPost {
 
