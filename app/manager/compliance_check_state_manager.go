@@ -13,7 +13,7 @@ type ComplianceCheckState int
 // concrete states
 const (
 	// ErrState represents the value that is returned when the transition didn't succeed,
-	// it is not a real state, that is, not part of the state machine
+	// it is not a real state (not part of the state machine) nor the real error
 	ErrState ComplianceCheckState = iota - 1
 
 	// internally used state (not a real state)
