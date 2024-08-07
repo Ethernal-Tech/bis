@@ -361,13 +361,21 @@ func (h *DBHandler) GetPoliciesByComplianceCheckId(complianceCheckId string) ([]
 //  1. 0 - pending
 //  2. 1 - passed
 //  3. 2 - failed
-func (h *DBHandler) UpdatePolicyStatus(complianceCheckId string, policyId int, status int) error {
-	query := `UPDATE TransactionPolicy SET Status = @p1 WHERE TransactionId = @p2 AND PolicyId = @p3`
+func (h *DBHandler) UpdatePolicyStatus(complianceCheckId string, policyId int, status int, description ...string) error {
+	query := `UPDATE TransactionPolicy SET Status = @p1, Description = @p4 WHERE TransactionId = @p2 AND PolicyId = @p3`
+
+	var descriptionText string
+	if len(description) == 0 {
+		descriptionText = ""
+	} else {
+		descriptionText = description[0]
+	}
 
 	_, err := h.db.Exec(query,
 		sql.Named("p1", status),
 		sql.Named("p2", complianceCheckId),
-		sql.Named("p3", policyId))
+		sql.Named("p3", policyId),
+		sql.Named("p4", descriptionText))
 	if err != nil {
 		errlog.Println(err)
 		return errors.New("unsuccessful update of policy status")

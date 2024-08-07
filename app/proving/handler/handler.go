@@ -134,21 +134,11 @@ func (h *ProvingHandler) HandleNonInteractiveProof(body []byte) {
 	}
 
 	result := 0
+	var description string
 	if messageData.Status == "Failed" {
-		// err = h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.SanctionedCheckOutput.ComplianceCheckID, policyID, true, "Proof genereation failed")
-		// if err != nil {
-		// 	errlog.Println(err)
-		// 	return
-		// }
 		result = 2
 	} else {
 		if messageData.SanctionedCheckOutput.NotSanctioned {
-			// Passed sanction check
-			// err = h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.SanctionedCheckOutput.ComplianceCheckID, policyID, false, "")
-			// if err != nil {
-			// 	errlog.Println(err)
-			// 	return
-			// }
 			result = 1
 		} else {
 			// Failed sanction check
@@ -173,7 +163,7 @@ func (h *ProvingHandler) HandleNonInteractiveProof(body []byte) {
 			names := []string{sender.Name, receiver.Name, beneficiaryBank.Name}
 
 			// Iterate over elements to determine which entity is sanctioned
-			description := "Sanctioned hit on"
+			description = "Sanctioned hit on"
 			for _, entity := range messageData.SanctionedCheckInput.ParticipantsList {
 				for _, sanctioned := range messageData.SanctionedCheckInput.PubSanctionsList {
 					if reflect.DeepEqual(entity, sanctioned) {
@@ -199,14 +189,17 @@ func (h *ProvingHandler) HandleNonInteractiveProof(body []byte) {
 					}
 				}
 			}
-			// err = h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.SanctionedCheckOutput.ComplianceCheckID, policyID, true, description)
-			// if err != nil {
-			// 	errlog.Println(err)
-			// 	return
-			// }
 			result = 2
 		}
 	}
+
+	err = h.DB.UpdatePolicyStatus(messageData.SanctionedCheckOutput.ComplianceCheckID, policyID, result, description)
+	if err != nil {
+		errlog.Println(err)
+		return
+	}
+	state, went, err := h.ComplianceCheckStateManager.Transition(messageData.SanctionedCheckOutput.ComplianceCheckID)
+	fmt.Println(state, went, err)
 
 	policy, err := h.DB.GetPolicyById(policyID)
 	if err != nil {
