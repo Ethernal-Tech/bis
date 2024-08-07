@@ -357,19 +357,28 @@ func (h *DBHandler) GetPoliciesByComplianceCheckId(complianceCheckId string) ([]
 	return policies, nil
 }
 
-// UpdatePolicyStatus updates status of the policy for the given compliance check. Allowed values ​​for status are:
+// UpdatePolicyStatus updates status of the policy for the given compliance check. Allowed status values:
 //  1. 0 - pending
 //  2. 1 - passed
 //  3. 2 - failed
+//
+// Method also receives an additional optional parameter "description". Therefore, description field can
+// also be updated by method invocation. If more than one additional parameter is sent, an error is returned.
 func (h *DBHandler) UpdatePolicyStatus(complianceCheckId string, policyId int, status int, description ...string) error {
-	query := `UPDATE TransactionPolicy SET Status = @p1, Description = @p4 WHERE TransactionId = @p2 AND PolicyId = @p3`
+	if status < 0 || status > 2 {
+		return errors.New("invalid policy status")
+	}
 
 	var descriptionText string
 	if len(description) == 0 {
 		descriptionText = ""
-	} else {
+	} else if len(description) == 1 {
 		descriptionText = description[0]
+	} else {
+		return errors.New("more than one additional parameter is passed")
 	}
+
+	query := `UPDATE TransactionPolicy SET Status = @p1, Description = @p4 WHERE TransactionId = @p2 AND PolicyId = @p3`
 
 	_, err := h.db.Exec(query,
 		sql.Named("p1", status),
