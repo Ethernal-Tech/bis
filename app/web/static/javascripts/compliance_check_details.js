@@ -1,1 +1,3 @@
-console.log("Hello from compliance check details")
+function backToCompliance() {
+    window.location.reload();
+}
