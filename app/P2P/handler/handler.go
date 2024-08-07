@@ -10,6 +10,7 @@ import (
 	"bisgo/errlog"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"strconv"
 )
 
@@ -105,11 +106,8 @@ func (h *P2PHandler) AddComplianceCheck(messageID int, payload []byte) error {
 		return returnErr
 	}
 
-	err = h.DB.UpdateComplianceCheckStatus(data.ComplianceCheck.ComplianceCheckId, 1)
-	if err != nil {
-		errlog.Println(err)
-		return returnErr
-	}
+	state, went, err := h.ComplianceCheckStateManager.Transition(data.ComplianceCheck.ComplianceCheckId)
+	fmt.Println(state, went, err)
 
 	return nil
 }
@@ -355,6 +353,9 @@ func (h *P2PHandler) ConfirmComplianceCheck(messageID int, payload []byte) error
 		}
 	}
 
+	state, went, err := h.ComplianceCheckStateManager.Transition(confirmation.ComplianceCheckId)
+	fmt.Println(state, went, err)
+
 	go h.RulesEngine.Do(confirmation.ComplianceCheckId, config.ResolveRuleEngineProofType())
 
 	return nil
@@ -401,6 +402,9 @@ func (h *P2PHandler) ProcessPolicyCheckResult(messageID int, payload []byte) err
 		errlog.Println(err)
 		return returnErr
 	}
+
+	state, went, err := h.ComplianceCheckStateManager.Transition(complianceCheck.Id)
+	fmt.Println(state, went, err)
 
 	if policyCheckResult.Proof != "" {
 		h.DB.InsertTransactionProof(complianceCheck.Id, policyCheckResult.Proof)

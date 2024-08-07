@@ -358,9 +358,9 @@ func (h *DBHandler) GetPoliciesByComplianceCheckId(complianceCheckId string) ([]
 }
 
 // UpdatePolicyStatus updates status of the policy for the given compliance check. Allowed values ​​for status are:
-// 1. 0 - pending
-// 2. 1 - passed
-// 3. 2 - failed
+//  1. 0 - pending
+//  2. 1 - passed
+//  3. 2 - failed
 func (h *DBHandler) UpdatePolicyStatus(complianceCheckId string, policyId int, status int) error {
 	query := `UPDATE TransactionPolicy SET Status = @p1 WHERE TransactionId = @p2 AND PolicyId = @p3`
 
@@ -429,11 +429,11 @@ func (h *DBHandler) GetPolicyTypeById(id int) (models.NewPolicyType, error) {
 // GetPolicyToProcessItsCheckResult is a special method to get the policy to process the result of its check.
 // Due to its specificity, the given method is not intended to be used in any other case. Each policy can be
 // uniquely identified by its id. However, unique identification can also be based on the following parameters:
-// 1. policy type (id)
-// 2. owner
-// 3. transaction type (id)
-// 4. originating jurisdiction (id)
-// 5. isPrivate flag
+//  1. policy type (id)
+//  2. owner
+//  3. transaction type (id)
+//  4. originating jurisdiction (id)
+//  5. isPrivate flag
 func (h *DBHandler) GetPolicyToProcessItsCheckResult(policyTypeId int, owner string, transactionTypeId int, originatingJurisditionId string, isPrivate int) (models.NewPolicy, error) {
 	query := `SELECT Id, PolicyTypeId, Owner, TransactionTypeId, PolicyEnforcingJurisdictionId, OriginatingJurisdictionId, BeneficiaryJurisdictionId, Parameters, IsPrivate, Latest 
 				FROM Policy WHERE PolicyTypeId = @p1 

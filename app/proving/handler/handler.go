@@ -41,19 +41,17 @@ func (h *ProvingHandler) HandleInteractiveProof(body []byte) {
 	values := strings.Split(messageData.Value, ";")
 	if strings.Split(values[0], ",")[1] == "0" {
 		result = 1
-		// err = h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.ComplianceCheckID, policyID, false, "")
-		// if err != nil {
-		// 	errlog.Println(err)
-		// 	return
-		// }
 	} else {
 		result = 2
-		err = h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.ComplianceCheckID, policyID, true, "Entity is sanctioned")
-		if err != nil {
-			errlog.Println(err)
-			return
-		}
 	}
+
+	err = h.DB.UpdatePolicyStatus(messageData.ComplianceCheckID, policyID, result)
+	if err != nil {
+		errlog.Println(err)
+		return
+	}
+	state, went, err := h.ComplianceCheckStateManager.Transition(messageData.ComplianceCheckID)
+	fmt.Println(state, went, err)
 
 	// originator does't need to notify its central bank about the result
 	check, err := h.DB.GetComplianceCheckById(messageData.ComplianceCheckID)
@@ -137,20 +135,20 @@ func (h *ProvingHandler) HandleNonInteractiveProof(body []byte) {
 
 	result := 0
 	if messageData.Status == "Failed" {
-		err = h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.SanctionedCheckOutput.ComplianceCheckID, policyID, true, "Proof genereation failed")
-		if err != nil {
-			errlog.Println(err)
-			return
-		}
+		// err = h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.SanctionedCheckOutput.ComplianceCheckID, policyID, true, "Proof genereation failed")
+		// if err != nil {
+		// 	errlog.Println(err)
+		// 	return
+		// }
 		result = 2
 	} else {
 		if messageData.SanctionedCheckOutput.NotSanctioned {
 			// Passed sanction check
-			err = h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.SanctionedCheckOutput.ComplianceCheckID, policyID, false, "")
-			if err != nil {
-				errlog.Println(err)
-				return
-			}
+			// err = h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.SanctionedCheckOutput.ComplianceCheckID, policyID, false, "")
+			// if err != nil {
+			// 	errlog.Println(err)
+			// 	return
+			// }
 			result = 1
 		} else {
 			// Failed sanction check
@@ -201,11 +199,11 @@ func (h *ProvingHandler) HandleNonInteractiveProof(body []byte) {
 					}
 				}
 			}
-			err = h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.SanctionedCheckOutput.ComplianceCheckID, policyID, true, description)
-			if err != nil {
-				errlog.Println(err)
-				return
-			}
+			// err = h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.SanctionedCheckOutput.ComplianceCheckID, policyID, true, description)
+			// if err != nil {
+			// 	errlog.Println(err)
+			// 	return
+			// }
 			result = 2
 		}
 	}

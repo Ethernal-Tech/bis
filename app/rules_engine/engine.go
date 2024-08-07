@@ -52,6 +52,9 @@ func rulesEngineStartLog(complianceCheckId string) {
 }
 
 func (e *RulesEngine) Do(complianceCheckId string, proofType string) {
+	state, went, err := e.complianceCheckStateManager.Transition(complianceCheckId)
+	fmt.Println(state, went, err)
+
 	// due to the system running locally, there is almost no delay, so we
 	// need to introduce it somehow thus it feels like a distributed system
 	time.Sleep(2 * time.Second)
@@ -117,11 +120,13 @@ func (e *RulesEngine) interactivePrivatePolicy(complianceCheck models.Compliance
 	// loop through private policies and set their status to successful (1)
 	// they are not checked in any way
 	for _, policy := range policies {
-		err := e.complianceCheckStateManager.UpdateComplianceCheckPolicyStatus(e.db, complianceCheck.Id, policy.Policy.Id, false, "")
+		err := e.db.UpdatePolicyStatus(complianceCheck.Id, policy.Policy.Id, 1)
 		if err != nil {
 			errlog.Println(err)
 			return
 		}
+		state, went, err := e.complianceCheckStateManager.Transition(complianceCheck.Id)
+		fmt.Println(state, went, err)
 	}
 
 	policyCheckResult := common.PolicyCheckResultDTO{
@@ -312,46 +317,37 @@ func (e *RulesEngine) interactiveCapitalFlowManagement(complianceCheck models.Co
 		return strings.Join([]string{message, address.String(), hex.EncodeToString(signature)}, ";")
 	}
 
+	var result int
+
 	// (if) CFM policy check successful
 	// (else) otherwise, unsuccessful
 	if amount <= float64(limit) {
-		err := e.complianceCheckStateManager.UpdateComplianceCheckPolicyStatus(e.db, complianceCheck.Id, policy.Policy.Id, false, "")
-		if err != nil {
-			errlog.Println(err)
-			return
-		}
+		result = 1
 
-		proof := signCFMResult(complianceCheck.Id, 0)
-		e.db.InsertTransactionProof(complianceCheck.Id, proof)
-
-		policyCheckResult = common.PolicyCheckResultDTO{
-			ComplianceCheckId: complianceCheck.Id,
-			Code:              "CFM",
-			Name:              "Capital Flow Management",
-			Owner:             config.ResolveMyGlobalIdentifier(),
-			Result:            1,
-			ForwardTo:         complianceCheck.OriginatorBankId,
-			Proof:             proof,
-		}
 	} else {
-		err := e.complianceCheckStateManager.UpdateComplianceCheckPolicyStatus(e.db, complianceCheck.Id, policy.Policy.Id, true, "")
-		if err != nil {
-			errlog.Println(err)
-			return
-		}
+		result = 2
+	}
 
-		proof := signCFMResult(complianceCheck.Id, 1)
-		e.db.InsertTransactionProof(complianceCheck.Id, proof)
+	err = e.db.UpdatePolicyStatus(complianceCheck.Id, policy.Policy.Id, result)
+	if err != nil {
+		errlog.Println(err)
+		return
+	}
 
-		policyCheckResult = common.PolicyCheckResultDTO{
-			ComplianceCheckId: complianceCheck.Id,
-			Code:              "CFM",
-			Name:              "Capital Flow Management",
-			Owner:             config.ResolveMyGlobalIdentifier(),
-			Result:            2,
-			ForwardTo:         complianceCheck.OriginatorBankId,
-			Proof:             proof,
-		}
+	state, went, err := e.complianceCheckStateManager.Transition(complianceCheck.Id)
+	fmt.Println(state, went, err)
+
+	proof := signCFMResult(complianceCheck.Id, result-1)
+	e.db.InsertTransactionProof(complianceCheck.Id, proof)
+
+	policyCheckResult = common.PolicyCheckResultDTO{
+		ComplianceCheckId: complianceCheck.Id,
+		Code:              "CFM",
+		Name:              "Capital Flow Management",
+		Owner:             config.ResolveMyGlobalIdentifier(),
+		Result:            result,
+		ForwardTo:         complianceCheck.OriginatorBankId,
+		Proof:             proof,
 	}
 
 	// send CFM policy check result to the beneficiary bank
@@ -506,11 +502,11 @@ func (e *RulesEngine) doNonInteractiveAMT(complianceCheck models.ComplianceCheck
 		}
 	}
 
-	err = e.complianceCheckStateManager.UpdateComplianceCheckPolicyStatus(e.db, complianceCheck.Id, policyID, false, policyStatus)
-	if err != nil {
-		errlog.Println(err)
-		return
-	}
+	// err = e.complianceCheckStateManager.UpdateComplianceCheckPolicyStatus(e.db, complianceCheck.Id, policyID, false, policyStatus)
+	// if err != nil {
+	// 	errlog.Println(err)
+	// 	return
+	// }
 
 	// Notify the beneficiary about the policy result
 	policyCheckResult := common.PolicyCheckResultDTO{
@@ -573,11 +569,13 @@ func (e *RulesEngine) doNonInteractiveNETT(complianceCheck models.ComplianceChec
 		errlog.Println(errors.New("unexpected currency in cumulative amount calculations"))
 	}
 
-	err = e.complianceCheckStateManager.UpdateComplianceCheckPolicyStatus(e.db, complianceCheck.Id, policyID, false, polictStatus)
-	if err != nil {
-		errlog.Println(err)
-		return
-	}
+	_ = polictStatus
+
+	// err = e.complianceCheckStateManager.UpdateComplianceCheckPolicyStatus(e.db, complianceCheck.Id, policyID, false, polictStatus)
+	// if err != nil {
+	// 	errlog.Println(err)
+	// 	return
+	// }
 
 	// Notify the beneficiary about the policy result
 	policyCheckResult := common.PolicyCheckResultDTO{
