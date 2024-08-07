@@ -144,6 +144,6 @@
 }
 
 .state-pending {
-    background-color: var(--color-state-pending);
-    color: var(--color-state-on-pending);
+    background-color: var(--color-state-warning);
+    color: var(--color-state-on-warning);
 }
