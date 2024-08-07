@@ -96,6 +96,9 @@ func (h *DBHandler) GetComplianceCheckById(id string) (models.ComplianceCheck, e
 	return complianceCheck, nil
 }
 
+// Important note. The given method is used internally by the state manager. Therefore, it MUST NOT be used
+// directly, as it can cause race  conditions that can lead to system inconsistencies.
+//
 // AddComplianceCheckState adds new state for the compliance check with the given id.
 func (h *DBHandler) AddComplianceCheckState(id string, state int, description string) error {
 	query := `INSERT INTO TransactionHistory (TransactionId, StateId, Date, Description) VALUES (@p1, @p2, @p3, @p4)`

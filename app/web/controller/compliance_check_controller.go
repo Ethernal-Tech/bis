@@ -127,13 +127,13 @@ func (c *ComplianceCheckController) AddComplianceCheck(w http.ResponseWriter, r 
 			}
 		}
 
-		err = c.DB.UpdateComplianceCheckState(complianceCheckId, 1)
-		if err != nil {
-			errlog.Println(err)
+		// err = c.DB.UpdateComplianceCheckState(complianceCheckId, 1)
+		// if err != nil {
+		// 	errlog.Println(err)
 
-			http.Error(w, "Internal Server Error", 500)
-			return
-		}
+		// 	http.Error(w, "Internal Server Error", 500)
+		// 	return
+		// }
 
 		transactionType, err := c.DB.GetTransactionTypeById(transactionTypeId)
 		if err != nil {

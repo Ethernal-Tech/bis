@@ -41,11 +41,11 @@ func (h *ProvingHandler) HandleInteractiveProof(body []byte) {
 	values := strings.Split(messageData.Value, ";")
 	if strings.Split(values[0], ",")[1] == "0" {
 		result = 1
-		err = h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.ComplianceCheckID, policyID, false, "")
-		if err != nil {
-			errlog.Println(err)
-			return
-		}
+		// err = h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.ComplianceCheckID, policyID, false, "")
+		// if err != nil {
+		// 	errlog.Println(err)
+		// 	return
+		// }
 	} else {
 		result = 2
 		err = h.ComplianceCheckStateManager.UpdateComplianceCheckPolicyStatus(h.DB, messageData.ComplianceCheckID, policyID, true, "Entity is sanctioned")
