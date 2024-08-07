@@ -81,41 +81,41 @@ VALUES
     (3, N'NETT', N'Multilateral Netting Reporting')
 SET IDENTITY_INSERT [dbo].[PolicyType] OFF
 GO
-SET IDENTITY_INSERT [dbo].[Status] ON
+SET IDENTITY_INSERT [dbo].[State] ON
 
-INSERT [dbo].[Status]
+INSERT [dbo].[State]
     ([Id], [Name])
 VALUES
     (1, N'Compliance check created')
-INSERT [dbo].[Status]
+INSERT [dbo].[State]
     ([Id], [Name])
 VALUES
     (2, N'Policies applied')
-INSERT [dbo].[Status]
+INSERT [dbo].[State]
     ([Id], [Name])
 VALUES
     (3, N'Compliance proof requested')
-INSERT [dbo].[Status]
+INSERT [dbo].[State]
     ([Id], [Name])
 VALUES
     (4, N'Compliance proof generation failed')
-INSERT [dbo].[Status]
+INSERT [dbo].[State]
     ([Id], [Name])
 VALUES
     (5, N'Compliance proof generation succeeded')
-INSERT [dbo].[Status]
+INSERT [dbo].[State]
     ([Id], [Name])
 VALUES
     (6, N'Compliance proof attached to the selected settlement asset')
-INSERT [dbo].[Status]
+INSERT [dbo].[State]
     ([Id], [Name])
 VALUES
     (7, N'Settlement asset transferred to the beneficiary bank')
-INSERT [dbo].[Status]
+INSERT [dbo].[State]
     ([Id], [Name])
 VALUES
     (8, N'Assets released to the client')
-SET IDENTITY_INSERT [dbo].[Status] OFF
+SET IDENTITY_INSERT [dbo].[State] OFF
 GO
 SET IDENTITY_INSERT [dbo].[TransactionType] ON
 
