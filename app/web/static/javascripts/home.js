@@ -47,6 +47,7 @@ window.addEventListener('load', function() {
             .then(partialHTML => {
                 view.innerHTML = ""
                 view.innerHTML = partialHTML
+                loadScript('analytics')
             })
         })
     }
@@ -59,6 +60,7 @@ window.addEventListener('load', function() {
         .then(partialHTML => {
             view.innerHTML = ""
             view.innerHTML = partialHTML
+            loadScript('policies')
         })
     })
 })
