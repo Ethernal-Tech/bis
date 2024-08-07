@@ -351,6 +351,9 @@ func (h *P2PHandler) ConfirmComplianceCheck(messageID int, payload []byte) error
 			errlog.Println(err)
 			return returnErr
 		}
+
+		state, went, err := h.ComplianceCheckStateManager.Transition(confirmation.ComplianceCheckId)
+		fmt.Println(state, went, err)
 	}
 
 	state, went, err := h.ComplianceCheckStateManager.Transition(confirmation.ComplianceCheckId)

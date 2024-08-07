@@ -62,8 +62,8 @@ type BankModel struct {
 }
 
 type SearchModel struct {
-	Value    string `json:"value"`
-	From     string `json:"from"`
-	To       string `json:"to"`
-	StatusId string `json:statusId`
+	Value   string `json:"value"`
+	From    string `json:"from"`
+	To      string `json:"to"`
+	StateId string `json:StateId`
 }

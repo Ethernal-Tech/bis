@@ -322,7 +322,7 @@ func (m *ComplianceCheckStateManager) Transition(complianceCheckId string) (Comp
 
 					m.finSigCh <- complianceCheckId
 
-					break
+					return ComplianceProofGenerationFailed, true, nil
 				}
 			}
 
@@ -336,6 +336,8 @@ func (m *ComplianceCheckStateManager) Transition(complianceCheckId string) (Comp
 					errlog.Println(err)
 					return ErrState, false, returnErr
 				}
+
+				return ComplianceProofGenerationSucceeded, true, nil
 			} else {
 				return currentState, false, nil
 			}

@@ -105,7 +105,7 @@ func (wrapper *DBHandler) GetCommercialBankTransactions(bankId string, searchMod
 					SELECT	th.TransactionId,
 							th.Date AS CreatedDate
 					FROM [dbo].[TransactionHistory] th
-					WHERE th.StatusId = 1`
+					WHERE th.StateId = 1`
 
 	if searchModel.From != "" {
 		query += " AND th.Date >= '" + searchModel.From + "'"
@@ -116,7 +116,7 @@ func (wrapper *DBHandler) GetCommercialBankTransactions(bankId string, searchMod
 
 	query += `), LatestStatus AS (
 					SELECT  th.TransactionId,
-							th.StatusId,
+							th.StateId,
 							th.Date,
 							ROW_NUMBER() OVER (PARTITION BY th.TransactionId ORDER BY th.Date DESC) AS rn
 					FROM [dbo].[TransactionHistory] th)
@@ -134,15 +134,15 @@ func (wrapper *DBHandler) GetCommercialBankTransactions(bankId string, searchMod
 					FROM [dbo].[Transaction] t
 					JOIN CreatedTransactions ct ON t.Id = ct.TransactionId
 					JOIN LatestStatus ls ON t.Id = ls.TransactionId AND ls.rn = 1
-					JOIN [dbo].[Status] s ON ls.StatusId = s.Id
+					JOIN [dbo].[State] s ON ls.StateId = s.Id
 					JOIN Bank as ob ON ob.GlobalIdentifier = t.OriginatorBankId
 					JOIN Bank as bb ON bb.GlobalIdentifier = t.BeneficiaryBankId
 					JOIN BankClient as bcs ON bcs.Id = t.SenderId
 					JOIN BankClient as bcr ON bcr.Id = t.ReceiverId
 				WHERE (t.OriginatorBankId = @p1 OR t.BeneficiaryBankId = @p1) and (ob.Name like @p2 OR bb.Name like @p2 OR bcs.Name like @p2 OR bcr.Name like @p2)`
 
-	if searchModel.StatusId != "" {
-		query += ` AND ls.StatusId = ` + searchModel.StatusId
+	if searchModel.StateId != "" {
+		query += ` AND ls.StateId = ` + searchModel.StateId
 	}
 
 	rows, err := wrapper.db.Query(query,
@@ -189,7 +189,7 @@ func (wrapper *DBHandler) GetCentralBankTransactions(bankId string, searchModel 
 		SELECT	th.TransactionId,
 				th.Date AS CreatedDate
 		FROM [dbo].[TransactionHistory] th
-		WHERE th.StatusId = 1`
+		WHERE th.StateId = 1`
 
 	if searchModel.From != "" {
 		query += " AND th.Date >= '" + searchModel.From + "'"
@@ -200,7 +200,7 @@ func (wrapper *DBHandler) GetCentralBankTransactions(bankId string, searchModel 
 
 	query += `), LatestStatus AS (
 			SELECT  th.TransactionId,
-					th.StatusId,
+					th.StateId,
 					th.Date,
 					ROW_NUMBER() OVER (PARTITION BY th.TransactionId ORDER BY th.Date DESC) AS rn
 			FROM [dbo].[TransactionHistory] th)
@@ -219,15 +219,15 @@ func (wrapper *DBHandler) GetCentralBankTransactions(bankId string, searchModel 
 			FROM [dbo].[Transaction] t
 			JOIN CreatedTransactions ct ON t.Id = ct.TransactionId
 			JOIN LatestStatus ls ON t.Id = ls.TransactionId AND ls.rn = 1
-			JOIN [dbo].[Status] s ON ls.StatusId = s.Id
+			JOIN [dbo].[State] s ON ls.StateId = s.Id
 			JOIN Bank as ob ON ob.GlobalIdentifier = t.OriginatorBankId
 			JOIN Bank as bb ON bb.GlobalIdentifier = t.BeneficiaryBankId
 			JOIN BankClient as bcs ON bcs.Id = t.SenderId
 			JOIN BankClient as bcr ON bcr.Id = t.ReceiverId
 		WHERE (ob.JurisdictionId = @p1 OR bb.JurisdictionId = @p1) and (ob.Name like @p2 OR bb.Name like @p2 OR bcs.Name like @p2 OR bcr.Name like @p2)`
 
-	if searchModel.StatusId != "" {
-		query += ` AND ls.StatusId = ` + searchModel.StatusId
+	if searchModel.StateId != "" {
+		query += ` AND ls.StateId = ` + searchModel.StateId
 	}
 
 	rows, err = wrapper.db.Query(query,
@@ -294,8 +294,8 @@ func (wrapper *DBHandler) GetTransactionHistory(transactionId string) models.Tra
 	query = `SELECT s.Name
 					,th.Date
 				FROM TransactionHistory th
-				JOIN Status as s ON s.Id = th.StatusId
-				Where Transactionid = @p1 Order by StatusId`
+				JOIN State as s ON s.Id = th.StateId
+				Where Transactionid = @p1 Order by StateId`
 
 	rows, err = wrapper.db.Query(query, sql.Named("p1", transactionId))
 

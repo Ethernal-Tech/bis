@@ -66,7 +66,7 @@ type TransactionPolicyStatus struct {
 type TransactionStatusHistory struct {
 	Id            int
 	TransactionId uint64
-	StatusId      int
+	StateId       int
 	Date          time.Time
 }
 

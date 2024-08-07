@@ -61,11 +61,11 @@
             <div><span name="Amount">{{.Amount}}</span> <span>-{{.Currency}}-</span></div>
             <div>{{.Status}}</div>
             {{if eq $.centralBankEmployee false}}
-            {{if and (eq .Status "CREATED") (eq .BeneficiaryBank $.bankName)}}
+            {{if and (eq .Status "Compliance check created") (eq .BeneficiaryBank $.bankName)}}
             <div>
                 <a href="/confirmtransaction?transaction={{.Id}}" class="set-policy">CONFIRM</a>
             </div>
-            {{else if (and (eq .Status "CREATED") (eq .OriginatorBank $.bankName))}}
+            {{else if (and (eq .Status "Compliance check created") (eq .OriginatorBank $.bankName))}}
             <div>
                 -
             </div>
