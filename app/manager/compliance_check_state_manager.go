@@ -347,6 +347,16 @@ func (m *ComplianceCheckStateManager) Transition(complianceCheckId string) (Comp
 		}
 	case ComplianceProofGenerationSucceeded:
 	case SettlementAssetTransferred:
+		m.mutDesc.Lock()
+		description := m.descriptions[complianceCheckId][AssetsReleased]
+		m.mutDesc.Unlock()
+
+		err := m.db.AddComplianceCheckState(complianceCheckId, int(AssetsReleased), description)
+		if err != nil {
+			errlog.Println(err)
+			return ErrState, false, returnErr
+		}
+
 		m.finSigCh <- complianceCheckId
 
 		deleteDescriptions = true
