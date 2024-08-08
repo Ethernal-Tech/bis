@@ -1,7 +1,7 @@
 var view
 
 window.addEventListener('load', function() {
-    user = document.getElementById("home-user")
+    user = document.getElementById("profile")
     logoutWindow = document.getElementById("home-logout-window")
     document.addEventListener('click', function(event){
     if (!logoutWindow.contains(event.target) && !user.contains(event.target)) {
