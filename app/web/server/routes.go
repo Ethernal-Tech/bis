@@ -60,6 +60,9 @@ func (server *WebServer) Routes() http.Handler {
 	{
 		router.HandlerFunc(http.MethodPost, "/api/getpolicies", server.GetPolicies)
 		router.HandlerFunc(http.MethodPost, "/api/getpolicy", server.GetPolicy)
+		// TODO: Remove after setup
+		// Testing SWIFT functions on deployment
+		router.HandlerFunc(http.MethodPost, "/api/test-swift", server.TestSwift)
 	}
 
 	return DenyAccessToHTML(server.SessionManager.LoadAndSave(router))

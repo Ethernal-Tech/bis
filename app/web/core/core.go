@@ -17,6 +17,7 @@ type Core struct {
 	ComplianceCheckStateManager *manager.ComplianceCheckStateManager
 	P2PClient                   *p2pclient.P2PClient
 	RulesEngine                 *engine.RulesEngine
+	SwiftManager                *manager.SwiftManager
 }
 
 // CreateCore function initializes and returns a new instance of the Core component.
@@ -28,5 +29,6 @@ func CreateCore() *Core {
 		ComplianceCheckStateManager: manager.GetComplianceCheckStateManager(),
 		P2PClient:                   p2pclient.GetP2PClient(),
 		RulesEngine:                 engine.GetRulesEngine(),
+		SwiftManager:                manager.InitSwiftManager(),
 	}
 }

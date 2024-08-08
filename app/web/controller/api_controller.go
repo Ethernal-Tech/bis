@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 // GetPolicies handles the web API call to "/api/getpolicies" for retrieving applicable policies for a given transaction
@@ -192,4 +193,48 @@ func (controller *APIController) GetPolicy(w http.ResponseWriter, r *http.Reques
 		log.Println(err.Error())
 		http.Error(w, "Internal Server Error", 500)
 	}
+}
+
+func (c *APIController) TestSwift(w http.ResponseWriter, r *http.Request) {
+	data := struct {
+		URL string `json:"url"`
+	}{}
+
+	decoder := json.NewDecoder(r.Body)
+	err := decoder.Decode(&data)
+	if err != nil {
+		errlog.Println(err)
+
+		http.Error(w, "Invalid JSON data", http.StatusBadRequest)
+		return
+	}
+
+	assertion, err := c.SwiftManager.GenerateAsserionToken()
+	if err != nil {
+		errlog.Println(err)
+		return
+	}
+
+	accessToken, err := c.SwiftManager.GetJwtToken(assertion)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	time.Sleep(time.Second * 1)
+
+	message := c.SwiftManager.GeneratePACS008Message("KRW", "200000", "Comapny KR", "Company AU", "0j1k2l3m4n5o6p7q8r9s0t1u2v3w4x5y6z7a8b9c0d1e2f3g4h5i6j7k8l9m0n")
+
+	err = c.SwiftManager.SendPACS008ToSwiftNetwork(message, accessToken, data.URL)
+	if err != nil {
+		fmt.Println(err)
+	}
+
+	time.Sleep(time.Second * 1)
+
+	err = c.SwiftManager.RevokeJwtToken(accessToken)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
