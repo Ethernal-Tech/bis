@@ -39,6 +39,10 @@
     width: 1px;
 }
 
+#profile {
+    cursor: pointer;
+}
+
 .home-user {
     display: flex;
     justify-content: center;
@@ -128,8 +132,24 @@
     margin-bottom: 1px;
 }
 
-.home-views-container > div:hover {
+.home-views-container .side-bar-item:hover {
+    background-color: var(--color-container-hover);
+}
+
+.home-views-container .side-bar-item.active {
     background-color: var(--color-container);
+}
+
+.home-views-container .side-bar-item.active::after {
+    display: block;
+    width: 8px;
+    height: 8px;
+    content: "";
+    background-color: #F05150;
+    border-radius: 50%;
+    position: absolute;
+    right: 0;
+    margin: 6px 24px 0 0;
 }
 
 .home-icon-with-text > div {
@@ -264,25 +284,21 @@ scrollbar-width: none; /* Firefox */
 @keyframes showSideBar {
     from {
         width: 0;
-        transform: translateX(-100%);
     }
     to {
         width: 240px;
-        transform: translateX(0);
     }
 }
 
 @keyframes showSideBarElements {
     0% {
         opacity: 0;
-        transform: translateX(-100%);
     }
     85% {
         opacity: 0;
     }
     100% {
         opacity: 1;
-        transform: translateX(0);
     }
 }
 

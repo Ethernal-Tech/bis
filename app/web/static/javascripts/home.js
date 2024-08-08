@@ -89,6 +89,15 @@ window.addEventListener('load', function() {
             }, 300);
         }
     });
+
+    const sideBarItems = document.getElementsByClassName('side-bar-item');
+    for (let element of sideBarItems) {   
+        element.addEventListener('click', function() {
+            for (let element of sideBarItems)
+                element.classList.remove('active');
+            this.classList.add('active');
+        }); 
+    }
 })
 
 function loadScript(partial) {
