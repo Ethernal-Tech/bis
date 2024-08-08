@@ -63,6 +63,32 @@ window.addEventListener('load', function() {
             loadScript('policies')
         })
     })
+
+    document.getElementsByClassName('home-hamburger')[0].addEventListener('click', function() {
+        let homeBody = document.getElementsByClassName('home-body')[0];
+        let homeSideBar = document.getElementsByClassName('home-side-bar')[0];
+        let homeView = document.getElementById('home-view');
+        if (homeBody.classList.contains('hide-home-side-bar')) {
+            homeBody.classList.remove('hide-home-side-bar');
+            homeBody.classList.add('show-home-side-bar');
+            homeView.classList.remove('expend-home-view');
+            homeView.classList.add('shrink-home-view');
+            setTimeout(() => {
+                homeSideBar.classList.remove('hidden');
+                homeSideBar.classList.add('visible');
+            }, 100);
+        }
+        else {
+            homeBody.classList.remove('show-home-side-bar');
+            homeBody.classList.add('hide-home-side-bar');
+            homeView.classList.remove('shrink-home-view');
+            homeView.classList.add('expend-home-view');
+            setTimeout(() => {
+                homeSideBar.classList.remove('visible');
+                homeSideBar.classList.add('hidden');
+            }, 300);
+        }
+    });
 })
 
 function loadScript(partial) {
