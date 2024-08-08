@@ -1,1 +1,3 @@
-console.log("Hello from policies")
+function createNewRule() {
+    console.log("create new rule")
+}

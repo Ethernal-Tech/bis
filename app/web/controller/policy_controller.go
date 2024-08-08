@@ -11,7 +11,25 @@ import (
 // Policies handles a web POST "/policies" request. It responds with a view (HTML partial) containing all
 // policies associated with the current bank, as well as all tools for their successful management.
 func (c *PolicyController) Policies(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "./app/web/static/views/policies.html")
+	if c.SessionManager.GetString(r.Context(), "inside") != "yes" {
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+
+		return
+	}
+	viewData := map[string]any{}
+
+	ts, err := template.ParseFiles("./app/web/static/views/policies.html")
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error 1", 500)
+		return
+	}
+
+	err = ts.Execute(w, viewData)
+	if err != nil {
+		log.Println(err.Error())
+		http.Error(w, "Internal Server Error 2", 500)
+	}
 }
 
 func (controller *PolicyController) ShowPolicies(w http.ResponseWriter, r *http.Request) {
