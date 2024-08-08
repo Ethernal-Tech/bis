@@ -39,6 +39,10 @@
     width: 1px;
 }
 
+#profile {
+    cursor: pointer;
+}
+
 .home-user {
     display: flex;
     justify-content: center;
@@ -97,6 +101,9 @@
     display: flex;
     flex-direction: column;
     position: relative;
+    animation-duration: .3s;
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: forwards;
 }
 
 .home-views {
@@ -119,12 +126,30 @@
     width: 100%;
     border-radius: 8px;
     padding: 8px 12px 8px 12px;
-    transition-duration: 500ms;
     gap: 8px;
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: forwards;
+    margin-bottom: 1px;
 }
 
-.home-views-container > div:hover {
+.home-views-container .side-bar-item:hover {
+    background-color: var(--color-container-hover);
+}
+
+.home-views-container .side-bar-item.active {
     background-color: var(--color-container);
+}
+
+.home-views-container .side-bar-item.active::after {
+    display: block;
+    width: 8px;
+    height: 8px;
+    content: "";
+    background-color: #F05150;
+    border-radius: 50%;
+    position: absolute;
+    right: 0;
+    margin: 6px 24px 0 0;
 }
 
 .home-icon-with-text > div {
@@ -135,6 +160,8 @@
 .home-banks-list {
     flex-grow: 1;
     border-bottom: 1px solid var(--color-border-outline-dark);
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: forwards;
 }
 
 .home-banks-list-title {
@@ -152,6 +179,8 @@
     align-items: center;
     padding: 10px 12px 10px 10px;
     gap: 4px;
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: forwards;
 }
 
 .home-footer-icon-with-text > div {
@@ -163,8 +192,11 @@
     display: flex;
     flex-direction: column;
     flex-grow: 1;
+    overflow: auto;
+    width: calc(100vw - 240px);
     height: calc(100vh - 48px);
-    background-color: var(--color-background-dim);
+    animation-timing-function: ease-in-out;
+    animation-fill-mode: forwards;
 }
 
 /* Hide scrollbar for WebKit browsers (Chrome, Safari) */
@@ -180,4 +212,102 @@ scrollbar-width: none; /* Firefox */
 
 .visible {
     display: flex;
+}
+
+.hidden {
+    display: none;
+}
+
+.hide-home-side-bar .home-side-bar {
+    animation-name: hideSideBar;
+}
+
+.hide-home-side-bar .home-icon-with-text,
+.hide-home-side-bar .home-banks-list,
+.hide-home-side-bar .home-banks-list-title,
+.hide-home-side-bar .home-footer-icon-with-text {
+    animation-name: hideSideBarElements;
+    animation-duration: 0;
+}
+
+.hide-home-side-bar .home-view {
+    animation-name: expendHomeView;
+}
+
+.show-home-side-bar .home-side-bar {
+    animation-name: showSideBar;
+}
+
+.show-home-side-bar .home-icon-with-text,
+.show-home-side-bar .home-banks-list,
+.show-home-side-bar .home-banks-list-title,
+.show-home-side-bar .home-footer-icon-with-text {
+    animation-name: showSideBarElements;
+    animation-duration: .3s;
+}
+
+.show-home-side-bar .home-view {
+    animation-name: shrinkHomeView;
+}
+
+@keyframes hideSideBar {
+    from {
+        width: 240px;
+        transform: translateX(0);
+    }
+    to {
+        width: 0;
+        transform: translateX(-100%);
+    }
+}
+
+@keyframes hideSideBarElements {
+    from {
+        opacity: 1;
+        transform: translateX(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateX(-100%);
+    }
+}
+
+@keyframes expendHomeView {
+    from {
+        width: calc(100vw - 240px);
+    }
+    to {
+        width: 100vw;
+    }
+}
+
+@keyframes showSideBar {
+    from {
+        width: 0;
+    }
+    to {
+        width: 240px;
+    }
+}
+
+@keyframes showSideBarElements {
+    0% {
+        opacity: 0;
+    }
+    85% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes shrinkHomeView {
+    from {
+        width: 100vw;
+        
+    }
+    to {
+        width: calc(100vw - 240px);
+    }
 }
