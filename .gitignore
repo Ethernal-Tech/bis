@@ -31,3 +31,4 @@ ca.key
 launch.json
 
 /mandala-p2p-client
+.env
