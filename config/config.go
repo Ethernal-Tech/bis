@@ -87,6 +87,15 @@ func ResolveServerPort() string {
 	return ":" + env_port
 }
 
+func ResolveServerTLSPort() string {
+	env_port := os.Getenv("SERVER_TLS_PORT")
+	if env_port == "" {
+		return ":5001"
+	}
+
+	return ":" + env_port
+}
+
 func ResolveIsCentralBank() bool {
 	return os.Getenv("IS_CENTRAL_BANK") != ""
 }

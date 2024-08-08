@@ -45,6 +45,10 @@ services:
       - GPJC_PUBLISH_ADDR=0.0.0.0:4000
       - MY_GLOBAL_IDENTIFIER=YYYYYYYYYYYYYYYYYYYY
       - JURISDICTION_CODE=SG
+      - SERVER_TLS_PORT=5000
+      - CA_CERT_PATH=./private-join-and-compute/ca.crt
+      - SRV_CERT_PATH=./server-cert.pem
+      - SRV_KEY_PATH=./server-key.pem
     ports:
       - "4001:4000"
     depends_on:
@@ -98,6 +102,10 @@ services:
       - GPJC_API_ADDRESS=myc
       - GPJC_PORT=10501
       - GPJC_PUBLISH_ADDR=0.0.0.0:4000
+      - SERVER_TLS_PORT=5000
+      - CA_CERT_PATH=./private-join-and-compute/ca.crt
+      - SRV_CERT_PATH=./server-cert.pem
+      - SRV_KEY_PATH=./server-key.pem
     ports:
       - "4002:4000"
     depends_on:
@@ -149,6 +157,10 @@ services:
       - IS_CENTRAL_BANK=true
       - P2P_NODE_ADDRESS=http://bnm-p2p:80/passthrough
       - MY_GLOBAL_IDENTIFIER=549300NROGNBV2T1GS07
+      - SERVER_TLS_PORT=5000
+      - CA_CERT_PATH=./private-join-and-compute/ca.crt
+      - SRV_CERT_PATH=./server-cert.pem
+      - SRV_KEY_PATH=./server-key.pem
     ports:
       - "4003:4000"
     depends_on:

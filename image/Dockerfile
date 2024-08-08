@@ -14,6 +14,9 @@ COPY Makefile /app
 COPY image/gpjc_scripts /app/gpjc_scripts
 COPY ca.crt /app
 COPY ca.key /app
+COPY server-cert.pem /app
+COPY server-key.pem /app
+COPY .env /app
 
 # Set the working directory inside the container
 WORKDIR /app

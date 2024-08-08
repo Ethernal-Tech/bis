@@ -64,3 +64,8 @@ restart-docker-uc2:
 test: run-docker
 	sleep 90
 	$(MAKE) -C playwright-tests test
+
+server-certs:
+	openssl genrsa -out server-key.pem 2048
+	openssl req -new -key server-key.pem -out server-csr.pem
+	openssl x509 -passin pass:1234 -req -in server-csr.pem -CA ca.crt -CAkey ca.key -CAcreateserial -out server-cert.pem -days 365

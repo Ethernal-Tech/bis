@@ -193,8 +193,13 @@ services:
       - GPJC_PUBLISH_ADDR=0.0.0.0:4000
       - MY_GLOBAL_IDENTIFIER=yyyyyyyyyyyyyyyyyyyy
       - PROOF_TYPE=noninteractive
+      - SERVER_TLS_PORT=5000
+      - CA_CERT_PATH=./private-join-and-compute/ca.crt
+      - SRV_CERT_PATH=./server-cert.pem
+      - SRV_KEY_PATH=./server-key.pem
     ports:
       - "4001:4000"
+      - "5001:5000"
     depends_on:
       sql-database-kr:
         condition: service_healthy
@@ -247,8 +252,13 @@ services:
       - GPJC_PORT=10501
       - GPJC_PUBLISH_ADDR=0.0.0.0:4000
       - PROOF_TYPE=noninteractive
+      - SERVER_TLS_PORT=5000
+      - CA_CERT_PATH=./private-join-and-compute/ca.crt
+      - SRV_CERT_PATH=./server-cert.pem
+      - SRV_KEY_PATH=./server-key.pem
     ports:
       - "4002:4000"
+      - "5002:5000"
     depends_on:
       sql-database-au:
         condition: service_healthy

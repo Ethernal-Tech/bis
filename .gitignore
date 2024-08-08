@@ -32,3 +32,4 @@ launch.json
 
 /mandala-p2p-client
 .env
+*.pem

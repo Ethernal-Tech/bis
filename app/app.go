@@ -4,6 +4,7 @@ import (
 	"bisgo/app/DB"
 	p2pserver "bisgo/app/P2P/server"
 	provingserver "bisgo/app/proving/server"
+	"bisgo/app/swift"
 	webserver "bisgo/app/web/server"
 	"bisgo/config"
 	"bisgo/errlog"
@@ -16,6 +17,7 @@ type app struct {
 	p2pServer     *p2pserver.P2PServer
 	webServer     *webserver.WebServer
 	provingServer *provingserver.ProvingServer
+	swiftHandler  *swift.SwiftHandler
 	*http.Server
 }
 
@@ -24,6 +26,7 @@ func Run() {
 		p2pServer:     p2pserver.GetP2PServer(),
 		webServer:     webserver.GetWebServer(),
 		provingServer: provingserver.GetProvingServer(),
+		swiftHandler:  swift.GetSwiftHandler(),
 	}
 
 	app.Server = &http.Server{
@@ -32,6 +35,8 @@ func Run() {
 	}
 
 	defer DB.Close()
+
+	app.swiftHandler.ListenAndServer()
 
 	fmt.Println("Starting server at port", strings.Split(app.Addr, ":")[1])
 
