@@ -75,3 +75,104 @@
     background-color: var(--color-container-white-hover);
     cursor: default;
 }
+
+.compliance-details-body {
+    display: flex;
+    align-items: start;
+    flex-direction: row;
+}
+
+.compliance-details-left {
+    background-color: var(--color-background-light);
+    width: 51%;
+}
+
+.compliance-details-name {
+    display: flex;
+    align-items: center;
+    height: 48px;
+    border-bottom: 1px solid var(--color-border-outline-disabled);
+    padding: 8px 24px 8px 24px;
+    cursor: default;
+}
+
+.compliance-details-left-fields {
+    height: 432px;
+    padding: 0px 24px 0px 24px;
+}
+
+.compliance-details-left-field {
+    height: 48px;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+}
+
+.compliance-details-left-field > div:first-child {
+    display: flex;
+    align-items: center;
+    width: 45%;
+    height: 48px;
+    padding: 8px 0px 8px 0px;
+    border-bottom: 1px solid var(--color-border-outline-disabled);
+}
+
+.compliance-details-left-field > div:nth-child(2) {
+    display: flex;
+    align-items: center;
+    width: 55%;
+    height: 48px;
+    padding: 8px 0px 8px 0px;
+    border-bottom: 1px solid var(--color-border-outline-disabled);
+}
+
+.compliance-details-left-policy {
+    display: flex;
+    flex-direction: row;
+    padding: 0px 24px 0px 24px;
+    margin-top: 14px;
+}
+
+.compliance-details-left-policy > div:first-child {
+    width: 45%;
+}
+
+.compliance-details-policies {
+    width: 55%;
+    border: 1px solid var(--color-border-outline-disabled);
+    border-radius: 8px;
+}
+
+.compliance-details-policy {
+    min-height: 44px;
+    padding: 12px;
+    border-bottom: 1px solid var(--color-border-outline-disabled);
+}
+
+.compliance-details-policy:last-child {
+    border-bottom: none;
+}
+
+
+
+
+.compliance-details-right {
+    width: 49%;
+}
+
+.compliance-details-report-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 48px;
+    border-bottom: 1px solid var(--color-border-outline-disabled);
+    border-left: 1px solid var(--color-border-outline-disabled);
+    padding: 8px 24px 8px 24px;
+    cursor: default;
+}
+
+.compliance-details-status {
+    padding: 5px 6px 7px 6px;
+    border-radius: 6px;
+    text-align: center;
+}
